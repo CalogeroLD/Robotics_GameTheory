@@ -495,6 +495,56 @@ DiscretizedArea::DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, st
 	m_graph = std::make_shared< lemon::Bfs<lemon::ListGraph> >(*m_listGraph.get());
 }
 
+//aggiunta
+double DiscretizedArea::updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _LastAgentPos, AgentPosition _CurrentAgentPos) {
+
+	double orientation;
+	Point2D p_last = _LastAgentPos.getPoint2D();
+	Point2D p_current = _CurrentAgentPos.getPoint2D();
+
+	AreaCoordinate last = _space->getCoordinate(p_last);
+	AreaCoordinate current = _space->getCoordinate(p_current);
+
+	if (current.row == last.row)
+	{
+		if (current.col == last.col + 1) orientation = IDSMath::Pi/2; //90
+		if (current.col == last.col - 1) orientation = IDSMath::Pi*1.5; //270
+	}
+	if (current.col == last.col)
+	{
+		if (current.row == last.row + 1) orientation = 0.0; //0
+		if (current.row == last.row - 1) orientation = IDSMath::Pi; //180
+	}
+	if (current.row == last.row + 1)
+	{
+		if (current.col == last.col + 1) orientation = IDSMath::Pi/4; //45
+		if (current.col == last.col - 1) orientation = 7*(IDSMath::Pi/4); //315
+	}
+	if (current.row == last.row - 1)
+	{
+		if (current.col == last.col + 1) orientation = 3*(IDSMath::Pi/4); //135
+		if (current.col == last.col - 1) orientation = 5*(IDSMath::Pi/4); //225
+	}
+	if (current.row == last.row && current.col == last.col) {
+		orientation = _LastAgentPos.getCamera().getOrientation(); // the same orientation
+	}
+	// set heading
+	_CurrentAgentPos.getCamera().setOrientation(orientation);
+	return orientation;
+
+
+	/*
+	//AgentPosition LastAgentPos = m_memory.m_elems.back().getLastPosition();
+	Line2D line = _LastAgentPos.getPoint2D().lineTo(_CurrentAgentPos.getPoint2D()); //m_point.lineTo(m_currentPosition.m_point);
+	double orientation = line.azimuth();
+	_CurrentAgentPos.getCamera().setOrientation(orientation);
+
+	return orientation;
+	// La mia attuale orientazione che va a definire il mio get Coverage	
+	//m_currentPosition.m_camera.setOrientation(orientation); // orientation is setted as the value of azimuth of the line that links two last points
+	*/
+}
+
 //////////////////////////////////////////////////////////////////////////
 AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
 {
@@ -557,65 +607,199 @@ void DiscretizedArea::setRandomSquareValue()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
+/*
+std::pair<AreaCoordinate, double> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
+{
+	// in this function all adiacent square are selected and pushed in result
+	std::pair<AreaCoordinate, double> result;
+
+	if (_current.row != DISCRETIZATION_ROW)
+	{
+		AreaCoordinate pos(_current.col, _current.row + 1); //A: head 0
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = 0.0;
+	}
+	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL)
+	{
+		AreaCoordinate pos(_current.col + 1, _current.row + 1); //B: head 45
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = (3.14/180)*45.0;
+	}
+	if (_current.col != DISCRETIZATION_COL) // check for upper limit for col becouse it is gonna be changed
+	{
+		AreaCoordinate pos(_current.col + 1, _current.row); //C: head 90
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = (3.14 / 180)*90.0;
+	}
+	if (_current.row != 0 && _current.col != DISCRETIZATION_COL)
+	{
+		AreaCoordinate pos(_current.col + 1, _current.row - 1); //D: head 135
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = (3.14 / 180)*135.0;
+	}
+	if (_current.row != 0)
+	{
+		AreaCoordinate pos(_current.col, _current.row - 1); //E: head 180
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = (3.14 / 180)*180.0;
+	}
+	if (_current.row != 0 && _current.col != 0)
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row  1); //F:head 225
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = (3.14 / 180)*225.0;
+	}
+	if (_current.col != 0) // check for lower limit of col becouse col is gonna be incremented
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row); //G: head 270
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
+			result.first = pos;
+			result.second = (3.14 / 180)*270.0;
+	}
+	if (_current.row != DISCRETIZATION_ROW && _current.col != 0)
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row + 1); //H: head 315
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.first = pos;
+			result.second = (3.14 / 180)*315.0;
+	}
+	return result;
+}
+*/
+
 std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
 {
 	// in this function all adiacent square are selected and pushed in result
 	std::vector<AreaCoordinate> result;
-	if(_current.col != 0) // check for lower limit of col becouse col is gonna be incremented
+
+	if (_current.row != DISCRETIZATION_ROW)
 	{
-		AreaCoordinate pos( _current.col-1, _current.row );
-		if(this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
+		AreaCoordinate pos(_current.col, _current.row + 1); //A: head 0
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if(_current.col != DISCRETIZATION_COL) // check for upper limit for col becouse it is gonna be changed
+	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL)
 	{
-		AreaCoordinate pos(_current.col+1, _current.row);
-		if(this->getSquare(pos) && this->getSquare(pos)->isValid())
+		AreaCoordinate pos(_current.col + 1, _current.row + 1); //B: head 45
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if(_current.row != 0)
+	if (_current.col != DISCRETIZATION_COL) // check for upper limit for col becouse it is gonna be changed
 	{
-		AreaCoordinate pos(_current.col,_current.row-1);
-		if(this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.push_back(pos);
-	}
-	if(_current.row != DISCRETIZATION_ROW)
-	{
-		AreaCoordinate pos(_current.col, _current.row+1);
-		if(this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.push_back(pos);
-	}
-	// diagonal directions added to feasible actions set:
-	
-/*	if (_current.row != DISCRETIZATION_COL && _current.col != DISCRETIZATION_COL) 
-	{
-		AreaCoordinate pos(_current.col + 1, _current.row + 1);
-		if (this->getSquare(pos), this->getSquare(pos)->isValid())
-			result.push_back(pos);
-	}
-	if (_current.row != DISCRETIZATION_COL && _current.col != 0)
-	{
-		AreaCoordinate pos(_current.col + 1, _current.row - 1);
-		if (this->getSquare(pos), this->getSquare(pos)->isValid())
+		AreaCoordinate pos(_current.col + 1, _current.row); //C: head 90
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	if (_current.row != 0 && _current.col != DISCRETIZATION_COL)
 	{
-		AreaCoordinate pos(_current.col + 1, _current.row - 1);
-		if (this->getSquare(pos), this->getSquare(pos)->isValid())
+		AreaCoordinate pos(_current.col + 1, _current.row - 1); //D: head 135
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != 0)
+	{
+		AreaCoordinate pos(_current.col, _current.row - 1); //E: head 180
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	if (_current.row != 0 && _current.col != 0)
 	{
-		AreaCoordinate pos(_current.col - 1, _current.row - 1);
-		if (this->getSquare(pos), this->getSquare(pos)->isValid())
+		AreaCoordinate pos(_current.col - 1, _current.row - 1); //F:head 225
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	*/
+	if (_current.col != 0) // check for lower limit of col becouse col is gonna be incremented
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row); //G: head 270
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
+			result.push_back(pos);
+	}
+	if (_current.row != DISCRETIZATION_ROW && _current.col != 0)
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row + 1); //H: head 315
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
 	return result;
 }
 
+std::vector<AreaCoordinate> DiscretizedArea::getHeadingbasedSquare(AreaCoordinate _current) const
+{
+	// in this function all adiacent square are selected and pushed in result
+	std::vector<AreaCoordinate> result;
+
+	if (_current.row != DISCRETIZATION_ROW)
+	{
+		_current.heading = 0;
+		AreaCoordinate pos(_current.col, _current.row + 1, _current.heading); //A: head 0
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL)
+	{
+		_current.heading = 45;
+		AreaCoordinate pos(_current.col + 1, _current.row + 1, _current.heading); //B: head 45
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.col != DISCRETIZATION_COL) // check for upper limit for col becouse it is gonna be changed
+	{
+		_current.heading = 90.0;
+		AreaCoordinate pos(_current.col + 1, _current.row, _current.heading); //C: head 90
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != 0 && _current.col != DISCRETIZATION_COL)
+	{
+		_current.heading = 135.0;
+		AreaCoordinate pos(_current.col + 1, _current.row - 1, _current.heading = 135.0); //D: head 135
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != 0)
+	{
+		_current.heading = 180.0;
+		AreaCoordinate pos(_current.col, _current.row - 1, _current.heading); //E: head 180
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != 0 && _current.col != 0)
+	{
+		_current.heading = 225.0;
+		AreaCoordinate pos(_current.col - 1, _current.row - 1, _current.heading); //F:head 225
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.col != 0) // check for lower limit of col becouse col is gonna be incremented
+	{
+		_current.heading = 270.0;
+		AreaCoordinate pos(_current.col - 1, _current.row, _current.heading); //G: head 270
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
+			result.push_back(pos);
+	}
+	if (_current.row != DISCRETIZATION_ROW && _current.col != 0)
+	{
+		_current.heading = 315.0;
+		AreaCoordinate pos(_current.col - 1, _current.row + 1, _current.heading); //H: head 315
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	return result;
+}
+
+/*
+// function that selects the feasible actions according to the heading
+std::vector<AreaCoordinate> DiscretizedArea::getHeadingValidSquares(std::vector<AreaCoordinate> FeasibleAreaCoordinate, AreaCoordinate const& _current, double _heading) const
+{
+	//if(_)
+}
+*/
 //////////////////////////////////////////////////////////////////////////
 void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const
 {

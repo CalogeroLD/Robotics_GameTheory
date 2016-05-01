@@ -238,8 +238,8 @@ std::vector<std::string> getAreaNames(std::string const& _folname)
 {
 	std::vector<std::string> l_result;
 	/// più scenari
-	l_result.push_back("External40.txt");
-	l_result.push_back("External50.txt");
+	l_result.push_back("External30.txt");
+	//l_result.push_back("External50.txt");
 
 
 #ifndef _TEST
@@ -409,7 +409,7 @@ int main(int argc, char* argv[])
 												double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
 												double l_benefitIndex = l_coverage->m_stats.getBenefitIndexMediumValue(); //errore medio
 												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti
-
+											
 
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 

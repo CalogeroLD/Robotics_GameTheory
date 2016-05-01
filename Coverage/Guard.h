@@ -26,7 +26,7 @@ namespace Robotics
 			AgentPosition m_position;
 			int m_index;
 			
-			GuardTrajectoryPosition(AgentPosition const& _position, int _index = 0) 
+			GuardTrajectoryPosition(AgentPosition const& _position, double const& _heading = 0.0, int _index = 0) 
 				: m_position(_position), m_index(_index) {}
 
 			bool operator==(GuardTrajectoryPosition const& other) const;
@@ -46,13 +46,16 @@ namespace Robotics
 		{
 			std::vector<GuardTrajectoryPosition> m_elems;
 
+
 		public:
 			std::vector<AgentPosition> getTrajectory() const;
 
 			AgentPosition getPosition(int i) const {return m_elems.at(i).m_position;}
+			//void setPosition(int n, AgentPosition _initialpos) const { m_elems.at[1].m_position = _initialpos;}
 
 			GuardTrajectory() : m_elems() {}
-			GuardTrajectory(AgentPosition pos) : m_elems( std::vector<GuardTrajectoryPosition>(1,pos) ) {}
+			// mod (1, pos) a (2, pos)
+			GuardTrajectory(AgentPosition pos) : m_elems( std::vector<GuardTrajectoryPosition>(2,pos) ) {}
 			GuardTrajectory(std::vector<GuardTrajectoryPosition> _traj) : m_elems( _traj ) {}
 			GuardTrajectory(GuardTrajectory const& _other) : m_elems( _other.m_elems ) {}
 			GuardTrajectory& operator=(GuardTrajectory const& _traj) 
@@ -70,7 +73,9 @@ namespace Robotics
 			bool isLast(int _maxLength) {return int(m_elems.size()) < _maxLength-1;}
 
 			/// Get the last position of the trajectory
-			AgentPosition getLastPosition() const {return m_elems.back().m_position;}
+			AgentPosition getLastPosition() const {
+				return m_elems.back().m_position;
+			}
 
 			inline int size() const { return int(m_elems.size());}
 
@@ -180,6 +185,9 @@ namespace Robotics
 			inline virtual bool isGuard() const {return true;}
 
 			std::vector<AgentPosition> getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const;
+			//aggiunta
+			void updateHeading(std::shared_ptr<DiscretizedArea> _space);
+
 
 			/// Trajectory Section
 
@@ -252,11 +260,14 @@ namespace Robotics
 			double computeBatteryCosts(std::shared_ptr<DiscretizedArea> _space);
 
 			void resetMemory();
+			
 
 		protected:
 			AgentPosition selectNextFeasiblePositionWithoutConstraint(std::shared_ptr<DiscretizedArea> _space);
 			AgentPosition selectNextFeasiblePositionWithoutConstraint(std::shared_ptr<DiscretizedArea> _space, std::set<int> & _alreadyTested);
-		};
+			
+		
+};
 
 		typedef std::shared_ptr<Guard> GuardPtr;
 	}

@@ -29,20 +29,27 @@ Guard::Guard( int _teamID, int _id, AgentPosition _position, int _trajectoryLeng
 Guard::~Guard()
 {}
 
+
+
+// return vector with all AgentPosition of feasible actions
 //////////////////////////////////////////////////////////////////////////
 std::vector<AgentPosition> Guard::getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const
 {
 	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() );
+	
+	double _heading = m_currentPosition.m_heading;
 
-	// Agent position contiene m_point e m_camera
+	// getStandardApproachableValidSquares deve dipendere anche da heading che aggiungo
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord);
-	_space->addSpecialApproachableValidSquares(l_currCoord, l_squares);
+	_space->addSpecialApproachableValidSquares(l_currCoord, l_squares); // aggiunge le diagonali in l_sqaure
+
+
 
 	std::vector<AgentPosition> l_result;
 	for(size_t i = 0; i < l_squares.size(); ++i )
 	{
 		//int l_distance = _space->getDistance(l_currCoord, l_squares[i]);
-		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), m_currentPosition.m_camera) );
+		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), 0.0, m_currentPosition.m_camera) );
 	}
 
 	return l_result;

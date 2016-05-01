@@ -169,7 +169,7 @@ void World::randomInitializeGuards()
 		Point2D l_point;
 		if(m_space->getRandomPosition(l_point))
 			// set position of the agent:
-			l_agent->setCurrentPosition( AgentPosition( l_point, CameraPosition( ((m_space->getXStep() +  m_space->getYStep()) / 2) * 3 ) ) );
+			l_agent->setCurrentPosition( AgentPosition( l_point, 0.0, CameraPosition( ((m_space->getXStep() +  m_space->getYStep()) / 2) * 3 ) ) );
 	}
 }
 
@@ -186,7 +186,7 @@ void World::randomInitializeNeutrals()
 		Point2D l_point;
 		if(m_space->getRandomPosition(l_point))
 			// set position of the agent:
-			l_agent->setCurrentPosition( AgentPosition( l_point, CameraPosition( ) ) );
+			l_agent->setCurrentPosition( AgentPosition( l_point, 0.0, CameraPosition( ) ) );
 	}
 }
 
@@ -203,7 +203,7 @@ void World::randomInitializeThief()
 		Point2D l_point;
 		if(m_space->getRandomPosition(l_point))
 			// set position of the agent:
-			l_agent->setCurrentPosition( AgentPosition( l_point, CameraPosition( ) ) );
+			l_agent->setCurrentPosition( AgentPosition( l_point, 0.0, CameraPosition( ) ) );
 	}
 }
 

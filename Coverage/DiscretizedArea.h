@@ -17,6 +17,7 @@
 #include <lemon/bfs.h>
 
 #include <set>
+#include "Guard.h"
 
 namespace IDS
 {
@@ -43,9 +44,10 @@ namespace Robotics
 		{
 			int row;
 			int col;
+			double heading;
 			double p;//aggiunta la probabilita
 
-			AreaCoordinate(int _col = -1, int _row = -1, double _p=-1) : row(_row), col(_col), p(_p) {}
+			AreaCoordinate(int _col = -1, int _row = -1, double _heading = 0.0, double _p = -1) : row(_row), col(_col), heading(_heading), p(_p) {}
 		};
 
 		inline bool operator< (AreaCoordinate const& a, AreaCoordinate const& b)
@@ -80,6 +82,7 @@ namespace Robotics
 
 			std::vector<double> m_old_values;
 		public:
+			std::pair<AreaCoordinate, double> getStandardApproachableValidSquares(AreaCoordinate const& _current) const;
 
 			/// Set the box of the Square
 			void setBoundingBox(IDS::BaseGeometry::Box2D const& _box);
@@ -143,11 +146,14 @@ namespace Robotics
 
 		public:
 			DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, std::set< IDS::BaseGeometry::Shape2D > const& _obstacles);
+			//aggiunta
+			double updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _lastAgentPos, AgentPosition _currentAgentPos);
 
 			DiscretizedArea(std::shared_ptr<StructuredArea> _area);
 			DiscretizedArea(std::shared_ptr<UnStructuredArea> _area);
 			DiscretizedArea(std::string const& _filename);
 			 
+
 			/// Compute Graph of the discretized area.
 			Graph getGraph() const;
 
@@ -192,6 +198,9 @@ namespace Robotics
 			void setRandomSquareValue();
 
 			std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const& _current) const;
+
+			std::vector<AreaCoordinate> getHeadingbasedSquare(AreaCoordinate _current) const;
+
 			void addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const;
 
 			std::set<std::shared_ptr<Square> > getVisibleSquares(AgentPosition const& _pos);

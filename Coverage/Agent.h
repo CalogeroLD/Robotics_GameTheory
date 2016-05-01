@@ -20,6 +20,9 @@
 #include <memory>
 #include <set>
 
+// set member function added on 24 April0 2016
+// get member functions added on March 2016
+
 namespace Robotics 
 {
 	namespace GameTheory 
@@ -48,6 +51,8 @@ namespace Robotics
 			CameraPosition(double _farRadius = 0., double _nearRadius = 0., double _orientation = 0., double _angle = IDSMath::TwoPi/4) 
 				: m_farRadius(_farRadius), m_nearRadius(_nearRadius), m_orientation(_orientation), m_angle(_angle) {}
 
+			std::vector<AreaCoordinate> line_scan(int x0, int y0, int a, int RMIN, int RMAX, int RSTEP, std::shared_ptr<DiscretizedArea> _area);
+
 			std::vector<AreaCoordinate> getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
 
 			double getFarRadius() const {return m_farRadius;}
@@ -56,9 +61,14 @@ namespace Robotics
 			double getOrientation() const { return m_orientation;}
 			double getAngle() const { return m_angle;}
 
+			// set member functions added
+			void setOrientation(double _orientation) { m_orientation = _orientation; }
+
+			IDS::BaseGeometry::Shape2D getVisibleArcArea(IDS::BaseGeometry::Point2D const & point, IDS::BaseGeometry::Point2D const & center, double angle) const;
+
 			IDS::BaseGeometry::Shape2D getVisibleArea(IDS::BaseGeometry::Point2D const& point) const;
 			IDS::BaseGeometry::Shape2D getVisibleNearArea(IDS::BaseGeometry::Point2D const& point) const; //aggiunta
-			//IDS::BaseGeometry::Shape2D getHeading(BaseGeometry::Point2D const & point, std::shared_ptr<DiscretizedArea> _area) const;
+			
 
 			double computeCosts() const {return 0.;}
 
@@ -72,6 +82,8 @@ namespace Robotics
 		protected:
 			/// The position of the agent.
 			IDS::BaseGeometry::Point2D m_point;
+			// The heading of the agent
+			double m_heading;
 
 			/// The camera orientation.
 			CameraPosition m_camera;
@@ -79,10 +91,14 @@ namespace Robotics
 
 		public:
 			AgentPosition() {}; //costruttore
-		
-			AgentPosition(IDS::BaseGeometry::Point2D const& point) : m_point(point), m_camera() {}
 
-			AgentPosition(IDS::BaseGeometry::Point2D const& point, CameraPosition _camera) : m_point(point), m_camera(_camera) {}
+			AgentPosition(IDS::BaseGeometry::Point2D const& point) : m_point(point), m_heading(0), m_camera() {}
+		
+			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading) : m_point(point), m_heading(heading), m_camera() {}
+
+			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading, CameraPosition _camera) : m_point(point), m_heading(heading), m_camera(_camera) {}
+
+			void setHeading(AgentPosition _agentPosiiton, double heading) { _agentPosiiton.m_heading = heading; }
 
 			//auto ProbabilityOfDetection(std::shared_ptr<DiscretizedArea> area, AreaCoordinate p_r, AreaCoordinate p_t);
 
@@ -91,6 +107,7 @@ namespace Robotics
 
 			/// Get Point2D
 			IDS::BaseGeometry::Point2D getPoint2D() const {return m_point;}
+			CameraPosition getCamera() const { return m_camera; }
 
 			/// True if other is in communication with this position
 			bool communicable(std::shared_ptr<Agent> _other) const;
@@ -121,8 +138,8 @@ namespace Robotics
 			/// Agent Identifier
 			int m_id;
 
+			AgentPosition m_oldPosition;
 			AgentPosition m_currentPosition;
-
 			AgentPosition m_nextPosition;
 
 			mutable enum Status 
@@ -147,6 +164,8 @@ namespace Robotics
 			//aggiunta
 
 			/// Get the position of the agent.
+
+
 			inline AgentPosition getCurrentPosition() const {return m_currentPosition;}
 			/// Set Current Position
 			void setCurrentPosition(AgentPosition const& _pos);
@@ -155,7 +174,7 @@ namespace Robotics
 			void setNextPosition(AgentPosition const& _pos);
 
 			// ultime due posizioni (aggiunta)
-			double getHeadingRobot(IDS::BaseGeometry::Point2D _point);
+			//double getHeadingRobot(IDS::BaseGeometry::Point2D _point);
 
 
 			/// True if the Agent is active, false otherwise.
@@ -196,14 +215,18 @@ namespace Robotics
 
 			inline IDS::BaseGeometry::Shape2D getVisibleArea() const {return m_currentPosition.getVisibleArea();}
 
+			CameraPosition getCurrentCamera() { return m_currentPosition.m_camera; }
+
 		protected:
 			Status getStatus() const;
 			void setStatus(Status stat);
 
-			std::vector<AgentPosition> getCurrentPos();
 		};
 
 		typedef std::shared_ptr<Agent> AgentPtr;
+		//aggiunto
+		typedef std::shared_ptr<Guard> GuardPtr;
+
 
 		class COVERAGE_API AgentActionIndex
 		{

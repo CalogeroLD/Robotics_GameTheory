@@ -2,28 +2,15 @@
 #include "Guard.h"
 #include "DiscretizedArea.h"
 
-
 #include "BaseGeometry/Shape2D.h"
 #include "BaseGeometry/Arc2D.h"
 #include "BaseGeometry/Point2D.h"
-#include "BaseGeometry/Line2D.h"
-
-
-//aggiunta
-#include "World.h"
-#include "CoverageExport.h"
-#include "CoverageAlgorithm.h"
-#include "LearningAlgorithm.h"
-
-
 
 using namespace std;
 using namespace Robotics;
 using namespace Robotics::GameTheory;
 using namespace IDS;
 using namespace IDS::BaseGeometry;
-
-
 
 //////////////////////////////////////////////////////////////////////////
 // MemoryGuardTrajectories
@@ -127,12 +114,11 @@ bool AgentPosition::operator!=(AgentPosition const& other) const
 	return !(*this == other);
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////
 void AgentPosition::updateCounter(std::shared_ptr<DiscretizedArea> area)
 {
 	AreaCoordinate l_coord = area->getCoordinate(m_point);
+
 	area->getSquare( l_coord.row, l_coord.col )->increaseCounter();
 
 	// Calcolo la copertura in base alla camera:
@@ -169,38 +155,11 @@ double AgentPosition::computeCosts() const
 	return m_camera.computeCosts();
 }
 
-
-void printArray(std::vector<AreaCoordinate> v, int c_row, int c_col) {
-	for (int i = 0; i < v.size(); ++i) {
-		double x = v.at(i).row;
-		double y = v.at(i).col;
-		double dist = sqrt(pow((x - c_row), 2) + pow((y - c_col), 2));
-		std::cout << "row: " << v.at(i).row << " \t col: " << v.at(i).col << "\t prob: " << v.at(i).p << std::endl;//<< "\n d : " << dist << std::endl;
-	}
-}
-
-
-
-double Agent::getHeadingRobot(IDS::BaseGeometry::Point2D _point) {
-	
-	AgentPosition current_pos = this->m_currentPosition;
-	AgentPosition next_pos = this->m_nextPosition;
-	std::vector<AgentPosition> result;
-	
-
-	Line2D orientationLine = current_pos.m_point.lineTo(next_pos.m_point);
-	return orientationLine.azimuth();
-	}
-
-
-
 //////////////////////////////////////////////////////////////////////////
 std::vector<AreaCoordinate> AgentPosition::getCoverage(std::shared_ptr<DiscretizedArea> _space ) const
 {
 	AreaCoordinate l_center = _space->getCoordinate(m_point);
-	std::vector<AreaCoordinate> AreaSensore = m_camera.getCoverage(l_center, _space); //area attuale
-	
-	return AreaSensore;
+	return m_camera.getCoverage(l_center, _space);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -233,124 +192,150 @@ bool CameraPosition::operator!=(CameraPosition const& other) const
 	return !(*this==other);
 }
 
+void printArray(std::vector<AreaCoordinate> v, int c_row, int c_col) {
+	for (int i = 0; i < v.size(); ++i) {
+		double x = v.at(i).row;
+		double y = v.at(i).col;
+		double dist = sqrt(pow((x - c_row), 2) + pow((y - c_col), 2));
+		std::cout << "col: " << v.at(i).col << " \t row: " << v.at(i).row << "\t prob: " << v.at(i).p << std::endl;//<< "\n d : " << dist << std::endl;
+	}
+	std::cout << "centro col: " << c_col << " \t  centro row: " << c_row << "\t prob: " << std::endl;//<< "\n d : " << dist << std::endl;
+}
 
-
-std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const
+/*std::vector<AreaCoordinate> CameraPosition::line_scan(int x0, int y0, int a, int RMIN, int RMAX, int RSTEP, std::shared_ptr<DiscretizedArea> _area)
 {
-	Point2D l_pt = _area->getPosition(_center);
-	Shape2D l_sensorArea = this->getVisibleArea(l_pt);
-	Shape2D l_sensorAreaNear = this->getVisibleNearArea(l_pt);
-	
-
-	if (!l_sensorArea.isValid())
-		return std::vector<AreaCoordinate>();
-	if (!l_sensorAreaNear.isValid())
-		return std::vector<AreaCoordinate>();
-
-	int l_rowDelta =int(floor(m_farRadius / _area->getYStep())) + 1;
-	int l_colDelta =int(floor(m_farRadius / _area->getXStep())) + 1;
-
-
+	AreaCoordinate element;
 	std::vector<AreaCoordinate> result;
-	AreaCoordinate l_elem;
-	for (int i = -l_rowDelta; i <= l_rowDelta; ++i)
+	int d, x, y;
+	float alpha;
+
+	for (a = 0; a <= 90; a = a+10)
 	{
-		int row = _center.row + i;
-		if (row < 0 || row > _area->getNumRow()) //check sui margini
-			continue;
-		for (int j = -l_colDelta; j <= l_colDelta; ++j)
-		{
-			int col = _center.col + j;
-			if (col < 0 || col > _area->getNumCol())
+		for (d = RMIN; d <= RMAX; d += RSTEP) {
+
+			alpha = a * IDSMath::Pi / 180; // angle in rads
+
+			x = x0 + d*cos(alpha);
+			y = y0 - d*sin(alpha);
+
+			if (x < 0 || x > _area->getNumCol())
 				continue;
-
-			SquarePtr l_square = _area->getSquare(row, col); //return m_lattice
-
-			//std::cout << "Questi sono nella riga row: " << row << " col:" << col << std::endl;
-			if (!l_square)
+			if (y < 0 || y > _area->getNumRow())
 				continue;
-
-			Point2D l_center = l_square->getBoundingBox().center();
-			// assegno solo i punti che sono interni all'area del sensore
-			if (l_sensorArea.contains(l_center) ) //  && !l_sensorAreaNear.contains(l_center))
-			{
-
-				l_elem.row = row;
-				l_elem.col = col;
-				//l_elem.p = ProbabilityOfDetection(_center, row, col);
-				result.push_back(l_elem);
-
-			}
+			element.col = x;
+			element.row = y;
+			result.push_back(element);
+			//if (a == 360)	a = 0;
 		}
 	}
+	return result;
+}*/
 
-	//auto p = AgentPosition::ProbabilityOfDetection(_area, _center, c);
+double modulo2pi(double angle) {
+
+	if (angle < 0)	return angle = angle + IDSMath::TwoPi;
+	if (angle > IDSMath::TwoPi)	 return angle = angle - IDSMath::TwoPi;
+}
+
+//////////////////////////////////////////////////////////////////////////
+std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const
+{
 	
-	// Debug screen output
-	
-	//std::cout << " m_farRadius: " << m_farRadius << std::endl;
-	//std::cout << " m_nearRadius:  " << m_nearRadius << std::endl;
-	//std::cout << " l_rowDelta: " << l_rowDelta << std::endl;
-	//std::cout << " l_colDelta: " << l_colDelta << std::endl;
-	/*std::cout << " getXSquare: " << _area->getXStep() << std::endl;
-	std::cout << " getYSquare: " << _area->getYStep() << std::endl;
-	std::cout << " getSquare: " << _area->getSquare(1, 1) << std::endl;
-	std::cout << " getNumCol: " << _area->getNumCol() << std::endl;
-	std::cout << " getNumRow: " << _area->getNumRow() << std::endl;*/
-	//std::cout << " size of Lattice: " << _area->getLattice().size() << endl;
-	//std::cout << " centro ROW: " << _center.row << " COL: " << _center.col << std::endl;
-	/*
-	std::cout << "dimensione di result: " << result.size() << std::endl;
+	int l_rowDelta = int(floor(m_farRadius / _area->getYStep())) + 1;
+	int l_colDelta = int(floor(m_farRadius / _area->getXStep())) + 1;
+
+	std::vector<AreaCoordinate> result;
+	std::vector<AreaCoordinate> tmp;
+	AreaCoordinate element;
+
+	// center(x0, y0)
+	int x0, y0, alpha_line, Rmin, Rmax, Rstep;
+	x0 = _center.col;
+	y0 = _center.row;
+	alpha_line = 0;
+	Rmin = 2; //m_nearRadius/_area->getYSTep()+_area->getXStep();
+	Rmax = l_colDelta+1; //int(l_colDelta + l_rowDelta / 2);
+	Rstep = 1; //Discretized radar resolution
+
+	double h = 0;
+	double fov = 90;
+	int d, x, y;
+	float alpha;
+	//for (alpha_line = h - fov / 2; alpha_line < h + fov / 2; alpha_line = alpha_line + 2.5)
+
+	for (alpha_line = 0; alpha_line < 90; alpha_line = alpha_line + 2.5)
+	{
+		for (d = Rmin; d <= Rmax; d += Rstep) //line scan
+		{
+			alpha = alpha_line * IDSMath::Pi / 180; // angle in rads
+
+			// sample the point of line with Rstep sensor resolution
+			x = x0 + d*cos(alpha);
+			y = y0 - d*sin(alpha);
+
+			// check if square goes outside area
+			if (x < 0 || x > _area->getNumCol())
+				continue;
+			if (y < 0 || y > _area->getNumRow())
+				continue;
+
+				element.col = x;
+				element.row = y;
+				tmp.push_back(element);
+
+				// insert the first element
+				if (tmp.size() == 1)	result.push_back(element);
+
+				// find double element from the second step
+				bool found = false;
+				if (tmp.size() > 1)
+				{
+					for (int i = 0; i < tmp.size() - 1 && found == false; i++)
+					{
+						if (tmp.at(i).col == x && tmp.at(i).row == y)
+							found = true;
+					}
+				}
+				// insert when double element has not been found
+				if (found == false)	result.push_back(element);
+				// mod 2*pi
+				if (alpha_line == 360)	alpha_line = 0;
+			//}
+		}
+	}
 	printArray(result, _center.row, _center.col);
-	*/
-//	std::cout << "dimensione di result " << result.size() << std::endl;	
-	//printArray(result, _center.row, _center.col);
-
 	return result;
 }
 
-/*
-BaseGeometry::Shape2D CameraPosition::getHeading(BaseGeometry::Point2D const& point, std::shared_ptr<DiscretizedArea> _area) const
+
+BaseGeometry::Shape2D CameraPosition::getVisibleNearArea(BaseGeometry::Point2D const& point) const
+try
 {
-	AreaCoordinate punto = _area->getCoordinate(point);
-	AreaCoordinate 
-	
-	Arc2D arco = makeArc( );
-
-}*/
-
-//////////////////////////////////////////////////////////////////////////
-BaseGeometry::Shape2D CameraPosition::getVisibleArea(BaseGeometry::Point2D const& point) const
-	try
-{
-
-	if(fabs(m_farRadius) < IDSMath::TOLERANCE)
+	if (fabs(m_nearRadius) < IDSMath::TOLERANCE)
 		return Shape2D();
 
-	Curve2D l_external = makeCircle( point, m_farRadius, false);
-
+	Curve2D l_external = makeCircle(point, m_nearRadius, false);
 	return Shape2D(std::vector<Curve2D>(1, l_external));
 }
 catch (...)
 {
 	return Shape2D();
 }
-
-BaseGeometry::Shape2D CameraPosition::getVisibleNearArea(BaseGeometry::Point2D const& point) const
-try
+//////////////////////////////////////////////////////////////////////////
+BaseGeometry::Shape2D CameraPosition::getVisibleArea(BaseGeometry::Point2D const& point) const
+	try
 {
-
-	if (fabs(m_nearRadius) < IDSMath::TOLERANCE)
+	if(fabs(m_farRadius) < IDSMath::TOLERANCE)
 		return Shape2D();
 
-	Curve2D l_internal = makeCircle(point, m_nearRadius, false);
-
-	return Shape2D(std::vector<Curve2D>(1, l_internal));
+	Curve2D l_external = makeCircle( point, m_farRadius, false);
+	return Shape2D( std::vector<Curve2D>(1,l_external) );
 }
 catch (...)
 {
 	return Shape2D();
 }
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

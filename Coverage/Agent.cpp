@@ -88,32 +88,32 @@ void Agent::setStatus(Status stat)
 //////////////////////////////////////////////////////////////////////////
 std::vector<AgentPosition> Agent::getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const
 {
-	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() ); 
+	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() ); // prende punto camera
+	double heading = m_currentPosition.m_heading;
 
-	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord); // prende 8 punti adiacenti e li mette in l_aquare
+	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord); // prende 8 punti adiacenti ABCDEFG
 
 	std::vector<AgentPosition> l_result;
-	for( size_t i = 0; i < l_squares.size(); ++i )
+	for( size_t i = 0; i < l_squares.size(); ++i)
 	{
 		// AgentPosition takes point and cameraPosition and put them in l_result
-		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), m_currentPosition.m_camera) );
+		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), l_squares[i].heading, m_currentPosition.m_camera) );
 	}
-
 	return l_result; // return vector of all AgentPosition possible
 }
 
-//In this function one among all FeasibleAction is selected 
+//In this function one random action among all FeasibleAction is selected 
 //////////////////////////////////////////////////////////////////////////
 AgentPosition Agent::selectRandomFeasibleAction(std::shared_ptr<DiscretizedArea> _space)
 {
 	std::vector<AgentPosition> l_feasible = this->getFeasibleActions(_space); // tutte le posizioni possibili in base a dove mi trovo
-	if(l_feasible.empty())
+	if(l_feasible.empty()) // if is empty return currentPosition
 		return m_currentPosition;
 	else
 	{
 		//this->removeBestTrajectoryFromFeasible(l_feasible);
 
-		int l_value = getRandomValue( int( l_feasible.size() ) ); // ne prende una a caso
+		int l_value = getRandomValue( int( l_feasible.size() ) ); // ne prende una a caso in posizione l_value
 		return l_feasible[l_value];
 	}
 }
@@ -145,5 +145,6 @@ std::shared_ptr<Sink> Agent::toSink()
 //////////////////////////////////////////////////////////////////////////
 void Agent::moveToNextPosition()
 {
+	m_oldPosition = m_currentPosition; // added
 	m_currentPosition = m_nextPosition;
 }

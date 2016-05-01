@@ -88,7 +88,7 @@ void LearningAlgorithm::communicate(std::shared_ptr<Guard> _agent)
 	set<GuardPtr> l_communicableAgents = _agent->getCommunicableAgents(m_guards);
 
 	//	2) recupero i riquadri che riesco a vedere
-	set<SquarePtr> l_visibleSquares = _agent->getVisibleSquares(m_space);
+	set<SquarePtr> l_visibleSquares = _agent->getVisibleSquares(m_space); //ok
 
 	//	3) Spedisco il messaggio
 	for(set<GuardPtr>::iterator it = l_communicableAgents.begin(); it != l_communicableAgents.end(); ++it)
@@ -125,7 +125,7 @@ void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 	std::shared_ptr<Square> temp_square;
 	
 	for (int i = 0; i < l_coord.size(); ++i) { // ispeziona tutti i quadrati visti dai sensori per contare quanti robot lo vedono 
-		temp_square = m_space->getSquare(l_coord[i]); 
+		temp_square = m_space->getSquare(l_coord[i]); // prende un quadrato delle m_lattice (griglia)
 		if (!temp_square->isValid())
 			continue;
 		int l_nq = temp_square->getTheNumberOfAgent(); // numero di agenti che vedono il quadrato
@@ -203,7 +203,6 @@ bool LearningAlgorithm::forwardOneStep(std::shared_ptr<Guard> _agent)
 	double l_rate = this->computeExplorationRate();
 	if(l_rate < 1.e-5)
 		return false;
-
 	//	ogni agente guardia aggiorna la prossima azione da compiere:
 	this->update(_agent);
 
@@ -221,6 +220,7 @@ void LearningAlgorithm::computeNextPosition()
 {
 	for(std::set<GuardPtr>::iterator it = m_guards.begin(); it != m_guards.end(); ++it)
 		this->forwardOneStep(*it);
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -291,16 +291,16 @@ void LearningAlgorithm::getGuardsSquare(std::vector<std::pair<SquarePtr, AgentAc
 //////////////////////////////////////////////////////////////////////////
 void LearningAlgorithm::getGuardsCoverage( std::vector< std::vector<IDS::BaseGeometry::Point2D> > & _areas)
 {
-	for(set<GuardPtr>::iterator it = m_guards.begin(); it != m_guards.end(); ++it)
+	for(set<GuardPtr>::iterator it = m_guards.begin(); it != m_guards.end(); ++it) // scorro su tutte le guardie
 	{
 		std::vector<IDS::BaseGeometry::Point2D> l_agentArea;
 		GuardPtr l_agent = *it;
-		Shape2D l_area = l_agent->getVisibleArea();
-		std::vector<Curve2D> l_bound = l_area.getBoundary();
+		Shape2D l_area = l_agent->getVisibleArea(); // return the shape with m_farRadius
+		std::vector<Curve2D> l_bound = l_area.getBoundary(); // get the boundary of sensor area
 		for(size_t i = 0 ; i < l_bound.size(); ++i)
 		{
-			std::vector<IDS::BaseGeometry::Point2D> l_partial = l_bound[i].approxByPoints(1);
-			l_agentArea.insert(l_agentArea.end(), l_partial.begin(), l_partial.end());
+			std::vector<IDS::BaseGeometry::Point2D> l_partial = l_bound[i].approxByPoints(1); // approssima la Curva con punti
+			l_agentArea.insert(l_agentArea.end(), l_partial.begin(), l_partial.end()); // vettore con tutti i punti che approssimano area sensore
 		}
 		_areas.push_back(l_agentArea);
 	}

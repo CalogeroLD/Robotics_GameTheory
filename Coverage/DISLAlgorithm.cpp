@@ -45,9 +45,8 @@ void DISLAlgorithm::update(std::shared_ptr<Guard> _agent)
 	}
 
 	_agent->selectNextAction(m_space);
-
 	//	ogni agente guardia muove verso la nuova posizione
 	_agent->moveToNextPosition(); // m_currentposition = m_nextposition
-
+	
 	return;
 }

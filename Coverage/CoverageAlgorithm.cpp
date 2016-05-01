@@ -603,6 +603,7 @@ void importFromFile(
 			driver.type = AgentDriver::NEUTRAL;
 			_agents.push_back(driver);
 		}
+		//aggiungo
 	}
 	iFile.close();
 }
@@ -613,7 +614,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	std::vector<IDS::BaseGeometry::Point2D> l_bound;
 	std::vector<AgentDriver> l_agentDriver;
 
-	importFromFile(_filename, l_bound, l_agentDriver);
+	importFromFile(_filename, l_bound, l_agentDriver); // setta l'area e le posizioni dei robot
 
 	/// Create Coverage Algorithm:
 	std::shared_ptr<Area> l_space = std::make_shared<StructuredArea>(l_bound);
@@ -627,8 +628,8 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 
 		++l_id;
 		AgentPosition l_pos( 
-			l_agentDriver[i].position 
-			/*l_space->randomPosition()*/, 
+			l_agentDriver[i].position, 0.0, 
+			/*l_space->randomPosition()*/ 
 			CameraPosition(l_space->getDistance() / 15.) );
 
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, _period, _type == 2? 1 : 2);
@@ -643,7 +644,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		if(l_agentDriver[i].type != AgentDriver::THIEF)
 			continue;
 		// aggiunto random angle
-		AgentPosition l_pos(l_space->randomPosition(), CameraPosition(l_space->getDistance() / 15., 0, IDSMath::Pi, IDSMath::Pi*(110/180) ) );
+		AgentPosition l_pos(l_space->randomPosition(), 0.0, CameraPosition(l_space->getDistance() / 15., 0, IDSMath::Pi, IDSMath::Pi*(110/180) ) );
 		Sleep(100);
 		
 		ThiefPtr l_agent = std::make_shared<Thief>(l_algorithm->getNumberOfAgent(), l_pos/*l_agentDriver[i].position*/);
@@ -655,7 +656,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		if(l_agentDriver[i].type != AgentDriver::SINK)
 			continue;
 
-		AgentPosition l_pos( l_space->randomPosition(), CameraPosition(l_space->getDistance() / 15.) );
+		AgentPosition l_pos( l_space->randomPosition(), 0.0, CameraPosition(l_space->getDistance() / 15.) );
 		Sleep(100);
 
 		SinkPtr l_agent = std::make_shared<Sink>(l_algorithm->getNumberOfAgent(), l_pos/*l_agentDriver[i].position*/);
@@ -687,7 +688,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 #ifdef _PRINT
 	cout << "creating scenario"<<endl;
 #endif
-
+	// mette in ingresso
 	std::shared_ptr<DiscretizedArea> l_space = std::make_shared<DiscretizedArea>(_areaFile);
 #ifdef _PRINT
 	cout << "created scenario"<<endl;
@@ -697,6 +698,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	cout << "Placing guards"<<endl;
 #endif
 	int l_id = -1;
+	//mette in ingresso
 	std::set< std::shared_ptr<Agent> >l_agents; 
 	for(size_t i = 0; i < l_agentDriver.size(); ++i)
 	{
@@ -709,16 +711,16 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 			//int num_level = 60.0;
 			double R = double((l_space->getXStep() + l_space->getYStep()) / 2. * 7.5);
 			double r = double(l_space->getXStep() + l_space->getYStep() / 2. );
-			double o = double( (90/180) * IDSMath::Pi);
+			double heading = double(IDSMath::Pi);
 			double v = double(IDSMath::TwoPi * (110/180));
 
-			AgentPosition l_pos(l_agentDriver[i].position, CameraPosition(R, r, o, v)); // prende 5 quadratini x 6 quadratini
+			AgentPosition l_pos(l_agentDriver[i].position, heading, CameraPosition(R, r, heading, v)); // prende 5 quadratini x 6 quadratini
 
 		// point
 			Point2D l_point;
 			if (l_space->getRandomPosition(l_point) && 0)
 			{
-				l_pos = AgentPosition(l_point, CameraPosition(double(l_space->getXStep() + l_space->getYStep()) / 2. *4.5));  //double(l_space->getXStep() + l_space->getYStep()) / 2. *1.5));
+				l_pos = AgentPosition(l_point, heading, CameraPosition(R, r, heading, v) );  //double(l_space->getXStep() + l_space->getYStep()) / 2. *1.5));
 				Sleep(50);
 			}
 
@@ -748,12 +750,12 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		if(l_agentDriver[i].type != AgentDriver::THIEF)
 			continue;
 
-		AgentPosition l_pos( l_agentDriver[i].position, CameraPosition() );
+		AgentPosition l_pos( l_agentDriver[i].position, 0.0, CameraPosition() );
 
 		Point2D l_point;
 		if( l_space->getRandomPosition(l_point) )
 		{
-			l_pos = AgentPosition ( l_point, CameraPosition() );
+			l_pos = AgentPosition ( l_point, 0.0, CameraPosition() );
 			Sleep(50);
 		}
 
@@ -772,12 +774,12 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		if(l_agentDriver[i].type != AgentDriver::SINK)
 			continue;
 
-		AgentPosition l_pos( l_agentDriver[i].position, CameraPosition() );
+		AgentPosition l_pos( l_agentDriver[i].position, 0.0, CameraPosition() );
 
 		Point2D l_point;
 		if( l_space->getRandomPosition(l_point) )
 		{
-			l_pos = AgentPosition ( l_point, CameraPosition() );
+			l_pos = AgentPosition ( l_point, 0.0, CameraPosition() );
 			Sleep(50);
 		}
 
