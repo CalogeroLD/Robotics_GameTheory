@@ -61,7 +61,7 @@ CoverageTest::CoverageTest(const vector<Point2D>& bound, bool counterclockwise)
 	for(int i = 0; i < g_numberOfAgents; ++i)
 	{
 		++l_id;
-		AgentPosition l_pos( l_space->randomPosition(), CameraPosition( l_space->getDistance()/7. ) );
+		AgentPosition l_pos( l_space->randomPosition(), l_space->randomAngle(), CameraPosition( l_space->getDistance()/7. ) );
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, g_agentsPeriod, g_pareto?1:2);
 		l_agents.insert(l_agent);
 		Sleep(1000);

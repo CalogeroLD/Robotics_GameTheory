@@ -8,6 +8,7 @@
 #include "Sink.h"
 #include "Probability.h"
 
+
 #include <sstream>
 #include <string>
 #include <set>
@@ -288,7 +289,7 @@ void LearningAlgorithm::getGuardsSquare(std::vector<std::pair<SquarePtr, AgentAc
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////// la usa solo per il disegno
 void LearningAlgorithm::getGuardsCoverage( std::vector< std::vector<IDS::BaseGeometry::Point2D> > & _areas)
 {
 	for(set<GuardPtr>::iterator it = m_guards.begin(); it != m_guards.end(); ++it) // scorro su tutte le guardie
@@ -296,9 +297,11 @@ void LearningAlgorithm::getGuardsCoverage( std::vector< std::vector<IDS::BaseGeo
 		std::vector<IDS::BaseGeometry::Point2D> l_agentArea;
 		GuardPtr l_agent = *it;
 		Shape2D l_area = l_agent->getVisibleArea(); // return the shape with m_farRadius
-		std::vector<Curve2D> l_bound = l_area.getBoundary(); // get the boundary of sensor area
+		std::vector<Curve2D> l_bound = l_area.getBoundary(); // get the boundary of sensor area		
+
 		for(size_t i = 0 ; i < l_bound.size(); ++i)
 		{
+			cout << l_bound.size() << std::endl;
 			std::vector<IDS::BaseGeometry::Point2D> l_partial = l_bound[i].approxByPoints(1); // approssima la Curva con punti
 			l_agentArea.insert(l_agentArea.end(), l_partial.begin(), l_partial.end()); // vettore con tutti i punti che approssimano area sensore
 		}

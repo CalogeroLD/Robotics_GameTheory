@@ -14,6 +14,10 @@
 #include "BaseGeometry/Point2D.h"
 #include "BaseGeometry/Shape2D.h"
 #include "BaseGeometry/Line2D.h"
+#include "BaseGeometry/Arc2D.h"
+#include "BaseGeometry/MakeArc2D.h"
+
+
 //	IDSBaseMath
 #include "IDSMath.h"
 
@@ -51,9 +55,12 @@ namespace Robotics
 			CameraPosition(double _farRadius = 0., double _nearRadius = 0., double _orientation = 0., double _angle = IDSMath::TwoPi/4) 
 				: m_farRadius(_farRadius), m_nearRadius(_nearRadius), m_orientation(_orientation), m_angle(_angle) {}
 
-			std::vector<AreaCoordinate> line_scan(int x0, int y0, int a, int RMIN, int RMAX, int RSTEP, std::shared_ptr<DiscretizedArea> _area);
+			//std::vector<AreaCoordinate> line_scan(int x0, int y0, int a, int RMIN, int RMAX, int RSTEP, std::shared_ptr<DiscretizedArea> _area);
 
-			std::vector<AreaCoordinate> getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
+			std::vector<AreaCoordinate> getCoverage(AreaCoordinate _center, double heading, std::shared_ptr<DiscretizedArea> _area) const;
+			std::vector<IDS::BaseGeometry::Point2D> getVisibleArcPoints(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
+			//aggiunta
+			//std::vector<Point2D> getVisibleArcPoints(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
 
 			double getFarRadius() const {return m_farRadius;}
 			//aggiunti
@@ -64,9 +71,10 @@ namespace Robotics
 			// set member functions added
 			void setOrientation(double _orientation) { m_orientation = _orientation; }
 
-			IDS::BaseGeometry::Shape2D getVisibleArcArea(IDS::BaseGeometry::Point2D const & point, IDS::BaseGeometry::Point2D const & center, double angle) const;
-
 			IDS::BaseGeometry::Shape2D getVisibleArea(IDS::BaseGeometry::Point2D const& point) const;
+
+			IDS::BaseGeometry::Arc2D getVisibleArcArea(IDS::BaseGeometry::Line2D const &points, double const &radius, double const &angle) const;
+
 			IDS::BaseGeometry::Shape2D getVisibleNearArea(IDS::BaseGeometry::Point2D const& point) const; //aggiunta
 			
 
@@ -98,7 +106,7 @@ namespace Robotics
 
 			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading, CameraPosition _camera) : m_point(point), m_heading(heading), m_camera(_camera) {}
 
-			void setHeading(AgentPosition _agentPosiiton, double heading) { _agentPosiiton.m_heading = heading; }
+			void setHeading(AgentPosition _agentPosition, double heading) { _agentPosition.m_heading = heading; }
 
 			//auto ProbabilityOfDetection(std::shared_ptr<DiscretizedArea> area, AreaCoordinate p_r, AreaCoordinate p_t);
 
@@ -108,6 +116,8 @@ namespace Robotics
 			/// Get Point2D
 			IDS::BaseGeometry::Point2D getPoint2D() const {return m_point;}
 			CameraPosition getCamera() const { return m_camera; }
+
+			//IDS::BaseGeometry::Arc2D getVisibleArcArea(IDS::BaseGeometry::Line2D const &line, double const &radius, double const &angle) const;
 
 			/// True if other is in communication with this position
 			bool communicable(std::shared_ptr<Agent> _other) const;
@@ -214,6 +224,8 @@ namespace Robotics
 			bool equals(std::shared_ptr<Agent>) const;
 
 			inline IDS::BaseGeometry::Shape2D getVisibleArea() const {return m_currentPosition.getVisibleArea();}
+			//aggiunto
+			//inline IDS::BaseGeometry::Arc2D getVisibleArcArea() const { return m_currentPosition.getVisibleArcArea(); }
 
 			CameraPosition getCurrentCamera() { return m_currentPosition.m_camera; }
 

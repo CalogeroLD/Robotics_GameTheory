@@ -1,10 +1,17 @@
 #include "Agent.h"
+#include "Agent.h"
+#include "Agent.h"
 #include "Guard.h"
 #include "DiscretizedArea.h"
 
 #include "BaseGeometry/Shape2D.h"
 #include "BaseGeometry/Arc2D.h"
 #include "BaseGeometry/Point2D.h"
+#include "BaseGeometry/MakeArc2D.h"
+#include "BaseGeometry/Line2D.h"
+
+
+
 
 using namespace std;
 using namespace Robotics;
@@ -123,7 +130,8 @@ void AgentPosition::updateCounter(std::shared_ptr<DiscretizedArea> area)
 
 	// Calcolo la copertura in base alla camera:
 	// per ora conta solo il raggio massimo e non cala con la distanza!
-	std::vector<AreaCoordinate> l_cover = m_camera.getCoverage(l_coord, area);
+	
+	std::vector<AreaCoordinate> l_cover = m_camera.getCoverage(l_coord, m_heading, area);
 
 	for(size_t i = 0; i < l_cover.size(); ++i)
 	{
@@ -159,7 +167,7 @@ double AgentPosition::computeCosts() const
 std::vector<AreaCoordinate> AgentPosition::getCoverage(std::shared_ptr<DiscretizedArea> _space ) const
 {
 	AreaCoordinate l_center = _space->getCoordinate(m_point);
-	return m_camera.getCoverage(l_center, _space);
+	return m_camera.getCoverage(l_center, m_heading, _space); // ho aggiunto argomenti
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -202,45 +210,57 @@ void printArray(std::vector<AreaCoordinate> v, int c_row, int c_col) {
 	std::cout << "centro col: " << c_col << " \t  centro row: " << c_row << "\t prob: " << std::endl;//<< "\n d : " << dist << std::endl;
 }
 
-/*std::vector<AreaCoordinate> CameraPosition::line_scan(int x0, int y0, int a, int RMIN, int RMAX, int RSTEP, std::shared_ptr<DiscretizedArea> _area)
-{
-	AreaCoordinate element;
-	std::vector<AreaCoordinate> result;
-	int d, x, y;
-	float alpha;
-
-	for (a = 0; a <= 90; a = a+10)
-	{
-		for (d = RMIN; d <= RMAX; d += RSTEP) {
-
-			alpha = a * IDSMath::Pi / 180; // angle in rads
-
-			x = x0 + d*cos(alpha);
-			y = y0 - d*sin(alpha);
-
-			if (x < 0 || x > _area->getNumCol())
-				continue;
-			if (y < 0 || y > _area->getNumRow())
-				continue;
-			element.col = x;
-			element.row = y;
-			result.push_back(element);
-			//if (a == 360)	a = 0;
-		}
-	}
-	return result;
-}*/
-
 double modulo2pi(double angle) {
 
 	if (angle < 0)	return angle = angle + IDSMath::TwoPi;
 	if (angle > IDSMath::TwoPi)	 return angle = angle - IDSMath::TwoPi;
+	if (angle >= 0 && angle <= IDSMath::TwoPi)	return angle;
+
 }
 
-//////////////////////////////////////////////////////////////////////////
-std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const
+double modulo360(double angle) {
+
+	if (angle < 0)	return angle = angle + 360;
+	if (angle > 360)	 return angle = angle - 360;
+	if (angle >= 0 && angle <= 360)	return angle;
+}
+
+/*if (alpha_line > 360 && turned_f == false && turned_l == true) {
+alpha_line += 360;
+alpha_finish += 360;
+turned_f = true;
+}*/
+/*if (alpha_line < 0 && turned_l == false){
+alpha_line += 360;
+alpha_finish += 360;
+turned_l = true;
+}*/
+
+// sample the point of line with Rstep sensor resolution
+/*if (alpha_line >= 180 && alpha_line <= 360) // sin positivo
 {
-	
+x = x0 + d*cos(alpha);
+y = y0 + d*sin(alpha);
+}
+if (alpha_line >= 0 && alpha_line < 180) // sin negativo
+{
+x = x0 + d*cos(alpha);
+y = y0 + d*sin(alpha);
+}
+if(alpha_line < 0 && alpha_line >= -180)
+{
+x = x0 + d*cos(alpha);
+y = y0 + d*sin(alpha);
+}
+if (alpha_line < -180 && alpha_line >= -360)
+{
+x = x0 + d*cos(alpha);
+y = y0 - d*sin(alpha);
+}*/
+
+//////////////////////////////////////////////////////////////////////////
+std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, double heading, std::shared_ptr<DiscretizedArea> _area) const
+{
 	int l_rowDelta = int(floor(m_farRadius / _area->getYStep())) + 1;
 	int l_colDelta = int(floor(m_farRadius / _area->getXStep())) + 1;
 
@@ -252,45 +272,57 @@ std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, 
 	int x0, y0, alpha_line, Rmin, Rmax, Rstep;
 	x0 = _center.col;
 	y0 = _center.row;
-	alpha_line = 0;
 	Rmin = 2; //m_nearRadius/_area->getYSTep()+_area->getXStep();
 	Rmax = l_colDelta+1; //int(l_colDelta + l_rowDelta / 2);
 	Rstep = 1; //Discretized radar resolution
 
-	double h = 0;
-	double fov = 90;
 	int d, x, y;
 	float alpha;
-	//for (alpha_line = h - fov / 2; alpha_line < h + fov / 2; alpha_line = alpha_line + 2.5)
+	// in this case heading of robot is considered coincident with the heading of camera
+	double h = heading; // heading che va preso con un range da 0 a 360 ( 0 = 360, considerato una volta sola)
+	double fov = m_angle; // feed of view
+	double alpha_begin = h - fov / 2;
+	double alpha_finish = h + fov / 2;
+	double angle_resolution = 2; // degrees
 
-	for (alpha_line = 0; alpha_line < 90; alpha_line = alpha_line + 2.5)
+	try
+	{
+		Point2D l_pt = _area->getPosition(_center);
+		Line2D line = makeLine(l_pt, h);
+		Arc2D l_Arco = this->getVisibleArcArea(line, m_farRadius, m_angle);
+		
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		system("pause");
+	}
+	
+	//for (alpha_line = 270; alpha_line < 360; alpha_line = alpha_line + 2.5)
+	for(alpha_line = alpha_begin; alpha_line < alpha_finish; alpha_line = alpha_line + angle_resolution )
 	{
 		for (d = Rmin; d <= Rmax; d += Rstep) //line scan
 		{
 			alpha = alpha_line * IDSMath::Pi / 180; // angle in rads
-
-			// sample the point of line with Rstep sensor resolution
-			x = x0 + d*cos(alpha);
-			y = y0 - d*sin(alpha);
+			
+			x = x0 + d*cos(-alpha);
+			y = y0 + d*sin(-alpha);
 
 			// check if square goes outside area
-			if (x < 0 || x > _area->getNumCol())
+			if (x <= 0 || x >= _area->getNumCol())
 				continue;
-			if (y < 0 || y > _area->getNumRow())
+			if (y <= 0 || y >= _area->getNumRow())
 				continue;
 
 				element.col = x;
 				element.row = y;
 				tmp.push_back(element);
 
-				// insert the first element
-				if (tmp.size() == 1)	result.push_back(element);
-
 				// find double element from the second step
 				bool found = false;
 				if (tmp.size() > 1)
 				{
-					for (int i = 0; i < tmp.size() - 1 && found == false; i++)
+					for (int i = 0; i < tmp.size() -1 && found == false; i++)
 					{
 						if (tmp.at(i).col == x && tmp.at(i).row == y)
 							found = true;
@@ -300,13 +332,95 @@ std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, 
 				if (found == false)	result.push_back(element);
 				// mod 2*pi
 				if (alpha_line == 360)	alpha_line = 0;
-			//}
 		}
 	}
-	printArray(result, _center.row, _center.col);
+	//result = this->getVisibleArcPoints(_center, _area);
+	//printArray(result, _center.row, _center.col);
 	return result;
 }
 
+//// potrebbe essere usata al posto di gerVisibleArea in LearningAlgorithm.cpp manca la ,linescan del bordo arco ////
+std::vector<IDS::BaseGeometry::Point2D> CameraPosition::getVisibleArcPoints(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const
+{
+	int l_rowDelta = int(floor(m_farRadius / _area->getYStep())) + 1;
+	int l_colDelta = int(floor(m_farRadius / _area->getXStep())) + 1;
+
+	AreaCoordinate element;
+	std::vector<AreaCoordinate> result;
+	std::vector<AreaCoordinate> tmp;
+
+	// center(x0, y0)
+	int x0, y0, alpha_line, Rmin, Rmax, Rstep, d;
+	x0 = _center.col;
+	y0 = _center.row;
+	Rmin = 2; //m_nearRadius/_area->getYSTep()+_area->getXStep();
+	Rmax = l_colDelta + 1; //int(l_colDelta + l_rowDelta / 2);
+	Rstep = 1; //Discretized radar resolution
+
+	int x, y;
+	double alpha, h, fov, alpha_begin, alpha_finish, angle_resolution;
+
+	h = m_orientation; // heading che va preso con un range da 0 a 360 ( 0 = 360, considerato una volta sola)
+	fov = m_angle; // feed of view
+	alpha_begin = h - fov / 2;
+	alpha_finish = h + fov / 2;
+	angle_resolution = 2; // degrees
+	
+	for (alpha_line = alpha_begin; alpha_line < alpha_finish; alpha_line = alpha_line + angle_resolution)
+	{
+		alpha = alpha_line * IDSMath::Pi / 180; // angle in rads
+		// It samples the points of bounds
+		x = x0 + Rmax*cos(-alpha);
+		y = y0 + Rmax*sin(-alpha);
+		// check if the points go out the discretized area
+		if (x <= 0 || x >= _area->getNumCol())
+			continue;
+		if (y <= 0 || y >= _area->getNumRow())
+			continue;
+
+		element.col = x;
+		element.row = y;
+		tmp.push_back(element);
+
+		// find double element from the second step till the last one
+		bool found = false;
+		if (tmp.size() > 1)
+		{
+			for (int i = 0; i < tmp.size() - 1 && found == false; i++)
+			{
+				if (tmp.at(i).col == x && tmp.at(i).row == y)
+					found = true;
+			}
+		}
+		// insert when double element has not been found
+		if (found == false)	result.push_back(element);
+		// mod 2*pi
+		if (alpha_line == 360)	alpha_line = 0;
+	}
+	// conrversion from AreaCcordinate to Point2D inspired to getCoordinate function
+	std::vector<Point2D> points;
+	for (int i = 0; i < result.size(); i++)
+	{
+		Point2D p = _area->getCoordinatePoint2D(result.at(i));
+		points.push_back(p);
+	}
+	return points;
+}
+
+///////////////////////////////////////////////////////////////////// come prendo i punti dall'arco Arc2d?
+BaseGeometry::Arc2D CameraPosition::getVisibleArcArea(BaseGeometry::Line2D const& line, double const& radius, double const& angle) const
+try
+{
+	if (fabs(m_farRadius) < IDSMath::TOLERANCE)
+		return Arc2D();
+
+	Arc2D l_external = makeArc(line, radius, angle);
+	return l_external;
+}
+catch (...)
+{
+	return Arc2D();
+}
 
 BaseGeometry::Shape2D CameraPosition::getVisibleNearArea(BaseGeometry::Point2D const& point) const
 try
@@ -335,6 +449,8 @@ catch (...)
 {
 	return Shape2D();
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

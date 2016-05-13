@@ -169,6 +169,8 @@ namespace Robotics
 
 			/// Compute index of row and index of column of the given point.
 			AreaCoordinate getCoordinate( IDS::BaseGeometry::Point2D const& point ) const;
+			// aggiunto
+			IDS::BaseGeometry::Point2D getCoordinatePoint2D(AreaCoordinate const & point) const;
 
 			SquarePtr getSquare(int row, int col) const;
 			SquarePtr getSquare(AreaCoordinate _coord) const;

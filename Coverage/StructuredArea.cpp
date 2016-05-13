@@ -73,6 +73,7 @@ IDS::BaseGeometry::Point2D StructuredArea::randomPosition() const
 	return l_point;
 }
 
+
 double Area::randomAngle() const
 {
 	//calcolo l'orientazione iniziale della camera

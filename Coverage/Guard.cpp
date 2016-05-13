@@ -213,10 +213,26 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 	switch(m_exploring)
 	{
 	case -1:
+		// a random position is selected (ABCDEFG)
 		this->setNextPosition( selectNextFeasiblePosition(_space) );
 		break;
 	default:
-		this->setNextPosition( m_memory.getNextPosition(m_exploring, m_currentTrajectory.size()) );
+		// a position from past ones is selected
+		AgentPosition nextAgentPosition = m_memory.getNextPosition(m_exploring, m_currentTrajectory.size());
+
+		Point2D nextPosition = nextAgentPosition.getPoint2D();
+		Point2D currentPosition = m_currentPosition.getPoint2D();
+		double y_delta = nextPosition.coord(1) - currentPosition.coord(1);
+		double x_delta = nextPosition.coord(0) - currentPosition.coord(0);
+
+		double heading = atan2(y_delta, x_delta);
+		
+		std::cout << "x: " << x_delta << "y: " << y_delta << std::endl;
+		std::cout << "heading " << heading << std::endl;
+
+		nextAgentPosition.setHeading(nextPosition, heading);
+
+		this->setNextPosition( nextAgentPosition ); // (indexBest, indexNext)
 	}
 }
 

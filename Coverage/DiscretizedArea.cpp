@@ -571,6 +571,17 @@ AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
 	return l_coord;
 }
 
+
+BaseGeometry::Point2D DiscretizedArea::getCoordinatePoint2D(AreaCoordinate const& point) const
+{
+	double l_xdist = point.col * m_xStep;
+	double l_ydist = point.row * m_yStep;
+
+	Point2D point2D = makePoint(IDSReal2D(l_xdist, l_ydist), BaseGeometry::EllMetric);
+
+	return point2D;
+}
+
 //////////////////////////////////////////////////////////////////////////
 SquarePtr DiscretizedArea::getSquare(Point2D const& V) const
 {
@@ -729,7 +740,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	return result;
 }
 
-std::vector<AreaCoordinate> DiscretizedArea::getHeadingbasedSquare(AreaCoordinate _current) const
+/*std::vector<AreaCoordinate> DiscretizedArea::getHeadingbasedSquare(AreaCoordinate _current) const
 {
 	// in this function all adiacent square are selected and pushed in result
 	std::vector<AreaCoordinate> result;
@@ -791,15 +802,8 @@ std::vector<AreaCoordinate> DiscretizedArea::getHeadingbasedSquare(AreaCoordinat
 			result.push_back(pos);
 	}
 	return result;
-}
+}*/
 
-/*
-// function that selects the feasible actions according to the heading
-std::vector<AreaCoordinate> DiscretizedArea::getHeadingValidSquares(std::vector<AreaCoordinate> FeasibleAreaCoordinate, AreaCoordinate const& _current, double _heading) const
-{
-	//if(_)
-}
-*/
 //////////////////////////////////////////////////////////////////////////
 void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const
 {
