@@ -200,8 +200,10 @@ namespace Robotics
 			void setRandomSquareValue();
 
 			std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const& _current) const;
+			//std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const & _current, double heading) const;
 
 			std::vector<AreaCoordinate> getHeadingbasedSquare(AreaCoordinate _current) const;
+
 
 			void addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const;
 

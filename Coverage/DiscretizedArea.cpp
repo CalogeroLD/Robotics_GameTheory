@@ -684,10 +684,17 @@ std::pair<AreaCoordinate, double> DiscretizedArea::getStandardApproachableValidS
 }
 */
 
+double Mod2Pi(double angle) {
+	if (angle < 0)	return angle += IDSMath::TwoPi;
+	if (angle > IDSMath::TwoPi)	return angle -= IDSMath::TwoPi;
+
+}
+
 std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
 {
 	// in this function all adiacent square are selected and pushed in result
-	std::vector<AreaCoordinate> result;
+	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
+	std::vector<AreaCoordinate> selected; // ased on heading
 
 	if (_current.row != DISCRETIZATION_ROW)
 	{
@@ -737,7 +744,16 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	return result;
+
+	for (int i = 0; i < result.size(); i++)
+	{
+		//vincolo cinematico dato dall'heading
+		if ( result.at(i).heading == _current.heading || result.at(i).heading == Mod2Pi(_current.heading - IDSMath::PiDiv4) || result.at(i).heading == Mod2Pi(_current.heading + IDSMath::PiDiv4) )
+		{
+			selected.push_back(result.at(i));
+		}
+	}
+	return selected;
 }
 
 

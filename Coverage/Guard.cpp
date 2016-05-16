@@ -41,6 +41,7 @@ std::vector<AgentPosition> Guard::getFeasibleActions( std::shared_ptr<Discretize
 
 	// getStandardApproachableValidSquares deve dipendere anche da heading che ho aggiunto
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord);
+	
 	// ho tolto la funzione sotto perchè sono già incluse dalla precedente
 	//_space->addSpecialApproachableValidSquares(l_currCoord, l_squares); // aggiunge le diagonali in l_sqaure
 
@@ -278,12 +279,13 @@ AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr
 AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr<DiscretizedArea> _space, std::set<int> &_alreadyTested)
 {
 	AgentPosition result;
-	std::vector<AgentPosition> l_feasible = this->getFeasibleActions(_space); // usa getstandardapproachableValidSquare con heading
+	// usa getstandardapproachableValidSquare con heading
+	std::vector<AgentPosition> l_feasible = this->getFeasibleActions(_space); 
 
 	std::vector< std::pair<AgentPosition, int> > l_notControlledFeasibleActions;
 	for(size_t i = 0; i < l_feasible.size(); ++i) // scorre su tutte le azioni fattibili con heading
 	{
-		if( _alreadyTested.find(i) != _alreadyTested.end() )  // se trova un already tested uguale all'ultimo elemento(azione)
+		if( _alreadyTested.find(i) != _alreadyTested.end() )  //se trova un already tested uguale all'ultimo elemento(azione)
 			continue;
 
 		if( m_currentTrajectory.contains(l_feasible[i]) )
