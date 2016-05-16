@@ -326,6 +326,7 @@ int main(int argc, char* argv[])
 
 		for (size_t l = 0; l < l_AreaFilenames.size(); ++l)
 		{
+
 			std::string l_AreaFilename = l_AreaFilenames[l];
 			std::string l_AreaName = l_AreaFilename.substr(l_AreaFilename.find_last_of("/\\") + 1, l_AreaFilename.find_last_of("."));
 

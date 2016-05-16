@@ -214,6 +214,8 @@ namespace Robotics
 			/// The set of agents can communicate with this agent
 			std::set<std::shared_ptr<Guard> > getCommunicableAgents(std::set< std::shared_ptr<Guard> > const& _guards) const;
 
+			AgentPosition selectNextFeasiblePosition(std::shared_ptr<DiscretizedArea> _space, double heading);
+
 			/// Receive the square visible from an other guard.
 			void receiveMessage( std::set<std::shared_ptr<Square> > const& _visible);
 

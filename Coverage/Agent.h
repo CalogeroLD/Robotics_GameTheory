@@ -105,6 +105,8 @@ namespace Robotics
 			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading) : m_point(point), m_heading(heading), m_camera() {}
 
 			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading, CameraPosition _camera) : m_point(point), m_heading(heading), m_camera(_camera) {}
+			
+			double getHeading() { return m_heading; }
 
 			void setHeading(AgentPosition _agentPosition, double heading) { _agentPosition.m_heading = heading; }
 
@@ -177,6 +179,8 @@ namespace Robotics
 
 
 			inline AgentPosition getCurrentPosition() const {return m_currentPosition;}
+			inline AgentPosition getNextPosition() const { return m_nextPosition; }
+
 			/// Set Current Position
 			void setCurrentPosition(AgentPosition const& _pos);
 

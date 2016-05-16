@@ -91,9 +91,7 @@ std::vector<AgentPosition> Agent::getFeasibleActions( std::shared_ptr<Discretize
 	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() ); // prende punto camera
 	// aggiunto
 	double heading = m_currentPosition.m_heading;
-
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord); // prende 8 punti adiacenti ABCDEFG
-
 	std::vector<AgentPosition> l_result;
 	for( size_t i = 0; i < l_squares.size(); ++i)
 	{

@@ -39,17 +39,17 @@ std::vector<AgentPosition> Guard::getFeasibleActions( std::shared_ptr<Discretize
 	
 	double _heading = m_currentPosition.m_heading;
 
-	// getStandardApproachableValidSquares deve dipendere anche da heading che aggiungo
+	// getStandardApproachableValidSquares deve dipendere anche da heading che ho aggiunto
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord);
-	_space->addSpecialApproachableValidSquares(l_currCoord, l_squares); // aggiunge le diagonali in l_sqaure
-
+	// ho tolto la funzione sotto perchè sono già incluse dalla precedente
+	//_space->addSpecialApproachableValidSquares(l_currCoord, l_squares); // aggiunge le diagonali in l_sqaure
 
 
 	std::vector<AgentPosition> l_result;
 	for(size_t i = 0; i < l_squares.size(); ++i )
 	{
 		//int l_distance = _space->getDistance(l_currCoord, l_squares[i]);
-		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), 0.0, m_currentPosition.m_camera) );
+		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), l_squares[i].heading, m_currentPosition.m_camera) );
 	}
 
 	return l_result;
@@ -206,33 +206,42 @@ void Guard::followBestTrajectory(double _explorationRate, bool best)
 	m_exploring = getBestTrajectoryIndex(best);
 }
 
+double ComputeHeading(AgentPosition _nextPosition, AgentPosition _currentPosition) {
+	//getPoint2D
+	Point2D nextPosition = _nextPosition.getPoint2D();
+	Point2D currentPosition = _currentPosition.getPoint2D();
+
+	double y_delta = nextPosition.coord(1) - currentPosition.coord(1);
+	double x_delta = nextPosition.coord(0) - currentPosition.coord(0);
+
+	double heading = IDSMath::PiDiv2 - atan2(y_delta, x_delta); // naval convention
+	return heading;
+}
+
 ///
 void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 {
 	// Seleziona la nuova posizione sulla base se Experiments o No
+
 	switch(m_exploring)
 	{
 	case -1:
 		// a random position is selected (ABCDEFG)
-		this->setNextPosition( selectNextFeasiblePosition(_space) );
+		this->setNextPosition( selectNextFeasiblePosition(_space) ); // mette in m_nextPosition la Position selezionata tra le fattbili
+
+		//std::cout << "heading 1: " << m_currentPosition.m_heading << std::endl;
+
 		break;
 	default:
 		// a position from past ones is selected
 		AgentPosition nextAgentPosition = m_memory.getNextPosition(m_exploring, m_currentTrajectory.size());
+		// Compute heading and assigns it to heading field
 
-		Point2D nextPosition = nextAgentPosition.getPoint2D();
-		Point2D currentPosition = m_currentPosition.getPoint2D();
-		double y_delta = nextPosition.coord(1) - currentPosition.coord(1);
-		double x_delta = nextPosition.coord(0) - currentPosition.coord(0);
-
-		double heading = atan2(y_delta, x_delta);
-		
-		std::cout << "x: " << x_delta << "y: " << y_delta << std::endl;
-		std::cout << "heading " << heading << std::endl;
-
-		nextAgentPosition.setHeading(nextPosition, heading);
+		//nextAgentPosition.m_heading = ComputeHeading(nextAgentPosition, m_currentPosition);
 
 		this->setNextPosition( nextAgentPosition ); // (indexBest, indexNext)
+		//std::cout << "heading 2: " << m_currentPosition.m_heading << std::endl;
+
 	}
 }
 
@@ -268,10 +277,11 @@ AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr
 //////////////////////////////////////////////////////////////////////////
 AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr<DiscretizedArea> _space, std::set<int> &_alreadyTested)
 {
-	std::vector<AgentPosition> l_feasible = this->getFeasibleActions(_space); // usa getstandardapproachableValidSquare 
+	AgentPosition result;
+	std::vector<AgentPosition> l_feasible = this->getFeasibleActions(_space); // usa getstandardapproachableValidSquare con heading
 
 	std::vector< std::pair<AgentPosition, int> > l_notControlledFeasibleActions;
-	for(size_t i = 0; i < l_feasible.size(); ++i) // scorre su tutte le azioni fattibili
+	for(size_t i = 0; i < l_feasible.size(); ++i) // scorre su tutte le azioni fattibili con heading
 	{
 		if( _alreadyTested.find(i) != _alreadyTested.end() )  // se trova un already tested uguale all'ultimo elemento(azione)
 			continue;
@@ -285,8 +295,13 @@ AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr
 		l_notControlledFeasibleActions.push_back( std::make_pair<>(l_feasible[i], i) );//AgentPosition, int
 	}
 
-	if(l_notControlledFeasibleActions.empty())
+	if (l_notControlledFeasibleActions.empty())
+	{
+		/*std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "next pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "heading " << m_currentPosition.m_heading << std::endl;*/
 		return m_currentPosition;
+	}
 	else if(_space->isThereASink())
 	{
 		std::vector<int> l_distanceNearestSink = _space->distanceFromNearestSink(l_notControlledFeasibleActions);
@@ -304,7 +319,12 @@ AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr
 		}
 
 		_alreadyTested.insert(l_notControlledFeasibleActions[l_mindistIndex].second);
-		return l_notControlledFeasibleActions[l_mindistIndex].first;
+
+		AgentPosition l_selectedPosition = l_notControlledFeasibleActions[l_mindistIndex].first;
+		/*std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "next pos: x " << l_selectedPosition.getPoint2D().coord(0) << "y " << l_selectedPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "heading " << l_selectedPosition.m_heading << std::endl;*/
+		return l_selectedPosition;
 	}
 	else
 	{
@@ -312,8 +332,14 @@ AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr
 
 		int l_value = getRandomValue( int( l_notControlledFeasibleActions.size() ) );
 		_alreadyTested.insert(l_notControlledFeasibleActions[l_value].second);
-		return l_notControlledFeasibleActions[l_value].first;
+
+		AgentPosition l_selectedPosition = l_notControlledFeasibleActions[l_value].first;;
+		std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "next pos: x " << l_selectedPosition.getPoint2D().coord(0) << "y " << l_selectedPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "heading " << l_selectedPosition.m_heading << std::endl;
+		return l_selectedPosition;
 	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -322,14 +348,19 @@ AgentPosition Guard::selectNextFeasiblePosition(std::shared_ptr<DiscretizedArea>
 	// Feasible action è un azione di una traiettoria ancora da definire ma che deve rispettare i vincoli degli algoritmi dinamici.
 	// Pesco il riquadro finchè non trovo un elemento accettabile!
 
-	if(!this->isRunning()) // la sua traiettoria non ha più di un passo o è al massimo consentito
+	if(!this->isRunning()) // la sua traiettoria non ha più di un passo o è al massimo consentito(all'inizio)
 	{
-		AgentPosition l_selectedPosition = this->selectNextFeasiblePositionWithoutConstraint(_space); // seleziona random(da modificare)
+		AgentPosition l_selectedPosition = this->selectNextFeasiblePositionWithoutConstraint(_space); // seleziona una posizione random(da modificare)
+
+		/*std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "next pos: x " << m_nextPosition.getPoint2D().coord(0) << "y " << l_selectedPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "heading " << l_selectedPosition.m_heading << std::endl;*/
+
 		return l_selectedPosition;
 	}
-
+	
 	AgentPosition l_selectedPosition = this->getCurrentPosition();
-	SquarePtr l_source = _space->getSquare(m_currentTrajectory.getPosition(0).getPoint2D());
+	SquarePtr l_source = _space->getSquare(m_currentTrajectory.getPosition(0).getPoint2D()); // point of the first element of m_elem
 
 	int l_nodeDistance = 0;
 	int k = 0;
@@ -340,7 +371,11 @@ AgentPosition Guard::selectNextFeasiblePosition(std::shared_ptr<DiscretizedArea>
 		
 		//if( (k < 8) && (m_currentTrajectory.contains(l_selectedPosition)) )
 		//	continue;
-		
+
+		/*std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "next pos: x " << m_nextPosition.getPoint2D().coord(0) << "y " << l_selectedPosition.getPoint2D().coord(1) << std::endl;
+		std::cout << "heading " << l_selectedPosition.m_heading << std::endl;*/
+
 		SquarePtr l_selected = _space->getSquare( l_selectedPosition.getPoint2D() );
 
 		l_nodeDistance = _space->getDistance(l_source, l_selected); // distanza percorsa dall' agente
