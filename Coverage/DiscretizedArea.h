@@ -147,7 +147,7 @@ namespace Robotics
 		public:
 			DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, std::set< IDS::BaseGeometry::Shape2D > const& _obstacles);
 			//aggiunta
-			double updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _lastAgentPos, AgentPosition _currentAgentPos);
+			//double updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _lastAgentPos, AgentPosition _currentAgentPos);
 
 			DiscretizedArea(std::shared_ptr<StructuredArea> _area);
 			DiscretizedArea(std::shared_ptr<UnStructuredArea> _area);
@@ -200,11 +200,9 @@ namespace Robotics
 			void setRandomSquareValue();
 
 			std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const& _current) const;
-			//std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const & _current, double heading) const;
-
-			std::vector<AreaCoordinate> getHeadingbasedSquare(AreaCoordinate _current) const;
-
-
+			void addPossibilityToRotate(AreaCoordinate const & _current, std::vector<AreaCoordinate> _selected);
+			// aggiunta
+			
 			void addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const;
 
 			std::set<std::shared_ptr<Square> > getVisibleSquares(AgentPosition const& _pos);

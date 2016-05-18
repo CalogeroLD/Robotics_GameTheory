@@ -9,7 +9,7 @@ EndTime
 Period
 1	
 TestCase
-1
+50
 ******************************************
 Agent File: Scenario_5G_1T_multiAgent
 -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-

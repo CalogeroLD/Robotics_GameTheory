@@ -7,8 +7,13 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <jansson.h>
+#include <time.h>
+
 #include "CoverageAlgorithm.h"
 #include "BoxPlotFile.h"
+#include "BatchSimulation.h"
+
 
 using namespace Robotics::GameTheory;
 using namespace IDS::BaseGeometry;
@@ -22,14 +27,15 @@ using namespace std;
 struct Log
 {
 	ofstream m_logFile;
-	Log(std::string const& name = "end.txt") : m_logFile()
+	Log(const std::string & name = "end.txt")
 	{
-		m_logFile = ofstream(name);
-		if (!m_logFile.is_open())
+		//cout << name ;
+		m_logFile.open(name.c_str());
+		if (m_logFile.fail())
 			throw std::exception("Unable to open log file");
 	}
 
-	Log& operator<<(std::string const& str)
+	Log& operator<<(const std::string & str)
 	{
 		if (m_logFile.is_open())
 			m_logFile << str;
@@ -37,7 +43,7 @@ struct Log
 		return *this;
 	}
 
-	Log& operator<<(double const& num)
+	Log& operator<<(const double & num)
 	{
 		if (m_logFile.is_open())
 			m_logFile << num;
@@ -45,7 +51,7 @@ struct Log
 		return *this;
 	}
 
-	Log& operator<<(int const& num)
+	Log& operator<<(const int & num)
 	{
 		if (m_logFile.is_open())
 			m_logFile << num;
@@ -250,13 +256,51 @@ std::vector<std::string> getAreaNames(std::string const& _folname)
 	return l_result;
 }
 
+/*std::string setFileName() {
+	time_t rawtime;
+	struct tm * timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	char buffer[22];
+	strftime(buffer, 22, "%G_%m_%e__%H_%M_%S", timeinfo);
+	//std::string tmp = "logFile_";
+	//tmp.append(buffer);
+	//tmp.append(".txt");
+	//std::cout << tmp << std::endl;
+	return "log.txt";
+	//return tmp;
+}*/
+
+// Returns the local date/time formatted as 2014-03-19 11:11:52
+const std::string currentDateTime() {
+	time_t     now = time(0);
+	struct tm  tstruct;
+	char       buf[80];
+	tstruct = *localtime(&now);
+
+	// for more information about date/time format
+	strftime(buf, sizeof(buf), "Prova_%Y_%m_%d_%H_%M_%S", &tstruct);
+	std::string date = string(buf);
+	return date;
+}
+
 //////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
+	json_t * root;
+	json_error_t error;
+
+	const std::string date = currentDateTime();
+	
+	//getchar();  // wait for keyboard input
+	
+
+	//setFileName();
 	Log l_log("log.txt");
-	Log l_benefitValue("l_benefitValue.txt");
-	Log l_potentialValue("l_potentialValue.txt");
-	Log l_coverageValue("l_coverageValue.txt");
+	
+	Log l_benefitValue(date + "_benefitvalue.txt");
+	Log l_potentialValue(date + "_potentialValue.txt");
+	Log l_coverageValue(date + "_coverageValue.txt");
 
 	//system("pause");
 
@@ -432,6 +476,7 @@ int main(int argc, char* argv[])
 												//l_log << endl;
 
 												l_benefitValue << l_benefitIndex << endl;
+												//prova << l_benefitValue << endl;
 
 												l_boxPlot.add(
 													"Benefit Index",

@@ -496,7 +496,7 @@ DiscretizedArea::DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, st
 }
 
 //aggiunta
-double DiscretizedArea::updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _LastAgentPos, AgentPosition _CurrentAgentPos) {
+/*double DiscretizedArea::updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _LastAgentPos, AgentPosition _CurrentAgentPos) {
 
 	double orientation;
 	Point2D p_last = _LastAgentPos.getPoint2D();
@@ -530,7 +530,7 @@ double DiscretizedArea::updateHeading(std::shared_ptr<DiscretizedArea> _space, A
 	}
 	// set heading
 	_CurrentAgentPos.getCamera().setOrientation(orientation);
-	return orientation;
+	return orientation;*/
 
 
 	/*
@@ -542,8 +542,8 @@ double DiscretizedArea::updateHeading(std::shared_ptr<DiscretizedArea> _space, A
 	return orientation;
 	// La mia attuale orientazione che va a definire il mio get Coverage	
 	//m_currentPosition.m_camera.setOrientation(orientation); // orientation is setted as the value of azimuth of the line that links two last points
-	*/
-}
+	
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
@@ -687,14 +687,14 @@ std::pair<AreaCoordinate, double> DiscretizedArea::getStandardApproachableValidS
 double Mod2Pi(double angle) {
 	if (angle < 0)	return angle += IDSMath::TwoPi;
 	if (angle > IDSMath::TwoPi)	return angle -= IDSMath::TwoPi;
-
+	if (angle >= 0 && angle <= IDSMath::TwoPi)	return angle;
 }
 
 std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
 {
 	// in this function all adiacent square are selected and pushed in result
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
-	std::vector<AreaCoordinate> selected; // ased on heading
+	std::vector<AreaCoordinate> selected; // based on heading
 
 	if (_current.row != DISCRETIZATION_ROW)
 	{
@@ -748,14 +748,25 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	for (int i = 0; i < result.size(); i++)
 	{
 		//vincolo cinematico dato dall'heading
-		if ( result.at(i).heading == _current.heading || result.at(i).heading == Mod2Pi(_current.heading - IDSMath::PiDiv4) || result.at(i).heading == Mod2Pi(_current.heading + IDSMath::PiDiv4) )
+		if ( result.at(i).heading == _current.heading || int(result.at(i).heading) == int(Mod2Pi(_current.heading - IDSMath::PiDiv4)) || int(result.at(i).heading) == int(Mod2Pi(_current.heading + IDSMath::PiDiv4) ) )
 		{
 			selected.push_back(result.at(i));
 		}
 	}
+	// aggiunge possibilità di ruotare sul posto
+	AreaCoordinate pos_ovest;
+	pos_ovest.col = _current.col;
+	pos_ovest.row = _current.row;
+	pos_ovest.heading = Mod2Pi(_current.heading - IDSMath::PiDiv2);
+	selected.push_back(pos_ovest);
+	// rotate East
+	AreaCoordinate pos_east;
+	pos_east.col = _current.col;
+	pos_east.row = _current.row;
+	pos_east.heading = Mod2Pi(_current.heading + IDSMath::PiDiv2);
+	selected.push_back(pos_east);
 	return selected;
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const
