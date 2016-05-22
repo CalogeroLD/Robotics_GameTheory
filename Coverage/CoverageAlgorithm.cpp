@@ -528,6 +528,7 @@ void CoverageAlgorithm::getThievesPosition(std::vector<AgentPosition> & _pos)
 struct AgentDriver 
 {
 	IDS::BaseGeometry::Point2D position;
+	double heading;
 	enum Type
 	{
 		THIEF =-1,
@@ -538,44 +539,45 @@ struct AgentDriver
 };
 
 //////////////////////////////////////////////////////////////////////////
-void importFromFile(
-	std::string const & _filename, 
-	std::vector<IDS::BaseGeometry::Point2D> & _boundary,
-	std::vector<AgentDriver> & _agents)
+void importFromFile(std::string const & _filename, std::vector<AgentDriver> & _agents)
 {
 	std::ifstream iFile(_filename);	// input.txt has integers, one per line
 
 	while (!iFile.eof())
 	{
+		// questi li posso togliere
 		int numOfXXX;
-		iFile >> numOfXXX; //vertices
+		/*iFile >> numOfXXX; //vertices
 		for(int i = 0; i < numOfXXX; ++i)
 		{
 			double x, y;
 			iFile >> x; //leggo da file e metto in x e y
 			iFile >> y;
 			_boundary.push_back( makePoint(IDSReal2D(x,y), EucMetric) );
-		}
+		}*/
 		iFile >> numOfXXX;	// guards
 		for(int i = 0; i < numOfXXX; ++i)
 		{
-			double x, y;
+			double x, y, heading;
 			iFile >> x;
 			iFile >> y;
+			iFile >> heading;
 			AgentDriver driver;
 			driver.position = makePoint(IDSReal2D(x,y), EucMetric);
+			driver.heading = heading;
 			driver.type = AgentDriver::GUARD;
 			_agents.push_back(driver);
 		}
 		iFile >> numOfXXX; // Thieves
 		for(int i = 0; i < numOfXXX; ++i)
 		{
-			double x, y;
+			double x, y, heading;
 			iFile >> x;
 			iFile >> y;
 			AgentDriver driver;
 			AgentDriver thief;
 			driver.position = makePoint(IDSReal2D(x,y), EucMetric);
+			driver.heading = heading;
 			thief.position = makePoint(IDSReal2D(x, y), EucMetric);
 			driver.type = AgentDriver::THIEF;
 			_agents.push_back(driver);
@@ -603,7 +605,6 @@ void importFromFile(
 			driver.type = AgentDriver::NEUTRAL;
 			_agents.push_back(driver);
 		}
-		//aggiungo
 	}
 	iFile.close();
 }
@@ -614,11 +615,12 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	std::vector<IDS::BaseGeometry::Point2D> l_bound;
 	std::vector<AgentDriver> l_agentDriver;
 
-	importFromFile(_filename, l_bound, l_agentDriver); // setta l'area e le posizioni dei robot
+	importFromFile(_filename, l_agentDriver); // setta l'area e le posizioni dei robot nelle struct AgentDriver
 
 	/// Create Coverage Algorithm:
 	std::shared_ptr<Area> l_space = std::make_shared<StructuredArea>(l_bound);
 
+	// carica tutti gli genti di tipo guardia nel vector l_agents
 	int l_id = -1;
 	std::set< std::shared_ptr<Agent> >l_agents; 
 	for(size_t i = 0; i < l_agentDriver.size(); ++i)
@@ -627,10 +629,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 			continue;
 
 		++l_id;
-		AgentPosition l_pos( 
-			l_agentDriver[i].position, 0.0, 
-			/*l_space->randomPosition()*/ 
-			CameraPosition(l_space->getDistance() / 15.) );
+		AgentPosition l_pos(l_agentDriver[i].position, l_agentDriver[i].heading, CameraPosition(l_space->getDistance() / 15.) );
 
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, _period, _type == 2? 1 : 2);
 
@@ -679,7 +678,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 #ifdef _PRINT
 	cout << "importing agent"<<endl;
 #endif
-	importFromFile(_agentFile, l_bound, l_agentDriver);
+	importFromFile(_agentFile, l_agentDriver);
 #ifdef _PRINT
 	cout << "imported agent"<<endl;
 #endif

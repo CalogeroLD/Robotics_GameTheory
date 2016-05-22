@@ -336,9 +336,9 @@ AgentPosition Guard::selectNextFeasiblePositionWithoutConstraint(std::shared_ptr
 		_alreadyTested.insert(l_notControlledFeasibleActions[l_value].second);
 
 		AgentPosition l_selectedPosition = l_notControlledFeasibleActions[l_value].first;;
-		std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
+		/*std::cout << "curr pos: x " << m_currentPosition.getPoint2D().coord(0) << "y " << m_currentPosition.getPoint2D().coord(1) << std::endl;
 		std::cout << "next pos: x " << l_selectedPosition.getPoint2D().coord(0) << "y " << l_selectedPosition.getPoint2D().coord(1) << std::endl;
-		std::cout << "heading " << l_selectedPosition.m_heading << std::endl;
+		std::cout << "heading " << l_selectedPosition.m_heading << std::endl;*/
 		return l_selectedPosition;
 	}
 

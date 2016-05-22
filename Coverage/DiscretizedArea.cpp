@@ -568,6 +568,7 @@ AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
 	double l_xdist = l_xLine.parameterAt(l_prjOrizontal);
 
 	AreaCoordinate l_coord(int( floor(l_xdist / m_xStep) ), int( floor(l_ydist / m_yStep) ));// rispettive coord in AreaCoordinate (row, col)
+	
 	return l_coord;
 }
 
@@ -618,71 +619,6 @@ void DiscretizedArea::setRandomSquareValue()
 	}
 }
 
-/*
-std::pair<AreaCoordinate, double> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
-{
-	// in this function all adiacent square are selected and pushed in result
-	std::pair<AreaCoordinate, double> result;
-
-	if (_current.row != DISCRETIZATION_ROW)
-	{
-		AreaCoordinate pos(_current.col, _current.row + 1); //A: head 0
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = 0.0;
-	}
-	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL)
-	{
-		AreaCoordinate pos(_current.col + 1, _current.row + 1); //B: head 45
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = (3.14/180)*45.0;
-	}
-	if (_current.col != DISCRETIZATION_COL) // check for upper limit for col becouse it is gonna be changed
-	{
-		AreaCoordinate pos(_current.col + 1, _current.row); //C: head 90
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = (3.14 / 180)*90.0;
-	}
-	if (_current.row != 0 && _current.col != DISCRETIZATION_COL)
-	{
-		AreaCoordinate pos(_current.col + 1, _current.row - 1); //D: head 135
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = (3.14 / 180)*135.0;
-	}
-	if (_current.row != 0)
-	{
-		AreaCoordinate pos(_current.col, _current.row - 1); //E: head 180
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = (3.14 / 180)*180.0;
-	}
-	if (_current.row != 0 && _current.col != 0)
-	{
-		AreaCoordinate pos(_current.col - 1, _current.row  1); //F:head 225
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = (3.14 / 180)*225.0;
-	}
-	if (_current.col != 0) // check for lower limit of col becouse col is gonna be incremented
-	{
-		AreaCoordinate pos(_current.col - 1, _current.row); //G: head 270
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
-			result.first = pos;
-			result.second = (3.14 / 180)*270.0;
-	}
-	if (_current.row != DISCRETIZATION_ROW && _current.col != 0)
-	{
-		AreaCoordinate pos(_current.col - 1, _current.row + 1); //H: head 315
-		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			result.first = pos;
-			result.second = (3.14 / 180)*315.0;
-	}
-	return result;
-}
-*/
 
 double Mod2Pi(double angle) {
 	if (angle < 0)	return angle += IDSMath::TwoPi;
@@ -694,9 +630,9 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 {
 	// in this function all adiacent square are selected and pushed in result
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
-	std::vector<AreaCoordinate> selected; // based on heading
+	//std::vector<AreaCoordinate> selected; // based on heading
 
-	if (_current.row != DISCRETIZATION_ROW)
+	/*if (_current.row != DISCRETIZATION_ROW)
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
@@ -716,7 +652,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	}
 	if (_current.row != 0 && _current.col != DISCRETIZATION_COL)
 	{
-		AreaCoordinate pos(_current.col + 1, _current.row - 1, 3*IDSMath::PiDiv4); //D: head 135
+		AreaCoordinate pos(_current.col + 1, _current.row - 1, 3 * IDSMath::PiDiv4); //D: head 135
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
@@ -728,7 +664,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	}
 	if (_current.row != 0 && _current.col != 0)
 	{
-		AreaCoordinate pos(_current.col - 1, _current.row - 1, 5*IDSMath::PiDiv4); //F:head 225
+		AreaCoordinate pos(_current.col - 1, _current.row - 1, 5 * IDSMath::PiDiv4); //F:head 225
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
@@ -743,28 +679,100 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, 7 * IDSMath::PiDiv4); //H: head 315
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
-	}
+	}*/
+	// Adds kinematics constraints based on heading of robots
+	result = this->addKinematicsContraints(_current, result);
+	return result;
+}
+	
+std::vector<AreaCoordinate> DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const
+{
+	std::vector<AreaCoordinate> selected;
+	bool bound = _current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL || _current.row == 0 || _current.col == 0;
+	bool upCorners = (_current.row == DISCRETIZATION_ROW && (_current.col == DISCRETIZATION_COL || _current.col == 0) );
+	bool lowCorners = (_current.row == 0 && (_current.col == DISCRETIZATION_COL || _current.col == 0));
 
-	for (int i = 0; i < result.size(); i++)
+	bool corners = upCorners || lowCorners;
+
+	if (bound)
 	{
-		//vincolo cinematico dato dall'heading
-		if ( result.at(i).heading == _current.heading || int(result.at(i).heading) == int(Mod2Pi(_current.heading - IDSMath::PiDiv4)) || int(result.at(i).heading) == int(Mod2Pi(_current.heading + IDSMath::PiDiv4) ) )
+		//corners
+		if (corners)
 		{
-			selected.push_back(result.at(i));
+			// ribalta orientamento
+			AreaCoordinate pos_south(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::Pi)); //H: head 315
+			selected.push_back(pos_south);
+		}
+		//bordi tranne corners
+		if (!corners)
+		{
+			AreaCoordinate pos_south(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::Pi)); //H: head 180
+			selected.push_back(pos_south);
+			AreaCoordinate pos_southEast(_current.col, _current.row, Mod2Pi(_current.heading + 3 * IDSMath::PiDiv4)); //H: head 135
+			selected.push_back(pos_southEast);
+			AreaCoordinate pos_southWeast(_current.col, _current.row, Mod2Pi(_current.heading - 3 * IDSMath::PiDiv4)); //H: head 225
+			selected.push_back(pos_southWeast);
 		}
 	}
-	// aggiunge possibilità di ruotare sul posto
-	AreaCoordinate pos_ovest;
-	pos_ovest.col = _current.col;
-	pos_ovest.row = _current.row;
-	pos_ovest.heading = Mod2Pi(_current.heading - IDSMath::PiDiv2);
-	selected.push_back(pos_ovest);
-	// rotate East
-	AreaCoordinate pos_east;
-	pos_east.col = _current.col;
-	pos_east.row = _current.row;
-	pos_east.heading = Mod2Pi(_current.heading + IDSMath::PiDiv2);
-	selected.push_back(pos_east);
+
+ 	// se ha trovato come possibile almeno una posizione feasible dai i vincoli di heading esse
+	if (!(bound))
+	{
+		// aggiunge possibilità di ruotare sul posto
+		AreaCoordinate pos_southEast(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4)); //H: head 135
+		selected.push_back(pos_southEast);
+		
+		AreaCoordinate pos_southWeast(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4)); //H: head 225
+		selected.push_back(pos_southWeast);
+
+		AreaCoordinate pos_ovest(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2)); // head 270
+		selected.push_back(pos_ovest);
+		// rotate East
+		AreaCoordinate pos_east(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv2)); // head 90
+		selected.push_back(pos_east);
+
+		// vai avanti secondo heading
+		AreaCoordinate pos_forward_east(_current.col-1, _current.row+1, Mod2Pi(_current.heading + IDSMath::PiDiv4)); // head 90
+		selected.push_back(pos_forward_east);
+
+		AreaCoordinate pos_forward_ovest(_current.col+1, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4)); // head 90
+		selected.push_back(pos_forward_ovest);
+
+		AreaCoordinate pos_forward(_current.col, _current.row + 1, Mod2Pi(_current.heading)); // head 90
+		selected.push_back(pos_forward);
+		
+		/*for (int i = 0; i < result.size(); i++)
+		{*/
+			//vincolo cinematico dato dall'heading per andare avanti
+			/*if (result.at(i).heading == _current.heading || int(result.at(i).heading) == int(Mod2Pi(_current.heading - IDSMath::PiDiv4)) || int(result.at(i).heading) == int(Mod2Pi(_current.heading + IDSMath::PiDiv4)))
+			{
+				selected.push_back(result.at(i));
+			}
+		}*/
+		/*if (_current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL)
+		{
+			std::cout << "bye bye" << std::endl;
+			//abort();
+			AreaCoordinate pos_south(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::Pi) ); //H: head 315
+			selected.push_back(pos_south);
+			AreaCoordinate pos_southEast(_current.col, _current.row, Mod2Pi(_current.heading + 3 * IDSMath::PiDiv4)); //H: head 315
+			selected.push_back(pos_southEast);
+			AreaCoordinate pos_southWeast(_current.col, _current.row, Mod2Pi(_current.heading - 3 * IDSMath::PiDiv4)); //H: head 315
+			selected.push_back(pos_southWeast);
+		}
+		// aggiunge possibilità di ruotare sul posto
+		AreaCoordinate pos_ovest(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2));
+		selected.push_back(pos_ovest);
+		// rotate East
+		AreaCoordinate pos_east(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv2));
+		selected.push_back(pos_east);*/
+	 }
+
+	/*if (result.size() == 0)
+	{
+		std::cout << "non ho trovato nessuna feasible action" << std::endl;
+	}*/
+	
 	return selected;
 }
 

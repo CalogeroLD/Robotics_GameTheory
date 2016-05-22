@@ -104,12 +104,18 @@ namespace Robotics
 		
 			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading) : m_point(point), m_heading(heading), m_camera() {}
 
-			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading, CameraPosition _camera) : m_point(point), m_heading(heading), m_camera(_camera) {}
-			
+			AgentPosition(IDS::BaseGeometry::Point2D const& point, double const& heading, CameraPosition _camera) : m_point(point), m_heading(heading), m_camera(_camera) 
+			{
+				this->setOrientationCamera(heading);
+				//_camera.setOrientation(heading);
+			}
+
+
 			double getHeading() { return m_heading; }
 
 			void setHeading(AgentPosition _agentPosition, double heading) { _agentPosition.m_heading = heading; }
-
+			// agg
+			void setOrientationCamera(double const& heading) { m_camera.setOrientation(heading); }
 			//auto ProbabilityOfDetection(std::shared_ptr<DiscretizedArea> area, AreaCoordinate p_r, AreaCoordinate p_t);
 
 			/// Update the counter of the lattice visible from that position
@@ -186,6 +192,8 @@ namespace Robotics
 
 			/// Set Current Position
 			void setNextPosition(AgentPosition const& _pos);
+			// orientation of camera is coincident with the heading of robot
+			//void setOrientation(double& heading) { m_currentPosition.m_camera.setOrientation(heading); }
 
 			// ultime due posizioni (aggiunta)
 			//double getHeadingRobot(IDS::BaseGeometry::Point2D _point);
@@ -236,6 +244,8 @@ namespace Robotics
 		protected:
 			Status getStatus() const;
 			void setStatus(Status stat);
+
+			//std::vector<AgentPosition> getFeasibleActions(std::shared_ptr<DiscretizedArea> _space);
 
 		};
 

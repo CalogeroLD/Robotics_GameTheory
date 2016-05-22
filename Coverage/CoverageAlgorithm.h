@@ -90,6 +90,8 @@ namespace Robotics
 				std::shared_ptr<Area> _space, 
 				int _type);
 
+			CoverageAlgorithm(const std::set<std::shared_ptr<Agent>>& _agent, int _type);
+
 			//////////////////////////////////////////////////////////////////////////
 			CoverageAlgorithm(
 				const std::set< std::shared_ptr<Agent> >& _agent, 

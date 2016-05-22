@@ -166,6 +166,8 @@ double AgentPosition::computeCosts() const
 //////////////////////////////////////////////////////////////////////////
 std::vector<AreaCoordinate> AgentPosition::getCoverage(std::shared_ptr<DiscretizedArea> _space ) const
 {
+	//double head = m_camera.getOrientation();
+	//std::cout << "head:" << head << endl;
 	AreaCoordinate l_center = _space->getCoordinate(m_point);
 	return m_camera.getCoverage(l_center, m_heading, _space); // ho aggiunto argomenti
 }
@@ -262,7 +264,8 @@ y = y0 - d*sin(alpha);
 std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, double heading, std::shared_ptr<DiscretizedArea> _area) const
 {
 	int l_rowDelta = int(floor(m_farRadius / _area->getYStep())) + 1;
-	int l_colDelta = int(floor(m_farRadius / _area->getXStep())) + 1;
+	int l_colDelta = int(floor(m_nearRadius / _area->getXStep())) + 1;
+	double oo = m_nearRadius;
 
 	std::vector<AreaCoordinate> result;
 	std::vector<AreaCoordinate> tmp;

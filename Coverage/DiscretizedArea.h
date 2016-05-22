@@ -200,6 +200,7 @@ namespace Robotics
 			void setRandomSquareValue();
 
 			std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const& _current) const;
+			std::vector<AreaCoordinate> addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const;
 			void addPossibilityToRotate(AreaCoordinate const & _current, std::vector<AreaCoordinate> _selected);
 			// aggiunta
 			

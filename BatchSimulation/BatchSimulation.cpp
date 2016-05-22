@@ -135,8 +135,8 @@ void readSimulationConfigFile(Log & _log, std::string const& _filename)
 		std::string l_line;
 		while (std::getline(file, l_line))
 		{
-			std::vector<std::string> l_token;
-			tokenize(l_line, l_sep, l_token);
+			std::vector<std::string> l_token; // il l_token mette gli elementi delle righe successive via via che scorre il file
+			tokenize(l_line, l_sep, l_token); // tokenize respect on separetor l_sep
 			if (l_token.empty())
 				continue;
 
@@ -228,7 +228,7 @@ std::vector<std::string> getAgentNames(std::string const& _folname)
 #endif
 
 #else
-	l_result.push_back("Scenario_5G_1T_multiAgent.dat");
+	l_result.push_back("Scenario_5G_1T_multiAgentMODIFIED.dat");
 
 #ifndef _TEST
 	l_result.push_back("Scenario_10G_1T_multiAgent.dat");
@@ -291,13 +291,9 @@ int main(int argc, char* argv[])
 	json_error_t error;
 
 	const std::string date = currentDateTime();
-	
 	//getchar();  // wait for keyboard input
-	
-
 	//setFileName();
 	Log l_log("log.txt");
-	
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
@@ -368,7 +364,7 @@ int main(int argc, char* argv[])
 		l_log << "******************************************" << endl;
 		l_log << "Agent File: " << l_AgentName << endl;
 
-		for (size_t l = 0; l < l_AreaFilenames.size(); ++l)
+		for (size_t l = 0; l < l_AreaFilenames.size(); ++l)// scorre sul file External con 0 in sub liberi e 1 nei sub con ostacolo
 		{
 
 			std::string l_AreaFilename = l_AreaFilenames[l];
@@ -427,6 +423,7 @@ int main(int argc, char* argv[])
 
 										setLostBattery(g_config.Epsilon[l_epsilonIndex]);
 
+										// cerca il file di cui passo il nome e preleva agenti e area(0 o 1)
 										std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
 											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
 												l_AreaFilename,
