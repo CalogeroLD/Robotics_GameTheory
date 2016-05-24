@@ -14,7 +14,39 @@
 #include "BoxPlotFile.h"
 #include "BatchSimulation.h"
 
+#include <jansson_config.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <boost\config\compiler\visualc.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+#include <exception>
+#include <sstream>
 
+#include <utility>
+#include <cstdio>
+#include <cassert>
+#include <cstring>
+#include <stdexcept>
+#include <..\SDK\rapidjson\include\rapidjson\rapidjson.h>
+#include <..\SDK\rapidjson\include\rapidjson\document.h>
+#include <..\SDK\rapidjson\include\rapidjson\stringbuffer.h>
+#include <..\SDK\rapidjson\include\rapidjson\filereadstream.h>
+#include <..\SDK\rapidjson\include\rapidjson\filewritestream.h>
+#include <..\SDK\rapidjson\include\rapidjson\reader.h>
+#include <..\SDK\rapidjson\include\rapidjson\writer.h>
+#include <..\SDK\rapidjson\include\rapidjson\stream.h>
+#include <..\SDK\rapidjson\include\rapidjson\allocators.h>
+#include <..\SDK\rapidjson\include\rapidjson\memorybuffer.h>
+#include <..\SDK\rapidjson\include\rapidjson\encodedstream.h>
+#include <..\SDK\rapidjson\include\rapidjson\memorystream.h>
+#include <..\SDK\rapidjson\include\rapidjson\stringbuffer.h>
+
+
+
+using namespace rapidjson;
+// ...
 using namespace Robotics::GameTheory;
 using namespace IDS::BaseGeometry;
 using namespace std;
@@ -284,12 +316,12 @@ const std::string currentDateTime() {
 	return date;
 }
 
+
+
+
 //////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
-	json_t * root;
-	json_error_t error;
-
 	const std::string date = currentDateTime();
 	//getchar();  // wait for keyboard input
 	//setFileName();
@@ -298,7 +330,71 @@ int main(int argc, char* argv[])
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
 
-	//system("pause");
+	
+		//boost::property_tree::ptree pt;
+		//boost::property_tree::read_json("ConfigurationFile.cpp", pt);
+
+		/*BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("Area.coord"))
+		{
+			assert(v.first.empty()); // array elements have no names
+			std::cout << v.second.data() << std::endl;
+		}/*
+
+
+
+	//const char* json = "ConfiguratioFile.json";
+
+	/*FILE* fp = fopen("ConfigurationFile.json", "rb"); // non-Windows use "r"
+	char readBuffer[65536];
+	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	std::cout << readBuffer[0] << endl;
+	
+
+	Document d;
+	d.ParseStream(is);
+
+	const Value& a = d["ciao"];*/
+	//assert(a.IsArray());
+	/*std::cout << a.Size() << endl;
+	for (SizeType i = 0; i < a.Size(); i++) // Uses SizeType instead of size_t
+		std::cout << a[i].GetInt() << "maremma" <<endl;
+
+	d.HasMember("Area");
+	assert(d["Area"].IsArray());
+	auto ciao = d["Area"].GetArray();
+	d["Area"].HasMember("coord");
+	assert(d["coord"].IsArray());
+	auto coordinate = d["coord"].GetArray();
+	assert(coordinate[0].IsFloat());*/
+	//auto d = coordinate[0].GetDouble();
+	//std::cout << d << std::endl;
+
+	/*Document document;
+	document.Parse(json);*/
+	/*assert(document.IsObject());
+	assert(document.HasMember("Area"));
+	assert(document["Area"].IsArray());
+	const Value& a = document["Array"];
+	assert(a.IsArray());
+	for (SizeType i = 0; i < a.Size(); i++) // Uses SizeType instead of size_t
+		cout << "/Area0" << endl;*/
+
+	//assert(document["Area"].IsString());
+	//std::cout << document["Area"].GetString() << endl;
+	
+	const char* str = "ConfigurationFile.json";
+	rapidjson::Document document;
+	if (document.Parse<0>(str).HasParseError() == false)
+	{
+		const Value& a = document["Area"];
+		const Value& b = a["coord"];
+		for (rapidjson::SizeType i = 0; i < b.Size(); i++)
+		{
+			const Value& c = b[i];
+
+			std::cout << c.GetDouble() << endl;
+		}
+	}
 
 	std::string l_folname;
 
@@ -306,9 +402,13 @@ int main(int argc, char* argv[])
 		return -1;
 	else if (argc >= 2)
 		l_folname = argv[1];
-	// richiamo le funzioni sopra definite sopra
+
+
+	// richiamo le funzioni sopra definite
 	std::vector<std::string> l_AgentFilenames = getAgentNames(l_folname);
 	std::vector<std::string> l_AreaFilenames = getAreaNames(l_folname);
+
+	//std::vector<std::string> getConfigurationFileName(l_ConfigurationFile);
 
 
 #ifdef _EPSILON
@@ -352,7 +452,8 @@ int main(int argc, char* argv[])
 #endif
 
 #endif
-
+	// prende il titolo del file e lo divide, mette i parametri di configurazione all'interno della struttura config,
+	// in l_file ci sono le info relative alla configurazione
 	readSimulationConfigFile(l_log, l_file);
 
 	for (size_t o = 0; o < l_AgentFilenames.size(); ++o)
@@ -378,6 +479,7 @@ int main(int argc, char* argv[])
 
 			try
 			{
+				// per decidere gli algoritmi: per ora scelgo solo DISL o PIPIP, no PARETO
 				for (int l_algorithmType = 0; l_algorithmType < 2; ++l_algorithmType)
 				{
 					std::string l_algName = (l_algorithmType == 0 ? "DISL" : l_algorithmType == 1 ? "PIPIP" : "PARETO");
@@ -629,4 +731,3 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-

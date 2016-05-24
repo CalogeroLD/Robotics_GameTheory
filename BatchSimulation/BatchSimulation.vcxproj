@@ -92,7 +92,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\SDK\jansson\;..\Coverage</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include\jansson;..\SDK;..\Coverage</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -100,8 +100,8 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\Coverage\Bin\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Coverage.lib;..\libs\jansson_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>libs;..\Coverage\Bin\$(Configuration);include</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Coverage.lib;jansson_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>echo BaseGeometry

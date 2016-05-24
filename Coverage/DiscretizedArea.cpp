@@ -632,7 +632,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
 	//std::vector<AreaCoordinate> selected; // based on heading
 
-	/*if (_current.row != DISCRETIZATION_ROW)
+	if (_current.row != DISCRETIZATION_ROW)
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
@@ -679,9 +679,9 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, 7 * IDSMath::PiDiv4); //H: head 315
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
-	}*/
+	}
 	// Adds kinematics constraints based on heading of robots
-	result = this->addKinematicsContraints(_current, result);
+	//result = this->addKinematicsContraints(_current, result);
 	return result;
 }
 	
@@ -712,6 +712,10 @@ std::vector<AreaCoordinate> DiscretizedArea::addKinematicsContraints(AreaCoordin
 			selected.push_back(pos_southEast);
 			AreaCoordinate pos_southWeast(_current.col, _current.row, Mod2Pi(_current.heading - 3 * IDSMath::PiDiv4)); //H: head 225
 			selected.push_back(pos_southWeast);
+			AreaCoordinate pos_left(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2)); //H: head 225
+			selected.push_back(pos_left);
+			AreaCoordinate pos_right(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2)); //H: head 225
+			selected.push_back(pos_right);
 		}
 	}
 

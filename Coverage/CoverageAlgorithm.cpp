@@ -675,46 +675,27 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 {
 	std::vector<IDS::BaseGeometry::Point2D> l_bound;
 	std::vector<AgentDriver> l_agentDriver;
-#ifdef _PRINT
-	cout << "importing agent"<<endl;
-#endif
+
+	// in l_agentDriver mette le coordinate lette da _agentFile (Guards, Thieves, Sinks, Neutral)
 	importFromFile(_agentFile, l_agentDriver);
-#ifdef _PRINT
-	cout << "imported agent"<<endl;
-#endif
 
 	/// Create Coverage Algorithm:
-#ifdef _PRINT
-	cout << "creating scenario"<<endl;
-#endif
-	// mette in ingresso
 	std::shared_ptr<DiscretizedArea> l_space = std::make_shared<DiscretizedArea>(_areaFile);
-#ifdef _PRINT
-	cout << "created scenario"<<endl;
-#endif
 
-#ifdef _PRINT
-	cout << "Placing guards"<<endl;
-#endif
 	int l_id = -1;
-	//mette in ingresso
 	std::set< std::shared_ptr<Agent> >l_agents; 
 	for(size_t i = 0; i < l_agentDriver.size(); ++i)
 	{
 		if(l_agentDriver[i].type != AgentDriver::GUARD)
 			continue;
-
 		++l_id;
-		// viene settata la posizione e la CameraPosition dell'agente di tipo guardia
-		// AgentPosition
+		// AgentPosition: viene settata la posizione e la CameraPosition dell'agente di tipo guardia
 			//int num_level = 60.0;
 			double farRadius = double((l_space->getXStep() + l_space->getYStep()) / 2. * 7.5);
 			double nearRadius = double(l_space->getXStep() + l_space->getYStep() / 2. );
 			double heading = double(0); // da [0 a 360)
 			double feedOfView = double(90);
-
 			AgentPosition l_pos(l_agentDriver[i].position, heading, CameraPosition(farRadius, nearRadius, heading, feedOfView)); // prende 5 quadratini x 6 quadratini
-
 		// point
 			Point2D l_point;
 			if (l_space->getRandomPosition(l_point) && 0)
@@ -722,7 +703,6 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 				l_pos = AgentPosition(l_point, heading, CameraPosition(farRadius, nearRadius, heading, feedOfView) );  //double(l_space->getXStep() + l_space->getYStep()) / 2. *1.5));
 				Sleep(50);
 			}
-
 			std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, _periodIndex, _type == 2 ? 1 : 2);
 			l_agents.insert(l_agent);
 	}
