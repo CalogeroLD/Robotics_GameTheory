@@ -286,24 +286,36 @@ const std::string currentDateTime() {
 int main(int argc, char* argv[])
 {
 	const std::string date = currentDateTime();
-	//getchar();  // wait for keyboard input
-	//setFileName();
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
 
 	std::string conf_file = "ConfigurationFile.json";
-    FILE * cf = fopen(conf_file.c_str(), "rb" );
+    FILE * cf = fopen(conf_file.c_str(), "r" );
     char readBuffer[65536];
     rapidjson::FileReadStream is(cf, readBuffer, sizeof(readBuffer));
     rapidjson::Document document;
     document.ParseStream(is);
-    
+    if (!document.IsObject()) {
+        std::cout << "ERR: error during the parsing of configuration file" << std::endl;
+        exit(1);
+    }
 
+    std::cout << document.IsObject() << std::endl;
+
+    rapidjson::Value& tmp = document["Area"];
+    rapidjson::Value& cols = tmp["cols"];
     
-	
+    std::cout << document.HasMember("Area") << std::endl;
+    std::cout << cols.GetInt() << std::endl;
+
+    system("PAUSE");
+    exit(0);
     
+    // Da qui in poi inserire il parsing del file dove prendere  gli argomenti
+    /****************************************************************/
+           
     std::string l_folname;
 
 	if (argc < 1)
