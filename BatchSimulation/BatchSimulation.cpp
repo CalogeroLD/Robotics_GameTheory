@@ -330,71 +330,18 @@ int main(int argc, char* argv[])
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
 
-	
-		//boost::property_tree::ptree pt;
-		//boost::property_tree::read_json("ConfigurationFile.cpp", pt);
 
-		/*BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("Area.coord"))
-		{
-			assert(v.first.empty()); // array elements have no names
-			std::cout << v.second.data() << std::endl;
-		}/*
+	const char* json = "ConfiguratioFile.json";
 
-
-
-	//const char* json = "ConfiguratioFile.json";
-
-	/*FILE* fp = fopen("ConfigurationFile.json", "rb"); // non-Windows use "r"
+	FILE* fp = fopen("ConfigurationFile.json", "rb"); // non-Windows use "r"
 	char readBuffer[65536];
 	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 	std::cout << readBuffer[0] << endl;
 	
-
-	Document d;
-	d.ParseStream(is);
-
-	const Value& a = d["ciao"];*/
-	//assert(a.IsArray());
-	/*std::cout << a.Size() << endl;
-	for (SizeType i = 0; i < a.Size(); i++) // Uses SizeType instead of size_t
-		std::cout << a[i].GetInt() << "maremma" <<endl;
-
-	d.HasMember("Area");
-	assert(d["Area"].IsArray());
-	auto ciao = d["Area"].GetArray();
-	d["Area"].HasMember("coord");
-	assert(d["coord"].IsArray());
-	auto coordinate = d["coord"].GetArray();
-	assert(coordinate[0].IsFloat());*/
-	//auto d = coordinate[0].GetDouble();
-	//std::cout << d << std::endl;
-
-	/*Document document;
-	document.Parse(json);*/
-	/*assert(document.IsObject());
-	assert(document.HasMember("Area"));
-	assert(document["Area"].IsArray());
-	const Value& a = document["Array"];
-	assert(a.IsArray());
-	for (SizeType i = 0; i < a.Size(); i++) // Uses SizeType instead of size_t
-		cout << "/Area0" << endl;*/
-
-	//assert(document["Area"].IsString());
-	//std::cout << document["Area"].GetString() << endl;
-	
-	const char* str = "ConfigurationFile.json";
+	std::string str = "ConfigurationFile.json";
 	rapidjson::Document document;
-	if (document.Parse<0>(str).HasParseError() == false)
-	{
-		const Value& a = document["Area"];
-		const Value& b = a["coord"];
-		for (rapidjson::SizeType i = 0; i < b.Size(); i++)
-		{
-			const Value& c = b[i];
-
-			std::cout << c.GetDouble() << endl;
-		}
-	}
+	
+	
 
 	std::string l_folname;
 
