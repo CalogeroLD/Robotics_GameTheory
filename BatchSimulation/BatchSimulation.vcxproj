@@ -101,7 +101,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>libs;..\Coverage\Bin\$(Configuration);include</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Coverage.lib;jansson_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Coverage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>echo BaseGeometry
@@ -124,6 +124,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="ConfigurationFile.json" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
