@@ -7,20 +7,14 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include <jansson.h>
 #include <time.h>
 
 #include "CoverageAlgorithm.h"
 #include "BoxPlotFile.h"
 #include "BatchSimulation.h"
 
-#include <jansson_config.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <boost\config\compiler\visualc.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
 #include <exception>
 #include <sstream>
 
@@ -29,24 +23,11 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <..\SDK\rapidjson\include\rapidjson\rapidjson.h>
-#include <..\SDK\rapidjson\include\rapidjson\document.h>
-#include <..\SDK\rapidjson\include\rapidjson\stringbuffer.h>
-#include <..\SDK\rapidjson\include\rapidjson\filereadstream.h>
-#include <..\SDK\rapidjson\include\rapidjson\filewritestream.h>
-#include <..\SDK\rapidjson\include\rapidjson\reader.h>
-#include <..\SDK\rapidjson\include\rapidjson\writer.h>
-#include <..\SDK\rapidjson\include\rapidjson\stream.h>
-#include <..\SDK\rapidjson\include\rapidjson\allocators.h>
-#include <..\SDK\rapidjson\include\rapidjson\memorybuffer.h>
-#include <..\SDK\rapidjson\include\rapidjson\encodedstream.h>
-#include <..\SDK\rapidjson\include\rapidjson\memorystream.h>
-#include <..\SDK\rapidjson\include\rapidjson\stringbuffer.h>
+
+#include <rapidjson/document.h>
+#include <rapidjson/filereadstream.h>
 
 
-
-using namespace rapidjson;
-// ...
 using namespace Robotics::GameTheory;
 using namespace IDS::BaseGeometry;
 using namespace std;
@@ -288,21 +269,6 @@ std::vector<std::string> getAreaNames(std::string const& _folname)
 	return l_result;
 }
 
-/*std::string setFileName() {
-	time_t rawtime;
-	struct tm * timeinfo;
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-	char buffer[22];
-	strftime(buffer, 22, "%G_%m_%e__%H_%M_%S", timeinfo);
-	//std::string tmp = "logFile_";
-	//tmp.append(buffer);
-	//tmp.append(".txt");
-	//std::cout << tmp << std::endl;
-	return "log.txt";
-	//return tmp;
-}*/
-
 // Returns the local date/time formatted as 2014-03-19 11:11:52
 const std::string currentDateTime() {
 	time_t     now = time(0);
@@ -317,19 +283,15 @@ const std::string currentDateTime() {
 }
 
 
-
-
-//////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
 	const std::string date = currentDateTime();
-	//getchar();  // wait for keyboard input
-	//setFileName();
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
 
+<<<<<<< HEAD
 
 	const char* json = "ConfiguratioFile.json";
 
@@ -344,6 +306,34 @@ int main(int argc, char* argv[])
 	
 
 	std::string l_folname;
+=======
+	std::string conf_file = "ConfigurationFile.json";
+    FILE * cf = fopen(conf_file.c_str(), "r" );
+    char readBuffer[65536];
+    rapidjson::FileReadStream is(cf, readBuffer, sizeof(readBuffer));
+    rapidjson::Document document;
+    document.ParseStream(is);
+    if (!document.IsObject()) {
+        std::cout << "ERR: error during the parsing of configuration file" << std::endl;
+        exit(1);
+    }
+
+    std::cout << document.IsObject() << std::endl;
+
+    rapidjson::Value& tmp = document["Area"];
+    rapidjson::Value& cols = tmp["cols"];
+    
+    std::cout << document.HasMember("Area") << std::endl;
+    std::cout << cols.GetInt() << std::endl;
+
+    system("PAUSE");
+    exit(0);
+    
+    // Da qui in poi inserire il parsing del file dove prendere  gli argomenti
+    /****************************************************************/
+           
+    std::string l_folname;
+>>>>>>> c2318cc5c9f7428b0d657a84a590abed4a41195f
 
 	if (argc < 1)
 		return -1;

@@ -1,17 +1,16 @@
-{ // content of file External_something
+{ 
   "Area": {
-    "coord": [ // coordinate in clockwise
+    "coord": [ 
       [ 487.80487805, -798.47909066 ],
       [ 9287.80487805, -798.47909066 ],
       [ 9287.80487805, -8193.91635305 ],
       [ 487.80487805, -8193.91635305 ]
     ],
-    // info to build the entire scenario
+    
     "cols": 30,
     "rows": 30,
     "obstacle": [ 15, 15 ]
   },
-  // content of file Scenario_5G_1T...
   "Agents": [
     [
       {
@@ -62,7 +61,6 @@
     "coord": [ ]
   },
 
-  // configuration set
   "Configuration": {
     "Monitor": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
     "Jump": 1,
