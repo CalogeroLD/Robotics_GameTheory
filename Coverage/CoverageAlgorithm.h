@@ -14,6 +14,8 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <rapidjson\document.h>
+#include <rapidjson\filereadstream.h>
 
 namespace IDS 
 {
@@ -56,18 +58,24 @@ namespace Robotics
 			int m_count;
 
 		public:
-
+			// vecchia
 			static std::shared_ptr<CoverageAlgorithm> createFromFile(
-				std::string const & _filename, 
+				rapidjson::Value& _agents,
+				//std::string const & _filename, 
 				int _type, 
 				int _period);
-
+			// modificata
 			static std::shared_ptr<CoverageAlgorithm> createFromAreaFile(
-				std::string const & _areaFile, 
-				std::string const & _agentFile, 
+				rapidjson::Value& Area, 
+				rapidjson::Value& Agents,
+				rapidjson::Value& Thieves,
+				rapidjson::Value& Sinks,
+				rapidjson::Value& NeutralAgents, 
 				int _type, 
-				int _period,
-				double _epsilon = 0.2);
+				int _periodIndex, 
+				double _epsilon);
+			// da me
+			//std::shared_ptr<CoverageAlgorithm> createFromAreaFile(rapidjson::Document _document, std::string const & _agentFile, int _type, int _periodIndex, double _epsilon);
 
 			/************************************************************************/
 			/* \brief Compute initial position and payoff

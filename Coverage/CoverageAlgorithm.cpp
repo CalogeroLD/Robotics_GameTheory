@@ -1,4 +1,5 @@
 #include "CoverageAlgorithm.h"
+#include "CoverageAlgorithm.h"
 #include "CoverageUtility.h"
 #include "LearningAlgorithm.h"
 #include "DISLAlgorithm.h"
@@ -25,6 +26,8 @@
 #include <math.h>
 
 #include <Windows.h>
+#include <rapidjson\document.h>
+#include <rapidjson\filereadstream.h>
 
 using namespace Robotics;
 using namespace Robotics::GameTheory;
@@ -527,19 +530,37 @@ void CoverageAlgorithm::getThievesPosition(std::vector<AgentPosition> & _pos)
 //////////////////////////////////////////////////////////////////////////
 struct AgentDriver 
 {
+	// Position and orientation
 	IDS::BaseGeometry::Point2D position;
 	double heading;
+	// Sensors Features
+	double FarRadius;
+	double NearRadius;
+	double Orientation;
+	double Angle;
+	// Robot identificator
+	int id;
+	// Agents type
 	enum Type
 	{
-		THIEF =-1,
 		NEUTRAL = 0,
 		GUARD = 1,
 		SINK = 2
 	} type;
 };
 
+struct ThiefDriver
+{
+	// Position and orientation
+	IDS::BaseGeometry::Point2D position;
+	double heading;
+	// Agents type
+	enum Type
+	{ THIEF = -1,} type;
+};
+
 //////////////////////////////////////////////////////////////////////////
-void importFromFile(std::string const & _filename, std::vector<AgentDriver> & _agents)
+/*void importFromFile(std::string const & _filename, std::vector<AgentDriver> & _agents)
 {
 	std::ifstream iFile(_filename);	// input.txt has integers, one per line
 
@@ -555,7 +576,7 @@ void importFromFile(std::string const & _filename, std::vector<AgentDriver> & _a
 			iFile >> y;
 			_boundary.push_back( makePoint(IDSReal2D(x,y), EucMetric) );
 		}*/
-		iFile >> numOfXXX;	// guards
+		/*iFile >> numOfXXX;	// guards
 		for(int i = 0; i < numOfXXX; ++i)
 		{
 			double x, y, heading;
@@ -607,28 +628,125 @@ void importFromFile(std::string const & _filename, std::vector<AgentDriver> & _a
 		}
 	}
 	iFile.close();
+}*/
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+void importAgentsFromFile(rapidjson::Value & _agents, std::vector<AgentDriver> & agentsDriver,
+	rapidjson::Value & _Neutralagents, std::vector<AgentDriver> & NeutralagentsDriver,
+	rapidjson::Value & _Sink, std::vector<AgentDriver> & Sinks)
+{
+	// Agents
+	rapidjson::Value& Agents_coord = _agents["coord"];
+	rapidjson::Value& Agents_sensors = _agents["sensors"];
+	rapidjson::Value& NeutralAgents_coord = _Neutralagents["coord"];
+	rapidjson::Value& NeutralAgents_sensors = _Neutralagents["sensors"];
+	rapidjson::Value& Sinks_coord = _Sink["coord"];
+
+	int n_NeutralAgents = Agents_coord.Size();
+	int n_agents = Agents_coord.Size();
+	int n_sinks = Sinks_coord.Size();
+	AgentDriver driver;
+
+	//////////Agents///////////
+	for (int i = 0; i < n_agents; i++)
+	{
+		// position and orientation
+		for (rapidjson::Value::ConstValueIterator itr = Agents_coord.Begin(); itr != Agents_coord.End(); ++itr)
+		{
+			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
+			driver.heading = itr->GetArray()[2].GetDouble();
+		}
+		// Sensor Features
+		for (rapidjson::Value::ConstValueIterator itr = Agents_sensors.Begin(); itr != Agents_sensors.End(); ++itr)
+		{
+			driver.type = AgentDriver::GUARD;
+			driver.FarRadius = itr->GetArray()[0].GetDouble();
+			driver.NearRadius = itr->GetArray()[1].GetDouble();
+			driver.Orientation = itr->GetArray()[2].GetDouble();
+			driver.Angle = itr->GetArray()[3].GetDouble();
+		}
+		// agent identificator
+		driver.id = i;
+		agentsDriver.push_back(driver);
+	}
+
+	////// Neutral ///////
+	for (int i = 0; i < n_NeutralAgents; i++)
+	{
+		// position and orientation
+		for (rapidjson::Value::ConstValueIterator itr = NeutralAgents_coord.Begin(); itr != NeutralAgents_coord.End(); ++itr)
+		{
+			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
+			driver.heading = itr->GetArray()[2].GetDouble();
+		}
+		// Sensor Features
+		for (rapidjson::Value::ConstValueIterator itr = NeutralAgents_sensors.Begin(); itr != NeutralAgents_sensors.End(); ++itr)
+		{
+			driver.type = AgentDriver::NEUTRAL;
+			driver.FarRadius = itr->GetArray()[0].GetDouble();
+			driver.NearRadius = itr->GetArray()[1].GetDouble();
+			driver.Orientation = itr->GetArray()[2].GetDouble();
+			driver.Angle = itr->GetArray()[3].GetDouble();
+		}
+		// agent identificator
+		//driver.id = i;
+		NeutralagentsDriver.push_back(driver);
+	}
+
+	////// Sinks ///////
+	for (int i = 0; i < n_sinks; i++)
+	{
+		for (rapidjson::Value::ConstValueIterator itr = Agents_coord.Begin(); itr != Agents_coord.End(); ++itr)
+		{
+			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
+		}
+	}
+
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+void importThievesFromFile(rapidjson::Value & _thieves, std::vector<ThiefDriver> & _thiefDriver)
+{
+	ThiefDriver driver;
+	rapidjson::Value& thief_coord = _thieves["coord"];
+	rapidjson::Value& n_thieves = _thieves["n_thieves"];
+	int num_thieves = n_thieves.GetInt();
+
+	for (int i = 0; i < num_thieves; i++)
+	{
+		for (rapidjson::Value::ConstValueIterator itr = thief_coord.Begin(); itr != thief_coord.End(); ++itr)
+		{
+			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
+			driver.heading = itr->GetArray()[2].GetDouble();
+			driver.type = ThiefDriver::THIEF;
+		}
+	}
+	_thiefDriver.push_back(driver);
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////
-std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::createFromFile(std::string const & _filename, int _type, int _period)
+/*std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::createFromFile(std::string const & _filename, int _type, int _period)
 {
 	std::vector<IDS::BaseGeometry::Point2D> l_bound;
 	std::vector<AgentDriver> l_agentDriver;
 
-	importFromFile(_filename, l_agentDriver); // setta l'area e le posizioni dei robot nelle struct AgentDriver
+	// set of positions, orientations and sensors features for each robot in l_agentDriver vector
+	importFromFile(_filename, l_agentDriver);
 
 	/// Create Coverage Algorithm:
 	std::shared_ptr<Area> l_space = std::make_shared<StructuredArea>(l_bound);
 
 	// carica tutti gli genti di tipo guardia nel vector l_agents
-	int l_id = -1;
-	std::set< std::shared_ptr<Agent> >l_agents; 
+	//int l_id = -1;
+	/*std::set< std::shared_ptr<Agent> >l_agents;
+
 	for(size_t i = 0; i < l_agentDriver.size(); ++i)
 	{
 		if(l_agentDriver[i].type != AgentDriver::GUARD)
 			continue;
-
-		++l_id;
+		//++l_id;
 		AgentPosition l_pos(l_agentDriver[i].position, l_agentDriver[i].heading, CameraPosition(l_space->getDistance() / 15.) );
 
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, _period, _type == 2? 1 : 2);
@@ -646,8 +764,8 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		AgentPosition l_pos(l_space->randomPosition(), 0.0, CameraPosition(l_space->getDistance() / 15., 0, IDSMath::Pi, IDSMath::Pi*(110/180) ) );
 		Sleep(100);
 		
-		ThiefPtr l_agent = std::make_shared<Thief>(l_algorithm->getNumberOfAgent(), l_pos/*l_agentDriver[i].position*/);
-		l_algorithm->setPositionOfThief(l_pos, l_agent);
+		ThiefPtr l_agent = std::make_shared<Thief>(l_algorithm->getNumberOfAgent(), l_pos/*l_agentDriver[i].position*/ //);
+	/*	l_algorithm->setPositionOfThief(l_pos, l_agent);
 	}
 
 	for(size_t i = 0; i < l_agentDriver.size(); ++i)
@@ -658,116 +776,85 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		AgentPosition l_pos( l_space->randomPosition(), 0.0, CameraPosition(l_space->getDistance() / 15.) );
 		Sleep(100);
 
-		SinkPtr l_agent = std::make_shared<Sink>(l_algorithm->getNumberOfAgent(), l_pos/*l_agentDriver[i].position*/);
-		l_algorithm->setPositionOfSink(l_pos, l_agent);
-	}
+		SinkPtr l_agent = std::make_shared<Sink>(l_algorithm->getNumberOfAgent(), l_pos /*l_agentDriver[i].position*/ //);
+		//l_algorithm->setPositionOfSink(l_pos, l_agent);
+	//}
 
-	return l_algorithm;
-}
+	//return l_algorithm;
+//}
 
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
-	std::string const & _areaFile, 
-	std::string const & _agentFile,
+	rapidjson::Value& Area,
+	rapidjson::Value& _Agents,
+	rapidjson::Value& _Thieves,
+	rapidjson::Value& _Sinks,
+	rapidjson::Value& _NeutralAgents,
 	int _type,
 	int _periodIndex,
 	double _epsilon)
 {
+	
 	std::vector<IDS::BaseGeometry::Point2D> l_bound;
 	std::vector<AgentDriver> l_agentDriver;
+	std::vector<AgentDriver> l_NeutralAgentsDriver;
+	std::vector<AgentDriver> l_Sinks;
+	std::vector<ThiefDriver> l_thievesDriver;
 
 	// in l_agentDriver mette le coordinate lette da _agentFile (Guards, Thieves, Sinks, Neutral)
-	importFromFile(_agentFile, l_agentDriver);
+	importAgentsFromFile(_Agents, l_agentDriver, _NeutralAgents, l_NeutralAgentsDriver, _Sinks, l_Sinks);
+	importThievesFromFile(_Thieves, l_thievesDriver);
 
 	/// Create Coverage Algorithm:
-	std::shared_ptr<DiscretizedArea> l_space = std::make_shared<DiscretizedArea>(_areaFile);
+	std::shared_ptr<DiscretizedArea> l_space = std::make_shared<DiscretizedArea>(Area);// areaFile
+	std::set< std::shared_ptr<Agent>> l_agents; 
 
-	int l_id = -1;
-	std::set< std::shared_ptr<Agent> >l_agents; 
-	for(size_t i = 0; i < l_agentDriver.size(); ++i)
+
+	// Agents setting parameters to create Algorithm
+	for (size_t i = 0; i < l_agentDriver.size(); i++)
 	{
-		if(l_agentDriver[i].type != AgentDriver::GUARD)
-			continue;
-		++l_id;
-		// AgentPosition: viene settata la posizione e la CameraPosition dell'agente di tipo guardia
-			//int num_level = 60.0;
-			double farRadius = double((l_space->getXStep() + l_space->getYStep()) / 2. * 7.5);
-			double nearRadius = double(l_space->getXStep() + l_space->getYStep() / 2. );
-			double heading = double(0); // da [0 a 360)
-			double feedOfView = double(90);
-			AgentPosition l_pos(l_agentDriver[i].position, heading, CameraPosition(farRadius, nearRadius, heading, feedOfView)); // prende 5 quadratini x 6 quadratini
-		// point
-			Point2D l_point;
-			if (l_space->getRandomPosition(l_point) && 0)
-			{
-				l_pos = AgentPosition(l_point, heading, CameraPosition(farRadius, nearRadius, heading, feedOfView) );  //double(l_space->getXStep() + l_space->getYStep()) / 2. *1.5));
-				Sleep(50);
-			}
-			std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, _periodIndex, _type == 2 ? 1 : 2);
-			l_agents.insert(l_agent);
+		AgentDriver tmp = l_agentDriver[i];
+		AgentPosition l_pos(tmp.position, tmp.heading, CameraPosition(tmp.FarRadius, tmp.NearRadius, tmp.Orientation, tmp.Angle) );
+		
+		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, tmp.id, l_pos, _periodIndex, _type == 2 ? 1 : 2);
+		l_agents.insert(l_agent);
 	}
-#ifdef _PRINT
-	cout << "Placed guards"<<endl;
-#endif
 
-#ifdef _PRINT
-	cout << "Creating algorithm"<<endl;
-#endif
-	std::shared_ptr<CoverageAlgorithm> l_algorithm = std::make_shared<CoverageAlgorithm>(l_agents, l_space, _type);
-	
-	l_algorithm->setExperimentalRate(_epsilon);
 
-#ifdef _PRINT
-	cout << "Created algorithm"<<endl;
-#endif
-
-#ifdef _PRINT
-	cout << "Placing Thief"<<endl;
-#endif
-	for(size_t i = 0; i < l_agentDriver.size(); ++i)
+	//ATTENZIONE NeutralAgents setting parameters to create Algorithm (prima non venivano considerati !)
+	/*for (size_t i = 0; i < l_NeutralAgentsDriver.size(); i++)
 	{
-		if(l_agentDriver[i].type != AgentDriver::THIEF)
-			continue;
+		AgentDriver tmp = l_NeutralAgentsDriver[i];
+		int id = l_agentDriver.size()+i;*/ // per non sovrappore gli id dati agli agents
+		/*AgentPosition l_pos(tmp.position, tmp.heading, CameraPosition(tmp.FarRadius, tmp.NearRadius, tmp.Orientation, tmp.Angle) );
 
-		AgentPosition l_pos( l_agentDriver[i].position, 0.0, CameraPosition() );
+		std::shared_ptr<Agent> l_agent = std::make_shared<Neutral>(1, id, l_pos, _periodIndex, _type == 2 ? 1 : 2);
+		l_agents.insert(l_agent);
+	}*/
+	std::shared_ptr<CoverageAlgorithm> l_algorithm = std::make_shared<CoverageAlgorithm>(l_agents, l_space, _type);
+	l_algorithm->setExperimentalRate(_epsilon);
+	
 
-		Point2D l_point;
-		if( l_space->getRandomPosition(l_point) )
-		{
-			l_pos = AgentPosition ( l_point, 0.0, CameraPosition() );
-			Sleep(50);
-		}
+	// SINKS setting parameters to create Algorithm
+	for (size_t i = 0; i < l_Sinks.size(); i++)
+	{
+		AgentDriver tmp = l_Sinks[i];
+		AgentPosition l_pos(tmp.position, 0.0, CameraPosition());
+
+		SinkPtr l_agent = std::make_shared<Sink>(l_algorithm->getNumberOfAgent(), l_pos);
+		l_algorithm->setPositionOfSink(l_pos, l_agent);
+	}
+
+
+	// Thieves setting parameters to create Algorithm
+	for (size_t i = 0; i < l_thievesDriver.size(); i++)
+	{
+		ThiefDriver tmp = l_thievesDriver[i];
+		AgentPosition l_pos( tmp.position, tmp.heading, CameraPosition() );
 
 		ThiefPtr l_agent = std::make_shared<Thief>(l_algorithm->getNumberOfAgent(), l_pos);
 		l_algorithm->setPositionOfThief(l_agent->getCurrentPosition(), l_agent);
 	}
-#ifdef _PRINT
-	cout << "Placed Thief"<<endl;
-#endif
-	
-#ifdef _PRINT
-	cout << "Placing Sink"<<endl;
-#endif
-	for(size_t i = 0; i < l_agentDriver.size(); ++i)
-	{
-		if(l_agentDriver[i].type != AgentDriver::SINK)
-			continue;
-
-		AgentPosition l_pos( l_agentDriver[i].position, 0.0, CameraPosition() );
-
-		Point2D l_point;
-		if( l_space->getRandomPosition(l_point) )
-		{
-			l_pos = AgentPosition ( l_point, 0.0, CameraPosition() );
-			Sleep(50);
-		}
-
-		SinkPtr l_agent = std::make_shared<Sink>(l_algorithm->getNumberOfAgent(), l_pos);
-		l_algorithm->setPositionOfSink(l_agent->getCurrentPosition(), l_agent);
-	}
-#ifdef _PRINT
-	cout << "Placed Sink"<<endl;
-#endif
 
 	return l_algorithm;
 }

@@ -24,9 +24,8 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <rapidjson/document.h>
-#include <rapidjson/filereadstream.h>
-
+#include<rapidjson\document.h>
+#include<rapidjson\filereadstream.h>
 
 using namespace Robotics::GameTheory;
 using namespace IDS::BaseGeometry;
@@ -137,7 +136,7 @@ struct SimulationConfig
 	int TestCase;
 } g_config;
 
-void readSimulationConfigFile(Log & _log, std::string const& _filename)
+/*void readSimulationConfigFile(Log & _log, std::string const& _filename)
 {
 	std::ifstream file(_filename);
 
@@ -223,52 +222,81 @@ void readSimulationConfigFile(Log & _log, std::string const& _filename)
 			}
 		}
 	}
+}*/
+
+///////////////////// NEW : readConfigurationFile /////////////////////
+void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
+
+	rapidjson::Value& Monitor = Config_Param["Monitor"];
+	rapidjson::Value& Jump = Config_Param["Jump"];
+	rapidjson::Value& Epsilon = Config_Param["Epsilon"];
+	rapidjson::Value& Print = Config_Param["Print"];
+	rapidjson::Value& Period = Config_Param["Period"];
+	rapidjson::Value& TestCase = Config_Param["TestCase"];
+	
+	// Prelevo gli elementi dei vari Array
+	for (rapidjson::Value::ConstValueIterator itr = Monitor.Begin(); itr != Monitor.End(); ++itr)
+	{
+		_log << "Monitor" << endl;
+		for (int i = 0; i < Monitor.Size(); i++)
+		{
+			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+		}
+		_log << endl;
+	}
+
+	for (rapidjson::Value::ConstValueIterator itr = Jump.Begin(); itr != Jump.End(); ++itr)
+	{
+		_log << "Jump" << endl;
+		for (int i = 0; i < Jump.Size(); i++)
+		{
+			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+		}
+		_log << endl;
+	}
+
+	for (rapidjson::Value::ConstValueIterator itr = Epsilon.Begin(); itr != Epsilon.End(); ++itr)
+	{
+		_log << "Epsilon" << endl;
+		for (int i = 0; i < Epsilon.Size(); i++)
+		{
+			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetDouble());
+		}
+		_log << endl;
+	}
+
+	for (rapidjson::Value::ConstValueIterator itr = Print.Begin(); itr != Print.End(); ++itr)
+	{
+		_log << "Print" << endl;
+		for (int i = 0; i < Print.Size(); i++)
+		{
+			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+		}
+		_log << endl;
+	}
+
+	for (rapidjson::Value::ConstValueIterator itr = Period.Begin(); itr != Period.End(); ++itr)
+	{
+		_log << "Period" << endl;
+		for (int i = 0; i < Period.Size(); i++)
+		{
+			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+		}
+		_log << endl;
+	}
+
+	for (rapidjson::Value::ConstValueIterator itr = TestCase.Begin(); itr != TestCase.End(); ++itr)
+	{
+		_log << "TestCase" << endl;
+		for (int i = 0; i < TestCase.Size(); i++)
+		{
+			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+		}
+		_log << endl;
+	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-std::vector<std::string> getAgentNames(std::string const& _folname)
-{
-	std::vector<std::string> l_result;
-
-#ifdef _SINK
-
-	l_result.push_back("Scenario_5G_1T_1S.dat");
-
-#ifndef _TEST
-	l_result.push_back("Scenario_10G_1T_1S.dat");
-	l_result.push_back("Scenario_15G_1T_1S.dat");
-	l_result.push_back("Scenario_20G_1T_1S.dat");
-#endif
-
-#else
-	l_result.push_back("Scenario_5G_1T_multiAgentMODIFIED.dat");
-
-#ifndef _TEST
-	l_result.push_back("Scenario_10G_1T_multiAgent.dat");
-	l_result.push_back("Scenario_15G_1T_multiAgent.dat");
-	l_result.push_back("Scenario_20G_1T_multiAgent.dat");
-#endif
-#endif
-	return l_result;
-}
-
-//////////////////////////////////////////////////////////////////////////
-std::vector<std::string> getAreaNames(std::string const& _folname)
-{
-	std::vector<std::string> l_result;
-	/// più scenari
-	l_result.push_back("External30.txt");
-	//l_result.push_back("External50.txt");
-
-
-#ifndef _TEST
-	//	l_result.push_back("External_trig.txt");
-	//	l_result.push_back("External_road.txt");
-	//	l_result.push_back("External_room.txt");
-#endif
-	return l_result;
-}
-
+////////////////// new ///////////////////////////////////////////
 // Returns the local date/time formatted as 2014-03-19 11:11:52
 const std::string currentDateTime() {
 	time_t     now = time(0);
@@ -283,115 +311,62 @@ const std::string currentDateTime() {
 }
 
 
+
+
+//////////////////////////////////////// MAIN ////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
 	const std::string date = currentDateTime();
+
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
 
-<<<<<<< HEAD
-
-	const char* json = "ConfiguratioFile.json";
-
-	FILE* fp = fopen("ConfigurationFile.json", "rb"); // non-Windows use "r"
-	char readBuffer[65536];
-	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-	std::cout << readBuffer[0] << endl;
-	
-	std::string str = "ConfigurationFile.json";
-	rapidjson::Document document;
-	
-	
-
-	std::string l_folname;
-=======
-	std::string conf_file = "ConfigurationFile.json";
+	// read file.json for set os parameters simulation
+	std::string conf_file = "Scenario_5G_1T_multiAgent.json";
     FILE * cf = fopen(conf_file.c_str(), "r" );
     char readBuffer[65536];
     rapidjson::FileReadStream is(cf, readBuffer, sizeof(readBuffer));
     rapidjson::Document document;
     document.ParseStream(is);
-    if (!document.IsObject()) {
+    
+	if (!document.IsObject()) {
         std::cout << "ERR: error during the parsing of configuration file" << std::endl;
         exit(1);
     }
+	// Area
+    rapidjson::Value& Area = document["Area"];
+	// Agents
+	rapidjson::Value& Agents = document["Agents"];
+	//Thieves
+	rapidjson::Value& Thieves = document["Thieves"];
+	//Sinks
+	rapidjson::Value& Sinks = document["Sinks"];
+	// Neutral_agents
+	rapidjson::Value& NeutralAgents = document["NeutralAgents"];
+	// Configuration
+	rapidjson::Value& Configuration_parameters = document["Configuration"];
 
-    std::cout << document.IsObject() << std::endl;
-
-    rapidjson::Value& tmp = document["Area"];
-    rapidjson::Value& cols = tmp["cols"];
-    
-    std::cout << document.HasMember("Area") << std::endl;
-    std::cout << cols.GetInt() << std::endl;
-
-    system("PAUSE");
-    exit(0);
-    
-    // Da qui in poi inserire il parsing del file dove prendere  gli argomenti
-    /****************************************************************/
-           
     std::string l_folname;
->>>>>>> c2318cc5c9f7428b0d657a84a590abed4a41195f
-
 	if (argc < 1)
 		return -1;
 	else if (argc >= 2)
 		l_folname = argv[1];
 
+	std::vector<std::string> l_AgentFilenames;
+	l_AgentFilenames.push_back("Scenario_5G_1T_multiAgent.json");
 
-	// richiamo le funzioni sopra definite
-	std::vector<std::string> l_AgentFilenames = getAgentNames(l_folname);
-	std::vector<std::string> l_AreaFilenames = getAreaNames(l_folname);
+	std::vector<std::string> l_AreaFilenames;
+	rapidjson::Value& AreaName = Area["Area_name"];
 
-	//std::vector<std::string> getConfigurationFileName(l_ConfigurationFile);
+	// prendo il char che descrive lo scenario. es. Open_sea
+	l_AreaFilenames.push_back(AreaName.GetString());
 
 
-#ifdef _EPSILON
-
-#ifndef _TEST
-	std::string l_file("config_EPSILON.dat");
-#else
-	std::string l_file("simple_config_EPSILON.dat");
-#endif
-
-#else
-
-#ifdef _STATIC
-
-#ifndef _TEST
-	std::string l_file("config_STATIC.dat");
-#else 
-	std::string l_file("simple_config_STATIC.dat");
-#endif
-
-#else
-
-#ifdef _TALGORITHM
-
-#ifndef _TEST
-	std::string l_file("config_T.dat");
-#else 
-	std::string l_file("simple_config_T.dat");
-#endif
-
-#else
-
-#ifndef _TEST
-	std::string l_file("config.dat");
-#else 
-	std::string l_file("simple_config.dat");
-#endif
-
-#endif
-
-#endif
-
-#endif
 	// prende il titolo del file e lo divide, mette i parametri di configurazione all'interno della struttura config,
 	// in l_file ci sono le info relative alla configurazione
-	readSimulationConfigFile(l_log, l_file);
+	readSimulationConfigFile(l_log, Configuration_parameters);
 
 	for (size_t o = 0; o < l_AgentFilenames.size(); ++o)
 	{
@@ -465,11 +440,21 @@ int main(int argc, char* argv[])
 										// cerca il file di cui passo il nome e preleva agenti e area(0 o 1)
 										std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
 											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
+												Area,
+												Agents,
+												Thieves,
+												Sinks,
+												NeutralAgents,
+												l_algorithmType, // DISL O PIPIP
+												g_config.Period[l_periodIndex],
+												0.1);
+										/*std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
+											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
 												l_AreaFilename,
 												l_AgentFilename,
 												l_algorithmType,
 												g_config.Period[l_periodIndex],
-												0.1);
+												0.1);*/
 
 										if (g_config.TimeEnd.size() > 0)
 											// Stop algorithm when number of steps reach a given value

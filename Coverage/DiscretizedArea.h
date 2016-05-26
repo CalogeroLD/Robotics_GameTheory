@@ -19,6 +19,9 @@
 #include <set>
 #include "Guard.h"
 
+#include <rapidjson\document.h>
+#include <rapidjson\filereadstream.h>
+
 namespace IDS
 {
 	namespace BaseGeometry
@@ -152,6 +155,9 @@ namespace Robotics
 			DiscretizedArea(std::shared_ptr<StructuredArea> _area);
 			DiscretizedArea(std::shared_ptr<UnStructuredArea> _area);
 			DiscretizedArea(std::string const& _filename);
+			// aggiunta da c. Li Destri
+			DiscretizedArea(rapidjson::Value& _Area);
+
 			 
 
 			/// Compute Graph of the discretized area.
