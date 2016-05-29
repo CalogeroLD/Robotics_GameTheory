@@ -157,7 +157,6 @@ namespace Robotics
 			DiscretizedArea(std::string const& _filename);
 			// aggiunta da c. Li Destri
 			DiscretizedArea(rapidjson::Value& _Area);
-
 			 
 
 			/// Compute Graph of the discretized area.

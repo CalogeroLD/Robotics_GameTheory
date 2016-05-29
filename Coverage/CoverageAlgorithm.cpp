@@ -543,20 +543,11 @@ struct AgentDriver
 	// Agents type
 	enum Type
 	{
+		THIEF = -1,
 		NEUTRAL = 0,
 		GUARD = 1,
 		SINK = 2
 	} type;
-};
-
-struct ThiefDriver
-{
-	// Position and orientation
-	IDS::BaseGeometry::Point2D position;
-	double heading;
-	// Agents type
-	enum Type
-	{ THIEF = -1,} type;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -636,92 +627,98 @@ void importAgentsFromFile(rapidjson::Value & _agents, std::vector<AgentDriver> &
 	rapidjson::Value & _Sink, std::vector<AgentDriver> & Sinks)
 {
 	// Agents
+
+	AgentDriver driver;
+	int id = 0;
+	//////////Agents///////////
+	if (!(_agents.HasMember("coord")))
+		cout << "ERR: Nautral Agents has not coord" << endl;
+	// check
+	if (!(_agents.HasMember("sensors")))
+		cout << "ERR: sensors field of Agents hasn't been decleared" << endl;
+
 	rapidjson::Value& Agents_coord = _agents["coord"];
 	rapidjson::Value& Agents_sensors = _agents["sensors"];
-	rapidjson::Value& NeutralAgents_coord = _Neutralagents["coord"];
-	rapidjson::Value& NeutralAgents_sensors = _Neutralagents["sensors"];
-	rapidjson::Value& Sinks_coord = _Sink["coord"];
 
-	int n_NeutralAgents = Agents_coord.Size();
-	int n_agents = Agents_coord.Size();
-	int n_sinks = Sinks_coord.Size();
-	AgentDriver driver;
-
-	//////////Agents///////////
-	for (int i = 0; i < n_agents; i++)
+	// position and orientation
+	if (Agents_coord.Size() == Agents_sensors.Size())
 	{
-		// position and orientation
-		for (rapidjson::Value::ConstValueIterator itr = Agents_coord.Begin(); itr != Agents_coord.End(); ++itr)
+		for (int i = 0; i < Agents_coord.Size(); i++)
 		{
-			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
-			driver.heading = itr->GetArray()[2].GetDouble();
-		}
-		// Sensor Features
-		for (rapidjson::Value::ConstValueIterator itr = Agents_sensors.Begin(); itr != Agents_sensors.End(); ++itr)
-		{
+			driver.position = makePoint(IDSReal2D(Agents_coord[i].GetArray()[0].GetDouble(), Agents_coord[i].GetArray()[1].GetDouble()), EucMetric);
+			driver.heading = Agents_coord[i].GetArray()[2].GetDouble();
+			// Sensor Features
 			driver.type = AgentDriver::GUARD;
-			driver.FarRadius = itr->GetArray()[0].GetDouble();
-			driver.NearRadius = itr->GetArray()[1].GetDouble();
-			driver.Orientation = itr->GetArray()[2].GetDouble();
-			driver.Angle = itr->GetArray()[3].GetDouble();
+			driver.FarRadius = Agents_sensors[i].GetArray()[0].GetDouble();
+			driver.NearRadius = Agents_sensors[i].GetArray()[1].GetDouble();
+			driver.Orientation = Agents_sensors[i].GetArray()[2].GetDouble();
+			driver.Angle = Agents_sensors[i].GetArray()[3].GetDouble();
+			driver.id = id++;
+			agentsDriver.push_back(driver);
 		}
-		// agent identificator
-		driver.id = i;
-		agentsDriver.push_back(driver);
+	}
+	else {
+		cout << "ERR: coord and sensors must have same sizes" << endl;
 	}
 
-	////// Neutral ///////
-	for (int i = 0; i < n_NeutralAgents; i++)
+	///// Neutral ////////
+	if (!(_Neutralagents.HasMember("coord")))
+		cout << "ERR: coord field of array hasn't been decleared" << endl;
+	// check
+	if (!(_Neutralagents.HasMember("sensors")))
+		cout << "ERR: sensors field of Agents hasn't been decleared" << endl;
+
+	rapidjson::Value& NeutralAgents_coord = _Neutralagents["coord"];
+	rapidjson::Value& NeutralAgents_sensors = _Neutralagents["sensors"];
+
+	// position and orientation
+	if (NeutralAgents_coord.Size() == NeutralAgents_sensors.Size())
 	{
-		// position and orientation
-		for (rapidjson::Value::ConstValueIterator itr = NeutralAgents_coord.Begin(); itr != NeutralAgents_coord.End(); ++itr)
+		for (int i = 0; i < NeutralAgents_coord.Size(); i++)
 		{
-			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
-			driver.heading = itr->GetArray()[2].GetDouble();
+			driver.position = makePoint(IDSReal2D(NeutralAgents_coord[i].GetArray()[0].GetDouble(), NeutralAgents_coord[i].GetArray()[1].GetDouble()), EucMetric);
+			driver.heading = NeutralAgents_coord[i].GetArray()[2].GetDouble();
+			// Sensor Features
+			driver.type = AgentDriver::GUARD;
+			driver.FarRadius = NeutralAgents_sensors[i].GetArray()[0].GetDouble();
+			driver.NearRadius = NeutralAgents_sensors[i].GetArray()[1].GetDouble();
+			driver.Orientation = NeutralAgents_sensors[i].GetArray()[2].GetDouble();
+			driver.Angle = NeutralAgents_sensors[i].GetArray()[3].GetDouble();
+			driver.id = id++;
+			NeutralagentsDriver.push_back(driver);
 		}
-		// Sensor Features
-		for (rapidjson::Value::ConstValueIterator itr = NeutralAgents_sensors.Begin(); itr != NeutralAgents_sensors.End(); ++itr)
-		{
-			driver.type = AgentDriver::NEUTRAL;
-			driver.FarRadius = itr->GetArray()[0].GetDouble();
-			driver.NearRadius = itr->GetArray()[1].GetDouble();
-			driver.Orientation = itr->GetArray()[2].GetDouble();
-			driver.Angle = itr->GetArray()[3].GetDouble();
-		}
-		// agent identificator
-		//driver.id = i;
-		NeutralagentsDriver.push_back(driver);
+	}
+	else {
+		cout << "ERR: coord and sensors must have same sizes" << endl;
 	}
 
 	////// Sinks ///////
-	for (int i = 0; i < n_sinks; i++)
+	if (!(_Sink.HasMember("coord")))
+		cout << "Err: Sinks have not coordinate" << endl;
+	
+		rapidjson::Value& Sinks_coord = _Sink["coord"];
+
+	for (rapidjson::Value::ConstValueIterator itr = Sinks_coord.Begin(); itr != Sinks_coord.End(); ++itr)
 	{
-		for (rapidjson::Value::ConstValueIterator itr = Agents_coord.Begin(); itr != Agents_coord.End(); ++itr)
-		{
-			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
-		}
+		driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
 	}
 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-void importThievesFromFile(rapidjson::Value & _thieves, std::vector<ThiefDriver> & _thiefDriver)
+void importThievesFromFile(rapidjson::Value & _thieves, std::vector<AgentDriver> & _thiefDriver)
 {
-	ThiefDriver driver;
-	rapidjson::Value& thief_coord = _thieves["coord"];
-	rapidjson::Value& n_thieves = _thieves["n_thieves"];
-	int num_thieves = n_thieves.GetInt();
+	AgentDriver driver;
+	rapidjson::Value& thieves_coord = _thieves["coord"];
 
-	for (int i = 0; i < num_thieves; i++)
+	for (int i = 0; i < thieves_coord.Size(); i++)
 	{
-		for (rapidjson::Value::ConstValueIterator itr = thief_coord.Begin(); itr != thief_coord.End(); ++itr)
-		{
-			driver.position = makePoint(IDSReal2D(itr->GetArray()[0].GetDouble(), itr->GetArray()[1].GetDouble()), EucMetric);
-			driver.heading = itr->GetArray()[2].GetDouble();
-			driver.type = ThiefDriver::THIEF;
-		}
+			driver.position = makePoint(IDSReal2D(thieves_coord[i].GetArray()[0].GetDouble(), thieves_coord[i].GetArray()[1].GetDouble()), EucMetric);
+			driver.heading = thieves_coord[i].GetArray()[2].GetDouble();
+			driver.type = AgentDriver::THIEF;
+			_thiefDriver.push_back(driver);
 	}
-	_thiefDriver.push_back(driver);
+	
 }
 
 
@@ -799,7 +796,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	std::vector<AgentDriver> l_agentDriver;
 	std::vector<AgentDriver> l_NeutralAgentsDriver;
 	std::vector<AgentDriver> l_Sinks;
-	std::vector<ThiefDriver> l_thievesDriver;
+	std::vector<AgentDriver> l_thievesDriver;
 
 	// in l_agentDriver mette le coordinate lette da _agentFile (Guards, Thieves, Sinks, Neutral)
 	importAgentsFromFile(_Agents, l_agentDriver, _NeutralAgents, l_NeutralAgentsDriver, _Sinks, l_Sinks);
@@ -849,7 +846,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	// Thieves setting parameters to create Algorithm
 	for (size_t i = 0; i < l_thievesDriver.size(); i++)
 	{
-		ThiefDriver tmp = l_thievesDriver[i];
+		AgentDriver tmp = l_thievesDriver[i];
 		AgentPosition l_pos( tmp.position, tmp.heading, CameraPosition() );
 
 		ThiefPtr l_agent = std::make_shared<Thief>(l_algorithm->getNumberOfAgent(), l_pos);

@@ -227,72 +227,105 @@ struct SimulationConfig
 ///////////////////// NEW : readConfigurationFile /////////////////////
 void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 
-	rapidjson::Value& Monitor = Config_Param["Monitor"];
-	rapidjson::Value& Jump = Config_Param["Jump"];
-	rapidjson::Value& Epsilon = Config_Param["Epsilon"];
-	rapidjson::Value& Print = Config_Param["Print"];
-	rapidjson::Value& Period = Config_Param["Period"];
-	rapidjson::Value& TestCase = Config_Param["TestCase"];
-	
+	std::vector<double> StopRate;
+	std::vector<int> MonitorUpdateTime;
+	std::vector<int> ThiefJump;
+	std::vector<double> Epsilon_v;
+	std::vector<int> TimeEnd_v;
+	std::vector<int> Period_v;
+	int TestCase_v;
+
 	// Prelevo gli elementi dei vari Array
-	for (rapidjson::Value::ConstValueIterator itr = Monitor.Begin(); itr != Monitor.End(); ++itr)
-	{
+	if (Config_Param.HasMember("Monitor")) {
+		rapidjson::Value& Monitor = Config_Param["Monitor"];
+
 		_log << "Monitor" << endl;
 		for (int i = 0; i < Monitor.Size(); i++)
 		{
-			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+			int tmp = Monitor[i].GetInt();
+			cout << Monitor[i].GetInt() << " \t";
+			MonitorUpdateTime.push_back(tmp);
 		}
+		g_config.MonitorUpdateTime = MonitorUpdateTime;
 		_log << endl;
 	}
+	else {
+		cout << "Monitor field hasn't been decleared";
+	}
 
-	for (rapidjson::Value::ConstValueIterator itr = Jump.Begin(); itr != Jump.End(); ++itr)
-	{
+	if (Config_Param.HasMember("Jump")) {
+		rapidjson::Value& Jump = Config_Param["Jump"];
 		_log << "Jump" << endl;
 		for (int i = 0; i < Jump.Size(); i++)
 		{
-			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+			int tmp = Jump[i].GetInt();
+			cout << Jump[i].GetInt() << "\t";
+			ThiefJump.push_back(tmp);
 		}
+		g_config.ThiefJump = ThiefJump;
 		_log << endl;
 	}
+	else {
+		cout << "Jump field hasn't been decleared" << endl;
+	}
 
-	for (rapidjson::Value::ConstValueIterator itr = Epsilon.Begin(); itr != Epsilon.End(); ++itr)
-	{
-		_log << "Epsilon" << endl;
+	if (Config_Param.HasMember("Epsilon")) {
+		rapidjson::Value& Epsilon = Config_Param["Epsilon"];
+		_log << "Epsilon";
 		for (int i = 0; i < Epsilon.Size(); i++)
 		{
-			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetDouble());
+			int tmp = Epsilon[i].GetDouble();
+			cout << Epsilon[i].GetDouble();
+			Epsilon_v.push_back(tmp);
 		}
+		g_config.Epsilon = Epsilon_v;
 		_log << endl;
 	}
+	else {
+		cout << "Epsilon field hasn't been decleared" << endl;
+	}
 
-	for (rapidjson::Value::ConstValueIterator itr = Print.Begin(); itr != Print.End(); ++itr)
-	{
+	if (Config_Param.HasMember("Print")) {
+		rapidjson::Value& Print = Config_Param["Print"];
 		_log << "Print" << endl;
 		for (int i = 0; i < Print.Size(); i++)
 		{
-			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+			int tmp = Print[i].GetInt();
+			cout << Print[i].GetInt() << "\t";
+			TimeEnd_v.push_back(tmp);
 		}
+		g_config.TimeEnd = TimeEnd_v;
 		_log << endl;
 	}
+	else {
+		cout << "Print field hasn't been decleared" << endl;
+	}
 
-	for (rapidjson::Value::ConstValueIterator itr = Period.Begin(); itr != Period.End(); ++itr)
-	{
+	if (Config_Param.HasMember("Period")) {
+		rapidjson::Value& Period = Config_Param["Period"];
 		_log << "Period" << endl;
 		for (int i = 0; i < Period.Size(); i++)
 		{
-			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
+			int tmp = Period[i].GetInt();
+			cout << Period[i].GetInt() << "\t";
+			Period_v.push_back(tmp);
 		}
+		g_config.Period = Period_v;
 		_log << endl;
 	}
+	else {
+		cout << "Period field hasn't been decleared" << endl;
+	}
 
-	for (rapidjson::Value::ConstValueIterator itr = TestCase.Begin(); itr != TestCase.End(); ++itr)
-	{
+	if (Config_Param.HasMember("TestCase")) {
+		rapidjson::Value& TestCase = Config_Param["TestCase"];
 		_log << "TestCase" << endl;
-		for (int i = 0; i < TestCase.Size(); i++)
-		{
-			g_config.MonitorUpdateTime.push_back(itr->GetArray()[i].GetInt());
-		}
+		g_config.TestCase = TestCase.GetInt();
+		cout << TestCase.GetInt();
 		_log << endl;
+	}
+	else {
+		cout << "TestCase field hasn't been decleared" << endl;
 	}
 }
 
@@ -309,8 +342,6 @@ const std::string currentDateTime() {
 	std::string date = string(buf);
 	return date;
 }
-
-
 
 
 //////////////////////////////////////// MAIN ////////////////////////////////////////////////
@@ -347,6 +378,22 @@ int main(int argc, char* argv[])
 	rapidjson::Value& NeutralAgents = document["NeutralAgents"];
 	// Configuration
 	rapidjson::Value& Configuration_parameters = document["Configuration"];
+	rapidjson::Value& Monitor = Configuration_parameters["Monitor"];
+	//cout << Configuration_parameters.HasMember("Monitor");
+	/*int a = Monitor[1].GetInt();
+	int size = Monitor.Size();
+	std::vector<int> MonitorUpdateTime;
+	cout << a << size << endl;
+
+	for (int i = 0; i < Monitor.Size(); i++)
+	{
+		int c = Monitor[i].GetInt();
+		MonitorUpdateTime.push_back(c);
+		cout << Monitor[i].GetInt() << endl;
+	}
+
+	g_config.MonitorUpdateTime = MonitorUpdateTime;*/
+	
 
     std::string l_folname;
 	if (argc < 1)

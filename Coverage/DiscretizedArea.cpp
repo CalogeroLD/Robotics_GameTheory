@@ -19,6 +19,7 @@
 #include <fstream>
 #include <iostream>
 
+//#define _PRINT
 using namespace std;
 using namespace Robotics;
 using namespace Robotics::GameTheory;
@@ -176,6 +177,184 @@ void DiscretizedArea::addEdges()
 			m_listGraph->addEdge( l_currentNode, l_sq->getNode() );
 	}
 }
+
+
+DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
+		: m_graph(nullptr)
+		, m_listGraph(nullptr)
+		, m_numberOfValidSquare(-1)
+		, m_sinkCoordinate(-1, -1)
+{
+	Point2D l_bottomLeft;
+	Point2D	l_bottomRight;
+	Point2D	l_topLeft;
+	Point2D	l_topRight;
+
+	std::vector<std::vector<bool>> l_grid;
+	int l_numcol(1), l_numrow(1);
+
+	// reading length and height from file.json
+		rapidjson::Value& length = Area["length"];
+		rapidjson::Value& height = Area["height"];
+		double length_value, height_value;
+
+
+
+		// takes it as double
+		if (length.IsDouble())
+		length_value = length.GetDouble();
+		if(height.IsDouble())
+		height_value = height.GetDouble();
+
+		l_bottomLeft = makePoint(IDSReal2D(0, 0), EucMetric);
+		l_topLeft = makePoint(IDSReal2D(0, height_value), EucMetric);
+		l_topRight = makePoint(IDSReal2D(length_value, height_value), EucMetric);
+		l_bottomRight = makePoint(IDSReal2D(length_value, 0), EucMetric);
+
+	// reading the number of row and col we set in the file.json
+	rapidjson::Value& rows = Area["rows"];
+	rapidjson::Value& cols = Area["cols"];
+
+	rapidjson::Value& ship = Area["ship"];
+	rapidjson::Value& ship_coord = ship["coord"]; // array
+	rapidjson::Value& ship_dimcol = ship["dim_col"]; // int
+	rapidjson::Value& ship_dimrow = ship["dim_row"]; // int
+	
+	int shipDimCol = ship_dimcol.GetInt();
+	int shipDimRow = ship_dimrow.GetInt();
+	int coord_shipCol, coord_shipRow;
+	
+	//cout << ship_coord.GetArray()[0].GetInt() << endl;
+
+	//cout << length.GetDouble() << endl;;
+	coord_shipCol = ship_coord.GetArray()[0].GetInt();
+	coord_shipRow = ship_coord.GetArray()[1].GetInt();
+
+	std::vector<AreaCoordinate> pointCoveredByShip;
+	AreaCoordinate point;
+
+	for (int i = coord_shipCol - shipDimCol; i <  coord_shipCol + shipDimCol; i++)
+	{
+		for (int j = coord_shipRow - shipDimRow; j < coord_shipRow + shipDimRow; j++)
+		{
+			AreaCoordinate point(j, i);
+			pointCoveredByShip.push_back(point);
+		}
+
+	}
+	l_numcol = cols.GetInt(); //step x
+	l_numrow = rows.GetInt(); //step y
+	std::vector<bool> l_row;
+
+	for (size_t i = 0; i < l_numrow; i++)
+	{
+		for (size_t j = 0; j < l_numcol; j++)
+		{
+			//AreaCoordinate point(j, i);
+			//std::vector<AreaCoordinate>::iterator it;
+			//it = find(pointCoveredByShip.begin(), pointCoveredByShip.end(), point);
+			//if(it == pointCoveredByShip.end()) // non lo trova
+				l_row.push_back(true);
+			//else
+				//l_row.push_back(false);
+		}
+		l_grid.push_back(l_row);
+	}
+	
+	double l_xdist = l_bottomLeft.distance(l_bottomRight);
+	double l_ydist = l_bottomLeft.distance(l_topLeft);
+
+	m_xStep = l_xdist / double(l_numcol);
+	m_yStep = l_ydist / double(l_numrow);
+
+#ifdef _PRINT
+	cout << "Col " << l_numcol << endl;
+	cout << "Row " << l_numrow << endl;
+#endif
+
+	double l_xpos = 0.;
+	double l_ypos = 0.;
+	m_numRow = 0;
+	m_numCol = 0;
+	bool l_firstrow = true;
+	int irow = 0;
+
+	while (l_ypos < l_ydist + IDSMath::TOLERANCE)
+	{
+		double l_yorigin = l_ypos + l_bottomLeft.coord(1);
+		int l_count = 0;
+		l_xpos = 0.;
+		int icol = 0;
+		while ((l_firstrow && l_xpos < l_xdist + IDSMath::TOLERANCE) || (!l_firstrow && l_count < m_numCol))
+		{
+			double l_xorigin = l_xpos + l_bottomLeft.coord(0);
+			l_xpos += m_xStep;
+			if (l_firstrow)
+			{
+				m_numCol++;
+			}
+			l_count++;
+			icol++;
+		}
+		l_ypos += m_yStep;
+		m_numRow++;
+		l_firstrow = false;
+		irow++;
+	}
+
+	l_xpos = 0.;
+	l_ypos = 0.;
+	l_firstrow = true;
+	irow = 0;
+	// messo da me
+	m_numCol = l_numcol;
+	m_numRow = l_numrow;
+
+	m_listGraph = std::make_shared<lemon::ListGraph>();
+	m_listGraph->reserveNode(m_numCol*m_numRow);
+	m_listGraph->reserveEdge((m_numCol - 1)*(m_numRow - 1) * 4);
+
+	while (l_ypos < l_ydist + IDSMath::TOLERANCE)
+	{
+		double l_yorigin = l_ypos + l_bottomLeft.coord(1);
+		int l_count = 0;
+		l_xpos = 0.;
+		int icol = 0;
+		while ((l_firstrow && l_xpos < l_xdist + IDSMath::TOLERANCE) || (!l_firstrow && l_count < m_numCol))
+		{
+			double l_xorigin = l_xpos + l_bottomLeft.coord(0);
+
+			Point2D l_mincord = makePoint(IDSReal2D(l_xorigin, l_yorigin), l_bottomLeft.isEllipsoidic() ? BaseGeometry::EllMetric : BaseGeometry::EucMetric);
+			Point2D l_maxcord = makePoint(IDSReal2D(l_xorigin + m_xStep, l_yorigin + m_yStep), l_bottomLeft.isEllipsoidic() ? BaseGeometry::EllMetric : BaseGeometry::EucMetric);
+
+			Box2D l_boxSquare = makeBoundingBox(l_mincord, l_maxcord);
+
+			SquarePtr l_square = std::make_shared<Square>(m_listGraph);
+			l_square->setBoundingBox(l_boxSquare);
+
+			int l_col = double(icol) / double(m_numCol) * double(l_grid.back().size());
+			int l_row = double(irow) / double(m_numRow) * double(l_grid.size());
+
+			if (l_col < l_grid.back().size() && l_row < l_grid.size() && l_grid[l_row][l_col])
+				l_square->setValid(true);
+			else
+				l_square->setValid(false);
+
+			m_lattice.push_back(l_square);
+
+			l_xpos += m_xStep;
+			l_count++;
+			icol++;
+		}
+		l_ypos += m_yStep;
+		l_firstrow = false;
+		irow++;
+	}
+
+	addEdges();
+	m_graph = std::make_shared< lemon::Bfs<lemon::ListGraph> >(*m_listGraph.get());
+}
+
 
 ////////////////////////////////////////////////////////////////////////// da FILE
 DiscretizedArea::DiscretizedArea(std::string const& _filename) 
@@ -561,8 +740,14 @@ AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
 	Line2D l_xLine = l_bottomLeft.lineTo(l_bottomRight); // restituisce le coordinate dei punti
 	Line2D l_yLine = l_bottomLeft.lineTo(l_topLeft);
 
+	//cout << "azimuth: " << l_xLine.azimuth() << "angolo tra" << l_xLine.angleBetween(l_yLine) << endl;
+
 	Point2D l_prjVertical = l_yLine.projectPoint(point); // restituisce punto proiettato sull'asse y 
 	Point2D l_prjOrizontal = l_xLine.projectPoint(point);// restituisce punto proiettato sull'asse x
+
+	/*cout << " punto x: " << point.coord(0) << "y: " << point.coord(1) << endl;
+	cout <<" punto proiettati orizz x : " << l_prjOrizontal.coord(0) << "y : " << l_prjOrizontal.coord(1) << endl;
+	cout << "punto proiettati verti x : " << l_prjVertical.coord(0) << "y : " << l_prjVertical.coord(1) << endl;*/
 
 	double l_ydist = l_yLine.parameterAt(l_prjVertical);
 	double l_xdist = l_xLine.parameterAt(l_prjOrizontal);
