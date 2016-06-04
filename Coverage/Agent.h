@@ -55,9 +55,9 @@ namespace Robotics
 			CameraPosition(double _farRadius = 0., double _nearRadius = 0., double _orientation = 0., double _angle = IDSMath::TwoPi/4) 
 				: m_farRadius(_farRadius), m_nearRadius(_nearRadius), m_orientation(_orientation), m_angle(_angle) {}
 
-			//std::vector<AreaCoordinate> line_scan(int x0, int y0, int a, int RMIN, int RMAX, int RSTEP, std::shared_ptr<DiscretizedArea> _area);
 
-			std::vector<AreaCoordinate> getCoverage(AreaCoordinate _center, double heading, std::shared_ptr<DiscretizedArea> _area) const;
+			//std::vector<AreaCoordinate> getCoverage(AreaCoordinate _center, double heading, std::shared_ptr<DiscretizedArea> _area) const;
+			
 			std::vector<IDS::BaseGeometry::Point2D> getVisibleArcPoints(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
 			//aggiunta
 			//std::vector<Point2D> getVisibleArcPoints(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
@@ -73,10 +73,15 @@ namespace Robotics
 
 			IDS::BaseGeometry::Shape2D getVisibleArea(IDS::BaseGeometry::Point2D const& point) const;
 
-			IDS::BaseGeometry::Arc2D getVisibleArcArea(IDS::BaseGeometry::Line2D const &points, double const &radius, double const &angle) const;
+			std::vector<AreaCoordinate> getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const;
 
-			IDS::BaseGeometry::Shape2D getVisibleNearArea(IDS::BaseGeometry::Point2D const& point) const; //aggiunta
+			IDS::BaseGeometry::Arc2D getVisibleArcArea(IDS::BaseGeometry::Line2D const &points, double const &radius, double const &angle) const;
 			
+			IDS::BaseGeometry::Shape2D getVisibleNearArea(IDS::BaseGeometry::Point2D const& point) const; //aggiunta
+			///////// aggiunta
+			IDS::BaseGeometry::Shape2D getVisibleArea(IDS::BaseGeometry::Point2D const& point, std::shared_ptr<DiscretizedArea> _area) const;
+			///////
+
 
 			double computeCosts() const {return 0.;}
 
@@ -132,6 +137,9 @@ namespace Robotics
 
 			/// is the center of the square visible in that position and that camera?
 			bool visible(std::shared_ptr<Square> _area) const;
+			
+			/////////////////////aggiunta//////////////
+			bool visible(std::shared_ptr<Square> _area, std::shared_ptr<DiscretizedArea> _space) const;
 
 			/// Compute Camera Costs
 			double computeCosts() const;
@@ -139,6 +147,16 @@ namespace Robotics
 			std::vector<AreaCoordinate> getCoverage(std::shared_ptr<DiscretizedArea> _space ) const;
 
 			IDS::BaseGeometry::Shape2D getVisibleArea() const;
+			//////
+			
+			IDS::BaseGeometry::Shape2D getVisibleArea(std::shared_ptr<DiscretizedArea> _space);
+			std::vector<IDS::BaseGeometry::Point2D> getVisibleArcPointsnull(std::shared_ptr<DiscretizedArea> _space, std::shared_ptr<DiscretizedArea> _area);
+
+			////
+			std::vector<IDS::BaseGeometry::Point2D> getVisibleArcPoints();
+			
+
+			std::vector<IDS::BaseGeometry::Point2D> getVisibleArcPointsnull();
 
 			bool operator==(AgentPosition const& other) const;
 			bool operator!=(AgentPosition const& other) const;

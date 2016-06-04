@@ -185,7 +185,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       </Command>
     </PreBuildEvent>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\Coverage\;..\SDK\;..\SDK\IDSBaseMath\;..\SDK\IDSCGUtility\;..\SDK\Stxxl\Include\;..\SDK\Boost\;..\SDK\Log4cxx\;..\SDK\lemon-1.3\build\;..\SDK\lemon-1.3\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\Coverage\;..\SDK;..\SDK\IDSBaseMath\;..\SDK\IDSCGUtility\;..\SDK\Stxxl\Include\;..\SDK\Boost\;..\SDK\Log4cxx\;..\SDK\lemon-1.3\build\;..\SDK\lemon-1.3\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>

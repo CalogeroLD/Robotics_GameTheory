@@ -19,7 +19,7 @@
 #include <fstream>
 #include <iostream>
 
-//#define _PRINT
+#define _PRINT
 using namespace std;
 using namespace Robotics;
 using namespace Robotics::GameTheory;
@@ -198,8 +198,6 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 		rapidjson::Value& height = Area["height"];
 		double length_value, height_value;
 
-
-
 		// takes it as double
 		if (length.IsDouble())
 		length_value = length.GetDouble();
@@ -230,6 +228,8 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	coord_shipCol = ship_coord.GetArray()[0].GetInt();
 	coord_shipRow = ship_coord.GetArray()[1].GetInt();
 
+	std::cout << "ship_coord : " << coord_shipCol << "," << coord_shipRow << std::endl;
+
 	std::vector<AreaCoordinate> pointCoveredByShip;
 	AreaCoordinate point;
 
@@ -254,7 +254,7 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 			//std::vector<AreaCoordinate>::iterator it;
 			//it = find(pointCoveredByShip.begin(), pointCoveredByShip.end(), point);
 			//if(it == pointCoveredByShip.end()) // non lo trova
-				l_row.push_back(true);
+				l_row.push_back(false);
 			//else
 				//l_row.push_back(false);
 		}
@@ -306,9 +306,10 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	l_ypos = 0.;
 	l_firstrow = true;
 	irow = 0;
+
 	// messo da me
-	m_numCol = l_numcol;
-	m_numRow = l_numrow;
+	//m_numCol = l_numcol;
+	//m_numRow = l_numrow;
 
 	m_listGraph = std::make_shared<lemon::ListGraph>();
 	m_listGraph->reserveNode(m_numCol*m_numRow);
@@ -355,9 +356,9 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	m_graph = std::make_shared< lemon::Bfs<lemon::ListGraph> >(*m_listGraph.get());
 }
 
-
+// c'era
 ////////////////////////////////////////////////////////////////////////// da FILE
-DiscretizedArea::DiscretizedArea(std::string const& _filename) 
+/*DiscretizedArea::DiscretizedArea(std::string const& _filename) 
 	: m_graph(nullptr)
 	, m_listGraph(nullptr)
 	, m_numberOfValidSquare(-1)
@@ -524,7 +525,7 @@ DiscretizedArea::DiscretizedArea(std::string const& _filename)
 
 	addEdges();
 	m_graph = std::make_shared< lemon::Bfs<lemon::ListGraph> >(*m_listGraph.get());
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 DiscretizedArea::DiscretizedArea(std::shared_ptr<StructuredArea> _area) 
@@ -549,6 +550,7 @@ DiscretizedArea::DiscretizedArea(std::shared_ptr<StructuredArea> _area)
 	m_listGraph = std::make_shared<lemon::ListGraph>();
 	m_listGraph->reserveNode(DISCRETIZATION_COL*DISCRETIZATION_ROW);
 	m_listGraph->reserveEdge( (DISCRETIZATION_COL-1)*(DISCRETIZATION_ROW-1)*4 );
+
 
 	double l_xpos = 0.;
 	double l_ypos = 0.;
@@ -762,8 +764,16 @@ BaseGeometry::Point2D DiscretizedArea::getCoordinatePoint2D(AreaCoordinate const
 {
 	double l_xdist = point.col * m_xStep;
 	double l_ydist = point.row * m_yStep;
-
-	Point2D point2D = makePoint(IDSReal2D(l_xdist, l_ydist), BaseGeometry::EllMetric);
+	Point2D point2D;
+	try
+	{
+		point2D = makePoint(IDSReal2D(l_xdist, l_ydist), point2D.isEllipsoidic() ? BaseGeometry::EllMetric : BaseGeometry::EucMetric);
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		system("pause");
+	}
 
 	return point2D;
 }
@@ -1052,7 +1062,7 @@ void DiscretizedArea::setThiefPosition(AgentPosition const& _pos)
 			if(col < 0 || col >= m_numCol)
 				continue;
 
-			if(i == 0 && j == 0)
+			if(i == 0 && j == 0) // per evitarli al den
 				continue;
 
 			double l_value = g_maxValue/ double( abs(i)+abs(j) );
