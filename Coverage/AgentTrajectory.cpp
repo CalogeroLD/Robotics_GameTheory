@@ -156,17 +156,6 @@ bool AgentPosition::visible(std::shared_ptr<Square> _area) const
 		return false;
 }
 
-////////////aggiunta/////////////
-//bool AgentPosition::visible(std::shared_ptr<Square> _area, std::shared_ptr<DiscretizedArea> _space) const
-//{
-//	Shape2D sh = this->m_camera.getVisibleArea(m_point, _space);
-//	//Shape2D sh = m_camera.getVisibleArea(m_point);
-//	if (sh.isValid())
-//		return sh.contains(_area->getBoundingBox().center());
-//	else
-//		return false;
-//}
-
 //////////////////////////////////////////////////////////////////////////
 double AgentPosition::computeCosts() const
 {
@@ -225,21 +214,12 @@ void printArray(std::vector<AreaCoordinate> v, int c_row, int c_col) {
 	std::cout << "size : " << v.size() << endl;
 }
 
-double modulo2pi(double angle) {
-
-	if (angle < 0)	return angle = angle + IDSMath::TwoPi;
-	if (angle > IDSMath::TwoPi)	 return angle = angle - IDSMath::TwoPi;
-	if (angle >= 0 && angle <= IDSMath::TwoPi)	return angle;
-
-}
-
 
 ///////////////////////////////////////////////////////////////////////
 std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, std::shared_ptr<DiscretizedArea> _area) const
 {
 	Point2D l_pt = _area->getPosition(_center);
 	Shape2D l_sensorArea = this->getVisibleArea(l_pt);
-	Shape2D l_sensorNearArea = this->getVisibleNearArea(l_pt);
 
 	if (!l_sensorArea.isValid())
 		return std::vector<AreaCoordinate>();
@@ -247,9 +227,11 @@ std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, 
 	int l_rowDelta = int(floor(m_farRadius / _area->getYStep())) + 1;
 	int l_colDelta = int(floor(m_farRadius / _area->getXStep())) + 1;
 
-	std::cout << "l_rowDelta :" << l_rowDelta << endl;
+	/*std::cout << "l_rowDelta :" << l_rowDelta << endl;
 	std::cout << "l_colDelta :" << l_colDelta << endl;
 	std::cout << "heading :" << m_orientation << endl;
+	std::cout << "farRadius :" << m_farRadius << endl;
+	std::cout << "nearRadius :" << m_nearRadius << endl;*/
 
 	std::vector<AreaCoordinate> result;
 	AreaCoordinate l_elem;
@@ -269,7 +251,7 @@ std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, 
 				continue;
 
 			Point2D l_center = l_square->getBoundingBox().center();
-			if (l_sensorArea.contains(l_center))// && !(l_sensorNearArea.contains(l_center)) )
+			if (l_sensorArea.contains(l_center) )
 			{
 				l_elem.row = row;
 				l_elem.col = col;
@@ -277,12 +259,16 @@ std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, 
 			}
 		}
 	}
-	//printArray(result, _center.row, _center.col);
-	//return result;
+
+	if (result.size() == 0) {
+		result.push_back(_center);
+	}
+//	printArray(result, _center.row, _center.col);
+	return result;
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
-BaseGeometry::Shape2D CameraPosition::getVisibleNearArea(BaseGeometry::Point2D const& point) const
+/*BaseGeometry::Shape2D CameraPosition::getVisibleNearArea(BaseGeometry::Point2D const& point) const
 try
 {
 	std::exception e;
@@ -297,7 +283,7 @@ try
 catch (...)
 {
 	return Shape2D();
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 BaseGeometry::Shape2D CameraPosition::getVisibleArea(BaseGeometry::Point2D const& point) const
@@ -344,7 +330,7 @@ catch (...)
 }
 
 //////////////////////////////////////////////////////////////////////////
-BaseGeometry::Shape2D CameraPosition::getVisibleArea(BaseGeometry::Point2D const& point, std::shared_ptr<DiscretizedArea> _area) const
+/*BaseGeometry::Shape2D CameraPosition::getVisibleArea(BaseGeometry::Point2D const& point, std::shared_ptr<DiscretizedArea> _area) const
 	try
 {
 	std::exception e;
@@ -383,7 +369,7 @@ BaseGeometry::Shape2D CameraPosition::getVisibleArea(BaseGeometry::Point2D const
 catch (...)
 {
 	return Shape2D();
-}
+}*/
 
 
 

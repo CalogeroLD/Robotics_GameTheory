@@ -260,7 +260,7 @@ std::set<std::shared_ptr<Square> > Guard::getVisibleSquares( std::shared_ptr<Dis
 {
 	std::set<std::shared_ptr<Square> > result;
 	std::vector<AreaCoordinate> l_coord = m_currentPosition.getCoverage(_space);
-	std::cout << l_coord.size() << std::endl;
+
 	for(size_t i = 0; i < l_coord.size(); ++i)
 	{
 		result.insert(_space->getSquare(l_coord[i]));

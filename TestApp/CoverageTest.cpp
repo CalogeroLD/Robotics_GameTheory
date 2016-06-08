@@ -22,6 +22,11 @@
 #include <time.h>
 #include <map>
 
+#include<rapidjson\document.h>
+#include<rapidjson\filereadstream.h>
+
+
+
 using namespace std;
 
 double const PI = 3.1415926536;
@@ -56,16 +61,58 @@ CoverageTest::CoverageTest(const vector<Point2D>& bound, bool counterclockwise)
 {
 	std::shared_ptr<Area> l_space = std::make_shared<StructuredArea>(bound);
 
+	std::string conf_file = "Scenario_5G_1T_multiAgent.json";
+	FILE * cf = fopen(conf_file.c_str(), "r");
+	char readBuffer[65536];
+	rapidjson::FileReadStream is(cf, readBuffer, sizeof(readBuffer));
+	rapidjson::Document document;
+	document.ParseStream(is);	
+	
+	if (!document.IsObject()) {
+		std::cout << "ERR: error during the parsing of configuration file" << std::endl;
+		exit(1);
+	}
+
+	// Agents
+	rapidjson::Value& Agents = document["Agents"];
+
+	if (!(Agents.HasMember("coord")))
+		cout << "ERR: Nautral Agents has not coord" << endl;
+	// check
+	if (!(Agents.HasMember("sensors")))
+		cout << "ERR: sensors field of Agents hasn't been decleared" << endl;
+
+	rapidjson::Value& Agents_coord = Agents["coord"];
+	rapidjson::Value& Agents_sensors = Agents["sensors"];
+
 	std::set< std::shared_ptr<Agent> >l_agents; 
 	int l_id = -1;
-	for(int i = 0; i < g_numberOfAgents; ++i)
+	
+	for (int i = 0; i < Agents_coord.Size(); i++)
+	{
+		++l_id;
+		double x = Agents_coord[i].GetArray()[0].GetDouble();
+		double y = Agents_coord[i].GetArray()[1].GetDouble();
+		double heading = Agents_coord[i].GetArray()[2].GetDouble();
+		double farRadius = Agents_sensors[i].GetArray()[0].GetDouble();
+		double nearRadius = Agents_sensors[i].GetArray()[1].GetDouble();
+		double orientation = Agents_sensors[i].GetArray()[2].GetDouble();
+		double fov = Agents_sensors[i].GetArray()[3].GetDouble();
+		AgentPosition l_pos(makePoint(IDSReal2D(x, y), EucMetric), heading, CameraPosition(farRadius, nearRadius, orientation, fov));
+
+		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, g_agentsPeriod, g_pareto ? 1 : 2);
+		l_agents.insert(l_agents);
+		Sleep(1000);
+	}
+	
+	/*for(int i = 0; i < g_numberOfAgents; ++i)
 	{
 		++l_id;
 		AgentPosition l_pos( l_space->randomPosition(), l_space->randomAngle(), CameraPosition( l_space->getDistance()/7. ) );
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, g_agentsPeriod, g_pareto?1:2);
 		l_agents.insert(l_agent);
 		Sleep(1000);
-	}
+	}*/
 
 	m_algorithm = std::make_shared<CoverageAlgorithm>(l_agents, l_space, g_correlated? 3 : g_pareto? 2: g_DISL? 0 : 1);
 }

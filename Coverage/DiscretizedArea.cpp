@@ -242,8 +242,8 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 		}
 
 	}
-	l_numcol = cols.GetInt(); //step x
-	l_numrow = rows.GetInt(); //step y
+	l_numcol = cols.GetInt()+1; //step x
+	l_numrow = rows.GetInt()+1; //step y
 	std::vector<bool> l_row;
 
 	for (size_t i = 0; i < l_numrow; i++)
@@ -254,7 +254,7 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 			//std::vector<AreaCoordinate>::iterator it;
 			//it = find(pointCoveredByShip.begin(), pointCoveredByShip.end(), point);
 			//if(it == pointCoveredByShip.end()) // non lo trova
-				l_row.push_back(false);
+				l_row.push_back(true);
 			//else
 				//l_row.push_back(false);
 		}
@@ -676,55 +676,6 @@ DiscretizedArea::DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, st
 	m_graph = std::make_shared< lemon::Bfs<lemon::ListGraph> >(*m_listGraph.get());
 }
 
-//aggiunta
-/*double DiscretizedArea::updateHeading(std::shared_ptr<DiscretizedArea> _space, AgentPosition _LastAgentPos, AgentPosition _CurrentAgentPos) {
-
-	double orientation;
-	Point2D p_last = _LastAgentPos.getPoint2D();
-	Point2D p_current = _CurrentAgentPos.getPoint2D();
-
-	AreaCoordinate last = _space->getCoordinate(p_last);
-	AreaCoordinate current = _space->getCoordinate(p_current);
-
-	if (current.row == last.row)
-	{
-		if (current.col == last.col + 1) orientation = IDSMath::Pi/2; //90
-		if (current.col == last.col - 1) orientation = IDSMath::Pi*1.5; //270
-	}
-	if (current.col == last.col)
-	{
-		if (current.row == last.row + 1) orientation = 0.0; //0
-		if (current.row == last.row - 1) orientation = IDSMath::Pi; //180
-	}
-	if (current.row == last.row + 1)
-	{
-		if (current.col == last.col + 1) orientation = IDSMath::Pi/4; //45
-		if (current.col == last.col - 1) orientation = 7*(IDSMath::Pi/4); //315
-	}
-	if (current.row == last.row - 1)
-	{
-		if (current.col == last.col + 1) orientation = 3*(IDSMath::Pi/4); //135
-		if (current.col == last.col - 1) orientation = 5*(IDSMath::Pi/4); //225
-	}
-	if (current.row == last.row && current.col == last.col) {
-		orientation = _LastAgentPos.getCamera().getOrientation(); // the same orientation
-	}
-	// set heading
-	_CurrentAgentPos.getCamera().setOrientation(orientation);
-	return orientation;*/
-
-
-	/*
-	//AgentPosition LastAgentPos = m_memory.m_elems.back().getLastPosition();
-	Line2D line = _LastAgentPos.getPoint2D().lineTo(_CurrentAgentPos.getPoint2D()); //m_point.lineTo(m_currentPosition.m_point);
-	double orientation = line.azimuth();
-	_CurrentAgentPos.getCamera().setOrientation(orientation);
-
-	return orientation;
-	// La mia attuale orientazione che va a definire il mio get Coverage	
-	//m_currentPosition.m_camera.setOrientation(orientation); // orientation is setted as the value of azimuth of the line that links two last points
-	
-}*/
 
 //////////////////////////////////////////////////////////////////////////
 AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
@@ -819,69 +770,132 @@ double Mod2Pi(double angle) {
 	if (angle < 0)	return angle += IDSMath::TwoPi;
 	if (angle > IDSMath::TwoPi)	return angle -= IDSMath::TwoPi;
 	if (angle >= 0 && angle <= IDSMath::TwoPi)	return angle;
+	else std::cout << "values out of range" <<std::endl;
 }
 
 std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
+{
+	std::vector<AreaCoordinate> adiacent; // all adiacent AreaCoordinate
+	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
+	adiacent = this->getActions(_current);
+	//std::cout << _current.heading << std::endl;
+	
+	result = adiacent;
+	return result;
+
+}
+
+
+std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _current) const
 {
 	// in this function all adiacent square are selected and pushed in result
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
 	//std::vector<AreaCoordinate> selected; // based on heading
 
-	if (_current.row != DISCRETIZATION_ROW)
+	if (_current.row != DISCRETIZATION_ROW && _current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv4)
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL)
+	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL && _current.heading == 0.0 && _current.heading == IDSMath::PiDiv2)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, IDSMath::PiDiv4); //B: head 45
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.col != DISCRETIZATION_COL) // check for upper limit for col becouse it is gonna be changed
+	if (_current.col != DISCRETIZATION_COL && _current.heading == IDSMath::PiDiv4 && _current.heading == 3 * IDSMath::PiDiv4) // check for upper limit for col becouse it is gonna be changed
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row, IDSMath::PiDiv2); //C: head 90
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != 0 && _current.col != DISCRETIZATION_COL)
+	if (_current.row != 0 && _current.col != DISCRETIZATION_COL && _current.heading == IDSMath::PiDiv2 && _current.heading == IDSMath::Pi)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row - 1, 3 * IDSMath::PiDiv4); //D: head 135
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != 0)
+	if (_current.row != 0 && _current.heading == 3 * IDSMath::PiDiv4 && _current.heading == 5 * IDSMath::PiDiv4)
 	{
-		AreaCoordinate pos(_current.col, _current.row - 1, IDSMath::Pi); //E: head 180
+		AreaCoordinate pos(_current.col, _current.row - 1, IDSMath::Pi && _current.heading == IDSMath::PiDiv4); //E: head 180
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != 0 && _current.col != 0)
+	if (_current.row != 0 && _current.col != 0 && _current.heading == 3 * IDSMath::PiDiv2 && _current.heading == IDSMath::Pi)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row - 1, 5 * IDSMath::PiDiv4); //F:head 225
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.col != 0) // check for lower limit of col becouse col is gonna be incremented
+	if (_current.col != 0 && _current.heading == 5 * IDSMath::PiDiv4 && _current.heading == 7 * IDSMath::PiDiv4) // check for lower limit of col becouse col is gonna be incremented
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row, 3 * IDSMath::PiDiv2); //G: head 270
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
 			result.push_back(pos);
 	}
-	if (_current.row != DISCRETIZATION_ROW && _current.col != 0)
+	if (_current.row != DISCRETIZATION_ROW && _current.col != 0 && _current.heading == 3 * IDSMath::PiDiv2 && _current.heading == 0.0)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, 7 * IDSMath::PiDiv4); //H: head 315
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
+	/////////////////////////
+	if (_current.col == DISCRETIZATION_COL && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // lato destro
+	{
+		//if (_current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2 || _current.heading == 3 * IDSMath::PiDiv4)
+		//{
+			{
+				AreaCoordinate pos(_current.col - 1, _current.row, Mod2Pi(_current.heading + IDSMath::Pi) ); // va indietro verso il centro
+				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+					result.push_back(pos);
+			}
+		//}
+	}
+	if (_current.row == DISCRETIZATION_ROW && (_current.col < DISCRETIZATION_COL && _current.col > 0)) // lato sup
+	{
+		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 0.0 || _current.heading == IDSMath::PiDiv4)
+		//{
+			{
+				AreaCoordinate pos(_current.col, _current.row - 1, Mod2Pi(_current.heading + IDSMath::Pi) ); // va sotto verso il centro
+				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+					result.push_back(pos);
+			}
+		//}
+	}
+	if (_current.col == 0 && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // lato sinistro
+	{
+		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 5 * IDSMath::PiDiv4)
+		//{
+			{
+				AreaCoordinate pos(_current.col + 1, _current.row, Mod2Pi(_current.heading + IDSMath::Pi) ); // va indietro verso il centro
+				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+					result.push_back(pos);
+			}
+		//}
+	}
+	if (_current.col == 0 && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // down
+	{
+		//if (_current.heading == 5 * IDSMath::PiDiv4 || _current.heading == IDSMath::Pi || _current.heading == 3 * IDSMath::PiDiv4)
+		//{
+			{
+				AreaCoordinate pos(_current.col, _current.row + 1, Mod2Pi(_current.heading + IDSMath::Pi) ); // va indietro verso il centro
+				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+					result.push_back(pos);
+			}
+		///}
+	}
 	// Adds kinematics constraints based on heading of robots
-	//result = this->addKinematicsContraints(_current, result);
+	//this->addKinematicsContraints(_current, result);
 	return result;
 }
 	
-std::vector<AreaCoordinate> DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const
+
+
+void DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const
 {
+	/*std::cout << "col: " << m_numCol << std::endl;
+	std::cout << "row : " << m_numRow << std::endl;*/
 	std::vector<AreaCoordinate> selected;
 	bool bound = _current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL || _current.row == 0 || _current.col == 0;
 	bool upCorners = (_current.row == DISCRETIZATION_ROW && (_current.col == DISCRETIZATION_COL || _current.col == 0) );
@@ -889,7 +903,7 @@ std::vector<AreaCoordinate> DiscretizedArea::addKinematicsContraints(AreaCoordin
 
 	bool corners = upCorners || lowCorners;
 
-	if (bound)
+	if (bound) // se sono nel bordo ho 2 possibilità
 	{
 		//corners
 		if (corners)
@@ -901,16 +915,18 @@ std::vector<AreaCoordinate> DiscretizedArea::addKinematicsContraints(AreaCoordin
 		//bordi tranne corners
 		if (!corners)
 		{
-			AreaCoordinate pos_south(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::Pi)); //H: head 180
-			selected.push_back(pos_south);
-			AreaCoordinate pos_southEast(_current.col, _current.row, Mod2Pi(_current.heading + 3 * IDSMath::PiDiv4)); //H: head 135
+			// posso solo ruotare
+			/*AreaCoordinate pos_south(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::Pi)); //H: head 180
+			selected.push_back(pos_south);*/
+			AreaCoordinate pos_southEast(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4)); //H: head 135
 			selected.push_back(pos_southEast);
-			AreaCoordinate pos_southWeast(_current.col, _current.row, Mod2Pi(_current.heading - 3 * IDSMath::PiDiv4)); //H: head 225
+			AreaCoordinate pos_southWeast(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4)); //H: head 225
 			selected.push_back(pos_southWeast);
-			AreaCoordinate pos_left(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2)); //H: head 225
+			/*AreaCoordinate pos_left(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2)); //H: head 225
 			selected.push_back(pos_left);
 			AreaCoordinate pos_right(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv2)); //H: head 225
-			selected.push_back(pos_right);
+			selected.push_back(pos_right);*/
+
 		}
 	}
 
@@ -972,7 +988,6 @@ std::vector<AreaCoordinate> DiscretizedArea::addKinematicsContraints(AreaCoordin
 		std::cout << "non ho trovato nessuna feasible action" << std::endl;
 	}*/
 	
-	return selected;
 }
 
 //////////////////////////////////////////////////////////////////////////
