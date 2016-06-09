@@ -777,12 +777,9 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 {
 	std::vector<AreaCoordinate> adiacent; // all adiacent AreaCoordinate
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
-	adiacent = this->getActions(_current);
-	//std::cout << _current.heading << std::endl;
-	
-	result = adiacent;
+	result = this->getActions(_current);
+	std::cout << result.size() << std::endl;
 	return result;
-
 }
 
 
@@ -791,27 +788,30 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 	// in this function all adiacent square are selected and pushed in result
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
 	//std::vector<AreaCoordinate> selected; // based on heading
+	int N_col = m_numCol;
+	int N_row = m_numRow;
+	std::cout << _current.col << _current.row << std::endl; 
 
-	if (_current.row != DISCRETIZATION_ROW && (_current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv4) )
+	std::cout << "col: " << m_numCol << "row: " << m_numRow << std::endl;
+	if (_current.row != m_numRow && (_current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
-			std::cout << "getSquare" << this->getSquare(pos) << " isValid " << this->getSquare(pos)->isValid() << std::endl;
 			result.push_back(pos);
 	}
-	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL && (_current.heading == 0.0 || _current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2) )
+	if (_current.row != m_numRow && _current.col != m_numCol && (_current.heading == 0.0 || _current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2) )
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, IDSMath::PiDiv4); //B: head 45
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.col != DISCRETIZATION_COL && (_current.heading == IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv4 || _current.heading==IDSMath::PiDiv2) ) // check for upper limit for col becouse it is gonna be changed
+	if (_current.col != m_numCol && (_current.heading == IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv4 || _current.heading==IDSMath::PiDiv2) ) // check for upper limit for col becouse it is gonna be changed
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row, IDSMath::PiDiv2); //C: head 90
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != 0 && _current.col != DISCRETIZATION_COL && (_current.heading == IDSMath::PiDiv2 || _current.heading == IDSMath::Pi || _current.heading == 3*IDSMath::PiDiv4) )
+	if (_current.row != 0 && _current.col != m_numCol && (_current.heading == IDSMath::PiDiv2 || _current.heading == IDSMath::Pi || _current.heading == 3*IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row - 1, 3 * IDSMath::PiDiv4); //D: head 135
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
@@ -835,14 +835,14 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
 			result.push_back(pos);
 	}
-	if (_current.row != DISCRETIZATION_ROW && _current.col != 0 && (_current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4) )
+	if (_current.row != m_numRow && _current.col != 0 && (_current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, 7 * IDSMath::PiDiv4); //H: head 315
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	/////////////////////////
-	if (_current.col == DISCRETIZATION_COL && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // lato destro
+	if (_current.col == m_numCol && (_current.row < m_numRow && _current.row > 0)) // lato destro
 	{
 		//if (_current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2 || _current.heading == 3 * IDSMath::PiDiv4)
 		//{
@@ -854,7 +854,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 			}
 		//}
 	}
-	if (_current.row == DISCRETIZATION_ROW && (_current.col < DISCRETIZATION_COL && _current.col > 0)) // lato sup
+	if (_current.row == m_numRow && (_current.col < m_numCol && _current.col > 0)) // lato sup
 	{
 		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 0.0 || _current.heading == IDSMath::PiDiv4)
 		//{
@@ -866,7 +866,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 			}
 		//}
 	}
-	if (_current.col == 0 && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // lato sinistro
+	if (_current.col == 0 && (_current.row < m_numRow && _current.row > 0)) // lato sinistro
 	{
 		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 5 * IDSMath::PiDiv4)
 		//{
@@ -878,7 +878,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 			}
 		//}
 	}
-	if (_current.row == 0 && (_current.col < DISCRETIZATION_COL && _current.col > 0)) // down
+	if (_current.row == 0 && (_current.col < m_numCol && _current.col > 0)) // down
 	{
 		//if (_current.heading == 5 * IDSMath::PiDiv4 || _current.heading == IDSMath::Pi || _current.heading == 3 * IDSMath::PiDiv4)
 		//{
@@ -902,9 +902,9 @@ void DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vect
 	/*std::cout << "col: " << m_numCol << std::endl;
 	std::cout << "row : " << m_numRow << std::endl;*/
 	std::vector<AreaCoordinate> selected;
-	bool bound = _current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL || _current.row == 0 || _current.col == 0;
-	bool upCorners = (_current.row == DISCRETIZATION_ROW && (_current.col == DISCRETIZATION_COL || _current.col == 0) );
-	bool lowCorners = (_current.row == 0 && (_current.col == DISCRETIZATION_COL || _current.col == 0));
+	bool bound = _current.row == m_numRow || _current.col == m_numCol || _current.row == 0 || _current.col == 0;
+	bool upCorners = (_current.row == m_numRow && (_current.col == m_numCol || _current.col == 0) );
+	bool lowCorners = (_current.row == 0 && (_current.col == m_numCol || _current.col == 0));
 
 	bool corners = upCorners || lowCorners;
 
@@ -969,7 +969,7 @@ void DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vect
 				selected.push_back(result.at(i));
 			}
 		}*/
-		/*if (_current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL)
+		/*if (_current.row == m_numRow || _current.col == m_numCol)
 		{
 			std::cout << "bye bye" << std::endl;
 			//abort();
