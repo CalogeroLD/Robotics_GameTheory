@@ -91,7 +91,7 @@ IDS::BaseGeometry::Point2D StructuredArea::randomPosition() const
 	Line2D l_xlineTop = l_topLeft.lineTo(l_topRight);
 
 	Point2D l_bottom = l_xlineBottom.pointFromOrigin(l_xstep * double(xSecret));
-	Point2D l_top = l_xlineTop.pointFromOrigin(l_xstep * double(xSecret));
+	Point2D l_top = l_xlineTop.pointFromOrigin(floor(l_xstep * double(xSecret) ) );
 
 	Line2D l_yline = l_bottom.lineTo(l_top);
 	l_point = l_yline.pointFromOrigin(l_ystep * double(ySecret));

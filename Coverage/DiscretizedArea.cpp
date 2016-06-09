@@ -796,6 +796,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			std::cout << "getSquare" << this->getSquare(pos) << " isValid " << this->getSquare(pos)->isValid() << std::endl;
 			result.push_back(pos);
 	}
 	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL && (_current.heading == 0.0 || _current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2) )
@@ -887,7 +888,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 					result.push_back(pos);
 			}
-		///}
+		//}
 	}
 	// Adds kinematics constraints based on heading of robots
 	//this->addKinematicsContraints(_current, result);
