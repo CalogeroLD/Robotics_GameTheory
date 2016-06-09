@@ -100,7 +100,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>libs;..\Coverage\Bin\$(Configuration);include</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>libs;..\Coverage\Bin\$(Configuration);include;..\SDK</AdditionalLibraryDirectories>
       <AdditionalDependencies>Coverage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>

@@ -85,10 +85,12 @@ CoverageTest::CoverageTest(const vector<Point2D>& bound, bool counterclockwise)
 	rapidjson::Value& Agents_coord = Agents["coord"];
 	rapidjson::Value& Agents_sensors = Agents["sensors"];
 
+	std::cout << "agenti " << Agents_coord.Size() << std::endl;
+ 
 	std::set< std::shared_ptr<Agent> >l_agents; 
 	int l_id = -1;
 	
-	for (int i = 0; i < Agents_coord.Size(); i++)
+	/*for (int i = 0; i < Agents_coord.Size(); i++)
 	{
 		++l_id;
 		double x = Agents_coord[i].GetArray()[0].GetDouble();
@@ -103,16 +105,26 @@ CoverageTest::CoverageTest(const vector<Point2D>& bound, bool counterclockwise)
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, g_agentsPeriod, g_pareto ? 1 : 2);
 		l_agents.insert(l_agents);
 		Sleep(1000);
-	}
-	
-	/*for(int i = 0; i < g_numberOfAgents; ++i)
+	}*/
+
+
+	for(int i = 0; i < g_numberOfAgents; ++i)
 	{
+	
+		double x = Agents_coord[i].GetArray()[0].GetDouble();
+		double y = Agents_coord[i].GetArray()[1].GetDouble();
+
+		double farRadius = Agents_sensors[i].GetArray()[0].GetDouble();
+		double nearRadius = Agents_sensors[i].GetArray()[1].GetDouble();
+		double orientation = Agents_sensors[i].GetArray()[2].GetDouble();
+		double fov = Agents_sensors[i].GetArray()[3].GetDouble();
+
 		++l_id;
-		AgentPosition l_pos( l_space->randomPosition(), l_space->randomAngle(), CameraPosition( l_space->getDistance()/7. ) );
+		AgentPosition l_pos(l_space->randomPosition(), 3.14/2, CameraPosition(farRadius, nearRadius, orientation, fov ) );
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, l_id, l_pos, g_agentsPeriod, g_pareto?1:2);
 		l_agents.insert(l_agent);
 		Sleep(1000);
-	}*/
+	}
 
 	m_algorithm = std::make_shared<CoverageAlgorithm>(l_agents, l_space, g_correlated? 3 : g_pareto? 2: g_DISL? 0 : 1);
 }
