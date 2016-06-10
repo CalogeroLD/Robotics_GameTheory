@@ -199,10 +199,15 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 		double length_value, height_value;
 
 		// takes it as double
-		if (length.IsDouble())
-		length_value = length.GetDouble();
-		if(height.IsDouble())
-		height_value = height.GetDouble();
+		if (!length.IsDouble())
+			cout << "Err: length is not a double" << endl;
+		else
+			length_value = length.GetDouble();
+
+		if (!height.IsDouble())
+			cout << "Err height is not a double" << endl;
+		else
+			height_value = height.GetDouble();
 
 		l_bottomLeft = makePoint(IDSReal2D(0, 0), EucMetric);
 		l_topLeft = makePoint(IDSReal2D(0, height_value), EucMetric);
@@ -218,8 +223,18 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	rapidjson::Value& ship_dimcol = ship["dim_col"]; // int
 	rapidjson::Value& ship_dimrow = ship["dim_row"]; // int
 	
-	int shipDimCol = ship_dimcol.GetInt();
-	int shipDimRow = ship_dimrow.GetInt();
+	int shipDimCol, shipDimRow;
+
+	if (!ship_dimcol.IsInt())
+		cout << "ERR: Ship_dimcol is not int" << endl;
+	else
+		shipDimCol = ship_dimcol.GetInt();
+
+	if (!ship_dimrow.IsInt())
+		cout << "ERR: Ship_dimcol is not int" << endl;
+	else
+		shipDimRow = ship_dimrow.GetInt();
+
 	int coord_shipCol, coord_shipRow;
 	
 	//cout << ship_coord.GetArray()[0].GetInt() << endl;
@@ -230,37 +245,70 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 
 	std::cout << "ship_coord : " << coord_shipCol << "," << coord_shipRow << std::endl;
 
+	// catch the points covered by ship to protect
 	std::vector<AreaCoordinate> pointCoveredByShip;
 	AreaCoordinate point;
 
-	for (int i = coord_shipCol - shipDimCol; i <  coord_shipCol + shipDimCol; i++)
+	for (int i = coord_shipCol - shipDimCol; i <=  coord_shipCol + shipDimCol; i++)
 	{
-		for (int j = coord_shipRow - shipDimRow; j < coord_shipRow + shipDimRow; j++)
+		for (int j = coord_shipRow - shipDimRow; j <= coord_shipRow + shipDimRow; j++)
 		{
 			AreaCoordinate point(j, i);
 			pointCoveredByShip.push_back(point);
 		}
 
 	}
-	l_numcol = cols.GetInt()+1; //step x
-	l_numrow = rows.GetInt()+1; //step y
-	std::vector<bool> l_row;
 
-	for (size_t i = 0; i < l_numrow; i++)
+	// Gets the dimentions of Area
+
+	l_numcol = cols.GetInt(); //step x
+	l_numrow = rows.GetInt(); //step y
+	//std::cout << l_numcol << endl;
+	//std::cout << l_numrow << endl;
+
+	std::vector<bool> l_row;
+	// builds the grid with true if is open sea without obstacles
+	for (int i = 0; i < l_numrow; i++)
 	{
-		for (size_t j = 0; j < l_numcol; j++)
+		for (int j = 0; j < l_numcol; j++)
 		{
-			//AreaCoordinate point(j, i);
-			//std::vector<AreaCoordinate>::iterator it;
-			//it = find(pointCoveredByShip.begin(), pointCoveredByShip.end(), point);
-			//if(it == pointCoveredByShip.end()) // non lo trova
 				l_row.push_back(true);
-			//else
-				//l_row.push_back(false);
 		}
 		l_grid.push_back(l_row);
+		l_row.clear();
+	}
+
+	// fills the subregions covered by ship with false 
+	for (int i = 0; i < l_numcol; i++)
+	{
+		for (int j = 0; j < l_numcol; j++)
+		{
+			for (int k = 0; k < pointCoveredByShip.size(); k++)
+			{
+				if (i == pointCoveredByShip.at(k).col && j == pointCoveredByShip.at(k).row)
+					l_grid.at(i).at(j) = false;
+			}
+		}
 	}
 	
+	// only for visualization of grid points
+	/*for (int i = 0; i < l_numrow; i++)
+	{
+		int c;
+		std::vector<bool> Riga = l_grid.at(i);
+
+		std::cout << "riga: " << i << " " ;
+		for (int j = 0; j < Riga.size(); j++)
+		{
+			if (Riga.at(j) == true)	c = 0;
+			if (Riga.at(j) == false)	c = 1;
+			std::cout << " " << c << " ";
+		}
+		std::cout << " " << endl;
+
+	}
+	std::cout << "dim grid: " << l_grid.size() << "  per   " << l_grid.at(0).size() << endl;*/
+
 	double l_xdist = l_bottomLeft.distance(l_bottomRight);
 	double l_ydist = l_bottomLeft.distance(l_topLeft);
 
@@ -268,8 +316,8 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	m_yStep = l_ydist / double(l_numrow);
 
 #ifdef _PRINT
-	cout << "Col " << l_numcol << endl;
-	cout << "Row " << l_numrow << endl;
+	//cout << "Col " << l_numcol << endl;
+	//cout << "Row " << l_numrow << endl;
 #endif
 
 	double l_xpos = 0.;
@@ -335,6 +383,7 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 
 			int l_col = double(icol) / double(m_numCol) * double(l_grid.back().size());
 			int l_row = double(irow) / double(m_numRow) * double(l_grid.size());
+			//std::cout << l_col << std::endl;
 
 			if (l_col < l_grid.back().size() && l_row < l_grid.size() && l_grid[l_row][l_col])
 				l_square->setValid(true);
@@ -778,7 +827,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	std::vector<AreaCoordinate> adiacent; // all adiacent AreaCoordinate
 	std::vector<AreaCoordinate> result; // all adjacent AreaCoordinate
 	result = this->getActions(_current);
-	std::cout << result.size() << std::endl;
+	//std::cout << result.size() << std::endl;
 	return result;
 }
 
@@ -790,9 +839,6 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 	//std::vector<AreaCoordinate> selected; // based on heading
 	int N_col = m_numCol;
 	int N_row = m_numRow;
-	std::cout << _current.col << _current.row << std::endl; 
-
-	std::cout << "col: " << m_numCol << "row: " << m_numRow << std::endl;
 	if (_current.row != m_numRow && (_current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0

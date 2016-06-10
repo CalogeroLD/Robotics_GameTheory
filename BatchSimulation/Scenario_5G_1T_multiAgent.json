@@ -12,7 +12,7 @@
     "cols": 30,
     "rows": 30,
     "ship": {
-      "coord": [ 15, 15 ],
+      "coord": [ 5, 15 ],
       "dim_col": 2,
       "dim_row": 2
     }
