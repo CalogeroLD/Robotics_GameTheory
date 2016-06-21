@@ -132,6 +132,10 @@ namespace Robotics
 		{
 			std::shared_ptr<lemon::Bfs<lemon::ListGraph>> m_graph;
 			std::shared_ptr<lemon::ListGraph> m_listGraph;
+			IDS::BaseGeometry::Point2D l_bottomLeft;
+			IDS::BaseGeometry::Point2D l_bottomRight;
+			IDS::BaseGeometry::Point2D l_topLeft;
+			IDS::BaseGeometry::Point2D l_topRight;
 
 			/// Lattice from bottom left to upper right, per rows.
 			std::vector< SquarePtr > m_lattice;
@@ -170,6 +174,8 @@ namespace Robotics
 
 			/// Get the origin of the lattice.
 			IDS::BaseGeometry::Point2D getOrigin() const;
+			///// Added
+			AreaCoordinate getCoordinate(rapidjson::Value & Area, IDS::BaseGeometry::Point2D const & point) const;
 
 			/// Compute index of row and index of column of the given point.
 			AreaCoordinate getCoordinate( IDS::BaseGeometry::Point2D const& point ) const;

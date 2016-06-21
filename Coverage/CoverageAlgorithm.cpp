@@ -803,7 +803,7 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	importThievesFromFile(_Thieves, l_thievesDriver);
 
 	/// Create Coverage Algorithm:
-	std::shared_ptr<DiscretizedArea> l_space = std::make_shared<DiscretizedArea>(Area);// areaFile
+	std::shared_ptr<DiscretizedArea> l_space = std::make_shared<DiscretizedArea>(Area);// areaFile che viene costruita
 	std::set< std::shared_ptr<Agent>> l_agents; 
 
 

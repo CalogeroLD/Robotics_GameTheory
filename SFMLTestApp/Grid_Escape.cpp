@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 		std::string l_AreaFilename = folder + "External.txt";
 		std::string l_AgentFilename = folder + "5G_1T.dat";
 
-		std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage = 
+		/*std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage = 
 			Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
 			l_AreaFilename, 
 			l_AgentFilename, 
@@ -48,7 +48,8 @@ int main(int argc, char* argv[])
 			0, // period
 			0); // epsilon
 		
-		g_configurationFile->createFromAlgorithm(l_coverage);
+
+		g_configurationFile->createFromAlgorithm(l_coverage);*/
 		l_brain = std::make_shared<Viewer>();
 	}
 	

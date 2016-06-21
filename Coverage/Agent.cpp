@@ -88,16 +88,15 @@ void Agent::setStatus(Status stat)
 //////////////////////////////////////////////////////////////////////////
 std::vector<AgentPosition> Agent::getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const
 {
+	//std::cout << m_currentPosition.getPoint2D().coord(0) << " " << m_currentPosition.getPoint2D().coord(1) << endl;
+
 	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() ); // prende punto camera
 	// aggiunto
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord); // prende 8 punti adiacenti ABCDEFG
 	
 	std::vector<AgentPosition> l_result;
-	
 	for( size_t i = 0; i < l_squares.size(); ++i)
 	{
-		// AgentPosition takes point and cameraPosition and put them in l_result
-		//m_currentPosition.setOrientationCamera(l_squares[i].heading);
 		l_result.push_back( AgentPosition(_space->getPosition(l_squares[i]), l_squares[i].heading, m_currentPosition.m_camera));
 	}
 	return l_result; // return vector of all AgentPosition possible
@@ -113,8 +112,9 @@ AgentPosition Agent::selectRandomFeasibleAction(std::shared_ptr<DiscretizedArea>
 	else
 	{
 		//this->removeBestTrajectoryFromFeasible(l_feasible);
-
+		//cout << "Numero di azioni fattibili: " << l_feasible.size() << endl;
 		int l_value = getRandomValue( int( l_feasible.size() ) ); // ne prende una a caso in posizione l_value
+		//std::cout << "azione scelta " << l_feasible[l_value].getPoint2D().coord(0) << l_feasible[l_value].getPoint2D().coord(1) << std::endl;
 		return l_feasible[l_value];
 	}
 }
@@ -146,6 +146,8 @@ std::shared_ptr<Sink> Agent::toSink()
 //////////////////////////////////////////////////////////////////////////
 void Agent::moveToNextPosition()
 {
-	m_oldPosition = m_currentPosition; // added
+	//m_oldPosition = m_currentPosition; // added
 	m_currentPosition = m_nextPosition;
+	
+	
 }

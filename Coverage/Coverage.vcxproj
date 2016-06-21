@@ -57,13 +57,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\;..\SDK\;..\SDK\IDSBaseMath\;..\SDK\BaseGeometry\;..\SDK\IDSGraphics\;..\SDK\lemon-1.3\build\;..\SDK\lemon-1.3\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SDK\rapidjson;.\;..\;..\SDK\;..\SDK\IDSBaseMath\;..\SDK\BaseGeometry\;..\SDK\IDSGraphics\;..\SDK\lemon-1.3\build\;..\SDK\lemon-1.3\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>COVERAGE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\SDK\IDSBaseMath\Bin\$(Configuration);..\SDK\BaseGeometry\Bin\$(Configuration);..\SDK\Common\Bin\$(Configuration);..\SDK\Log4cxx\Bin\$(Configuration);..\SDK\IDSGraphics\$(Platform)\$(Configuration);..\SDK\lemon-1.3\build\lemon\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\SDK\IDSBaseMath\Bin\$(Configuration);..\SDK\BaseGeometry\Bin\$(Configuration);..\SDK\Common\Bin\$(Configuration);..\SDK\Log4cxx\Bin\$(Configuration);..\SDK\IDSGraphics\$(Platform)\$(Configuration);..\SDK\lemon-1.3\build\lemon\$(Configuration);..\SDK\rapidjson;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>BaseGeometry.lib;Common.lib;IDSlog4cxx.lib;IDSBaseMath.lib;IDSGraphicsC.lib;lemon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

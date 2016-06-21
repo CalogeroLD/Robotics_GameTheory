@@ -11,13 +11,14 @@
 #include "BaseGeometry/MakePoint2D.h"
 #include "BaseGeometry/Box2D.h"
 #include "BaseGeometry/BaseGeometry.h"
-
 #include "BaseGeometry/BaseGeometryTypes.h"
 
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <fstream>
 #include <iostream>
+#include<rapidjson\document.h>
+#include<rapidjson\filereadstream.h>
 
 #define _PRINT
 using namespace std;
@@ -25,6 +26,7 @@ using namespace Robotics;
 using namespace Robotics::GameTheory;
 using namespace IDS;
 using namespace IDS::BaseGeometry;
+
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -185,34 +187,31 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 		, m_numberOfValidSquare(-1)
 		, m_sinkCoordinate(-1, -1)
 {
-	Point2D l_bottomLeft;
-	Point2D	l_bottomRight;
-	Point2D	l_topLeft;
-	Point2D	l_topRight;
 
 	std::vector<std::vector<bool>> l_grid;
 	int l_numcol(1), l_numrow(1);
 
 	// reading length and height from file.json
-		rapidjson::Value& length = Area["length"];
-		rapidjson::Value& height = Area["height"];
-		double length_value, height_value;
+	rapidjson::Value& length = Area["length"];
+	rapidjson::Value& height = Area["height"];
+	double length_value, height_value;
 
-		// takes it as double
-		if (!length.IsDouble())
-			cout << "Err: length is not a double" << endl;
-		else
-			length_value = length.GetDouble();
+	// takes it as double
+	if (!length.IsDouble())
+		cout << "Err: length is not a double" << endl;
+	else
+		length_value = length.GetDouble();
 
-		if (!height.IsDouble())
-			cout << "Err height is not a double" << endl;
-		else
-			height_value = height.GetDouble();
+	if (!height.IsDouble())
+		cout << "Err height is not a double" << endl;
+	else
+		height_value = height.GetDouble();
 
-		l_bottomLeft = makePoint(IDSReal2D(0, 0), EucMetric);
-		l_topLeft = makePoint(IDSReal2D(0, height_value), EucMetric);
-		l_topRight = makePoint(IDSReal2D(length_value, height_value), EucMetric);
-		l_bottomRight = makePoint(IDSReal2D(length_value, 0), EucMetric);
+	// dichiarate nell aclasse DiscretizedArea da C.Li Destri
+	l_bottomLeft = makePoint(IDSReal2D(0, 0), EucMetric);
+	l_topLeft = makePoint(IDSReal2D(0, height_value), EucMetric);
+	l_topRight = makePoint(IDSReal2D(length_value, height_value), EucMetric);
+	l_bottomRight = makePoint(IDSReal2D(length_value, 0), EucMetric);
 
 	// reading the number of row and col we set in the file.json
 	rapidjson::Value& rows = Area["rows"];
@@ -726,30 +725,53 @@ DiscretizedArea::DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, st
 }
 
 
+////////////////////////////////L. Destri//////////////////////////////////////////
+AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point)const
+{
+
+	/*std::cout << "controllo sui punti bottomleft: x " << l_bottomLeft.coord(0) << " y " << l_bottomLeft.coord(1) << std::endl;
+	std::cout << "controllo sui punti topleft: x " << l_topLeft.coord(0) << " y " << l_topLeft.coord(1) << std::endl;
+	std::cout << "controllo sui punti topRight: x " << l_topRight.coord(0) << " y " << l_topRight.coord(1) << std::endl;
+	std::cout << "controllo sui punti bottomRight: x " << l_bottomRight.coord(0) << " y " << l_bottomRight.coord(1) << std::endl;*/
+
+	Line2D l_xLine = l_bottomLeft.lineTo(l_bottomRight); // restituisce le coordinate dei punti
+	Line2D l_yLine = l_bottomLeft.lineTo(l_topLeft);
+
+	Point2D l_prjVertical = l_yLine.projectPoint(point); // restituisce punto proiettato sull'asse y 
+	Point2D l_prjOrizontal = l_xLine.projectPoint(point);// restituisce punto proiettato sull'asse x
+
+	cout << " getCoordinate del punto x =  " << point.coord(0) << "y = " << point.coord(1) << endl;
+	/*cout <<" punto proiettati orizz x : " << l_prjOrizontal.coord(0) << "y : " << l_prjOrizontal.coord(1) << endl;
+	cout << "punto proiettati verti x : " << l_prjVertical.coord(0) << "y : " << l_prjVertical.coord(1) << endl;*/
+
+	/*double l_ydist = l_yLine.parameterAt(l_prjVertical);
+	double l_xdist = l_xLine.parameterAt(l_prjOrizontal);*/
+
+	double l_ydist = point.coord(1); // coord y del punto
+	double l_xdist = point.coord(0); // coord x del punto
+
+	/*std::cout << l_ydist << l_xdist <<endl;
+	std::cout << l_xdist << l_ydist << endl;*/
+
+	std::cout << " AreaCoordinate row = " << int(floor(l_xdist / m_xStep)) << " col = " << int(floor(l_ydist / m_yStep)) << endl;
+
+	AreaCoordinate l_coord(int(floor(l_xdist / m_xStep)), int(floor(l_ydist / m_yStep)));// rispettive coord in AreaCoordinate (row, col)
+
+	return l_coord;
+}
+
 //////////////////////////////////////////////////////////////////////////
-AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
+/*AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
 {
 	Point2D l_bottomLeft = m_lattice[0]->getBoundingBox().minCoord();
 	Point2D l_bottomRight = m_lattice[0]->getBoundingBox().corner(1);
 	Point2D l_topLeft = m_lattice[0]->getBoundingBox().corner(2);
 
-	/*Get the angle between this line and a target line.
-		*
-		*	The angle is positive if the source line(this) must rotate
-		*	in clockwise direction to reach the target line,
-		*negative otherwise.*/
-
 	Line2D l_xLine = l_bottomLeft.lineTo(l_bottomRight); // restituisce le coordinate dei punti
 	Line2D l_yLine = l_bottomLeft.lineTo(l_topLeft);
 
-	//cout << "azimuth: " << l_xLine.azimuth() << "angolo tra" << l_xLine.angleBetween(l_yLine) << endl;
-
 	Point2D l_prjVertical = l_yLine.projectPoint(point); // restituisce punto proiettato sull'asse y 
 	Point2D l_prjOrizontal = l_xLine.projectPoint(point);// restituisce punto proiettato sull'asse x
-
-	/*cout << " punto x: " << point.coord(0) << "y: " << point.coord(1) << endl;
-	cout <<" punto proiettati orizz x : " << l_prjOrizontal.coord(0) << "y : " << l_prjOrizontal.coord(1) << endl;
-	cout << "punto proiettati verti x : " << l_prjVertical.coord(0) << "y : " << l_prjVertical.coord(1) << endl;*/
 
 	double l_ydist = l_yLine.parameterAt(l_prjVertical);
 	double l_xdist = l_xLine.parameterAt(l_prjOrizontal);
@@ -757,7 +779,7 @@ AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point) const
 	AreaCoordinate l_coord(int( floor(l_xdist / m_xStep) ), int( floor(l_ydist / m_yStep) ));// rispettive coord in AreaCoordinate (row, col)
 	
 	return l_coord;
-}
+}*/
 
 
 BaseGeometry::Point2D DiscretizedArea::getCoordinatePoint2D(AreaCoordinate const& point) const
@@ -839,25 +861,27 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 	//std::vector<AreaCoordinate> selected; // based on heading
 	int N_col = m_numCol;
 	int N_row = m_numRow;
-	if (_current.row != m_numRow && (_current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv4) )
+
+
+	if (_current.row != DISCRETIZATION_ROW && (_current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, 0.0); //A: head 0
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != m_numRow && _current.col != m_numCol && (_current.heading == 0.0 || _current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2) )
+	if (_current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL && (_current.heading == 0.0 || _current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2) )
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, IDSMath::PiDiv4); //B: head 45
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.col != m_numCol && (_current.heading == IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv4 || _current.heading==IDSMath::PiDiv2) ) // check for upper limit for col becouse it is gonna be changed
+	if (_current.col != DISCRETIZATION_COL && (_current.heading == IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv4 || _current.heading==IDSMath::PiDiv2) ) // check for upper limit for col becouse it is gonna be changed
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row, IDSMath::PiDiv2); //C: head 90
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
-	if (_current.row != 0 && _current.col != m_numCol && (_current.heading == IDSMath::PiDiv2 || _current.heading == IDSMath::Pi || _current.heading == 3*IDSMath::PiDiv4) )
+	if (_current.row != 0 && _current.col != DISCRETIZATION_COL && (_current.heading == IDSMath::PiDiv2 || _current.heading == IDSMath::Pi || _current.heading == 3*IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row - 1, 3 * IDSMath::PiDiv4); //D: head 135
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
@@ -881,14 +905,14 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) // se esiste ed è valida
 			result.push_back(pos);
 	}
-	if (_current.row != m_numRow && _current.col != 0 && (_current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4) )
+	if (_current.row != DISCRETIZATION_ROW && _current.col != 0 && (_current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 0.0 || _current.heading == 7 * IDSMath::PiDiv4) )
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, 7 * IDSMath::PiDiv4); //H: head 315
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	/////////////////////////
-	if (_current.col == m_numCol && (_current.row < m_numRow && _current.row > 0)) // lato destro
+	if (_current.col == DISCRETIZATION_COL && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // lato destro
 	{
 		//if (_current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2 || _current.heading == 3 * IDSMath::PiDiv4)
 		//{
@@ -900,7 +924,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 			}
 		//}
 	}
-	if (_current.row == m_numRow && (_current.col < m_numCol && _current.col > 0)) // lato sup
+	if (_current.row == DISCRETIZATION_ROW && (_current.col < DISCRETIZATION_COL && _current.col > 0)) // lato sup
 	{
 		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 0.0 || _current.heading == IDSMath::PiDiv4)
 		//{
@@ -912,7 +936,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 			}
 		//}
 	}
-	if (_current.col == 0 && (_current.row < m_numRow && _current.row > 0)) // lato sinistro
+	if (_current.col == 0 && (_current.row < DISCRETIZATION_ROW && _current.row > 0)) // lato sinistro
 	{
 		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 5 * IDSMath::PiDiv4)
 		//{
@@ -924,7 +948,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 			}
 		//}
 	}
-	if (_current.row == 0 && (_current.col < m_numCol && _current.col > 0)) // down
+	if (_current.row == 0 && (_current.col < DISCRETIZATION_COL && _current.col > 0)) // down
 	{
 		//if (_current.heading == 5 * IDSMath::PiDiv4 || _current.heading == IDSMath::Pi || _current.heading == 3 * IDSMath::PiDiv4)
 		//{
@@ -945,12 +969,12 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 
 void DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const
 {
-	/*std::cout << "col: " << m_numCol << std::endl;
-	std::cout << "row : " << m_numRow << std::endl;*/
+	/*std::cout << "col: " << DISCRETIZATION_COL << std::endl;
+	std::cout << "row : " << DISCRETIZATION_ROW << std::endl;*/
 	std::vector<AreaCoordinate> selected;
-	bool bound = _current.row == m_numRow || _current.col == m_numCol || _current.row == 0 || _current.col == 0;
-	bool upCorners = (_current.row == m_numRow && (_current.col == m_numCol || _current.col == 0) );
-	bool lowCorners = (_current.row == 0 && (_current.col == m_numCol || _current.col == 0));
+	bool bound = _current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL || _current.row == 0 || _current.col == 0;
+	bool upCorners = (_current.row == DISCRETIZATION_ROW && (_current.col == DISCRETIZATION_COL || _current.col == 0) );
+	bool lowCorners = (_current.row == 0 && (_current.col == DISCRETIZATION_COL || _current.col == 0));
 
 	bool corners = upCorners || lowCorners;
 
@@ -1015,7 +1039,7 @@ void DiscretizedArea::addKinematicsContraints(AreaCoordinate _current, std::vect
 				selected.push_back(result.at(i));
 			}
 		}*/
-		/*if (_current.row == m_numRow || _current.col == m_numCol)
+		/*if (_current.row == DISCRETIZATION_ROW || _current.col == DISCRETIZATION_COL)
 		{
 			std::cout << "bye bye" << std::endl;
 			//abort();
