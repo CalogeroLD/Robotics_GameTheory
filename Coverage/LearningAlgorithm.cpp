@@ -271,7 +271,29 @@ void LearningAlgorithm::getGuardsPosition(std::vector<AgentPosition> & _pos)
 			_pos.push_back( l_agent->getCurrentPosition() );
 		}
 	}
+	
 }
+
+std::vector<v_pos> LearningAlgorithm::getGuardsPosition1()
+{
+	v_pos vettore;
+	std::vector<v_pos> _pos;
+	_pos.clear();
+	_pos.reserve(m_guards.size());
+	for (set<GuardPtr>::iterator it = m_guards.begin(); it != m_guards.end(); ++it)
+	{
+		GuardPtr l_agent = *it;
+		if (l_agent->isGuard())
+		{
+			vettore.x = l_agent->getCurrentPosition().getPoint2D().coord(0);
+			vettore.y = l_agent->getCurrentPosition().getPoint2D().coord(1);
+			vettore.theta = l_agent->getCurrentPosition().getHeading();
+			_pos.push_back(vettore);
+		}
+	}
+	return _pos;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 void LearningAlgorithm::getGuardsSquare(std::vector<std::pair<SquarePtr, AgentActionIndex>> & _pos)

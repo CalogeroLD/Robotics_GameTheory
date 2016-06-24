@@ -24,6 +24,9 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "IDSBaseMath\IDSMath.h"
+
+
 #include<rapidjson\document.h>
 #include<rapidjson\filereadstream.h>
 
@@ -353,6 +356,7 @@ int main(int argc, char* argv[])
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
+	Log l_positions(date + "_positionsOfRobots");
 
 	// read file.json for set os parameters simulation
 	std::string conf_file = "Scenario_5G_1T_multiAgent.json";
@@ -522,13 +526,26 @@ int main(int argc, char* argv[])
 												double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
 												double l_benefitIndex = l_coverage->m_stats.getBenefitIndexMediumValue(); //errore medio
 												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti
-											
-
+												
+												// in positions mette tutte le posizioni di ciascun robot ad ogni passo
+												double x, y, theta;
+												for (int i = 0; i < l_coverage->getGuardsPosition1().size(); i++)
+												{
+													x = l_coverage->getGuardsPosition1().at(i).x;
+												    y = l_coverage->getGuardsPosition1().at(i).y;
+													theta = l_coverage->getGuardsPosition1().at(i).theta;
+													l_positions << x << endl;
+													l_positions << y << endl;
+													l_positions << theta << endl;
+												}
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 
 												//l_log << endl;
+												l_positions << x << endl;
+												l_positions << y << endl;
+												l_positions << theta << endl;
 
-												l_potentialValue << l_potentialIndex << endl;
+												l_potentialValue << l_potentialIndex << endl; 
 
 												l_boxPlot.add(
 													"Potential Index",

@@ -11,9 +11,16 @@
 #include "CoverageExport.h"
 
 #include "BaseGeometry/Point2D.h"
-
+#include "Agent.h"
 #include <memory>
 #include <set>
+
+/*struct v_pos
+{
+	double x;
+	double y;
+	double theta;
+};*/
 
 
 //const int N_MAX = 100000000;
@@ -64,6 +71,8 @@ namespace Robotics
 			virtual void monitoringSinks(std::set<std::shared_ptr<Sink>> const& );
 
 			virtual void getGuardsPosition(std::vector<AgentPosition> & _pos);
+			///////
+			std::vector<v_pos> getGuardsPosition1();
 			virtual void getGuardsSquare(std::vector< std::pair<std::shared_ptr<Square>, AgentActionIndex> > & _pos);
 			virtual void getGuardsCoverage( std::vector< std::vector<IDS::BaseGeometry::Point2D> > & _areas);
 			virtual void setExperimentalRate(double _epsilon) {m_experimentalRate = _epsilon;}

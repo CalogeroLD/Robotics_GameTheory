@@ -17,15 +17,21 @@
 #include "BaseGeometry/Arc2D.h"
 #include "BaseGeometry/MakeArc2D.h"
 
-
 //	IDSBaseMath
-#include "IDSMath.h"
+#include "IDSBasemath/IDSMath.h"
 
 #include <memory>
 #include <set>
 
 // set member function added on 24 April0 2016
 // get member functions added on March 2016
+
+struct v_pos
+{
+	double x;
+	double y;
+	double theta;
+};
 
 namespace Robotics 
 {

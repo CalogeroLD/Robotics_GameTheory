@@ -29,6 +29,13 @@
 #include <rapidjson\document.h>
 #include <rapidjson\filereadstream.h>
 
+struct vector_pos
+{
+	double x;
+	double y;
+	double theta;
+} vector_pos;
+
 using namespace Robotics;
 using namespace Robotics::GameTheory;
 using namespace std;
@@ -393,6 +400,30 @@ void CoverageAlgorithm::getGuardsPosition(std::vector<AgentPosition> & _pos)
 {
 	return m_learning->getGuardsPosition(_pos);
 }
+
+
+
+///////////// calo /////////////
+std::vector<v_pos> CoverageAlgorithm::getGuardsPosition1()
+{
+	return m_learning->getGuardsPosition1();
+}
+
+// calo //
+/*std::vector<AgentPosition> CoverageAlgorithm::getGuardsPosition1()
+{
+	std::vector<AgentPosition> _pos;
+	_pos.clear();
+	_pos.reserve(m_guards.size());
+	for (set<GuardPtr>::iterator it = m_guards.begin(); it != m_guards.end(); ++it)
+	{
+		GuardPtr l_agent = *it;
+		if (l_agent->isGuard())
+		{
+			_pos.push_back(l_agent->getCurrentPosition());
+		}
+	}
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 void CoverageAlgorithm::getGuardsCoverage( std::vector< std::vector<IDS::BaseGeometry::Point2D> > & _areas)

@@ -2,6 +2,15 @@
 // Returns the local date/time formatted as 2014-03-19 11:11:52
 char* getFormattedTime(void);
 
+// aggiunta 
+
+/*struct v_pos
+{
+	double x;
+	double y;
+	double theta;
+};*/
+
 // Remove path from filename
 #define __SHORT_FILE__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 

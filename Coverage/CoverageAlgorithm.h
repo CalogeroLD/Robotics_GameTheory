@@ -14,9 +14,16 @@
 #include <memory>
 #include <set>
 #include <vector>
-
+#include <Agent.h>
 #include <rapidjson\document.h>
 #include <rapidjson\filereadstream.h>
+
+/*struct v_pos
+{
+	double x;
+	double y;
+	double theta;
+};*/
 
 namespace IDS 
 {
@@ -42,7 +49,7 @@ namespace Robotics
 		class Square;
 		class World;
 		class AgentActionIndex;
-
+		
 		class COVERAGE_API CoverageAlgorithm
 		{
 		protected:
@@ -152,6 +159,7 @@ namespace Robotics
 			bool areaContains(const IDS::BaseGeometry::Point2D & _thiefStartingPt) const;
 
 			void getGuardsPosition(std::vector<AgentPosition> & _pos);
+			std::vector<v_pos> getGuardsPosition1();
 			void getGuardsSquare(std::vector<std::pair<std::shared_ptr<Square>, AgentActionIndex>> & _pos);
 			void getGuardsCoverage( std::vector< std::vector<IDS::BaseGeometry::Point2D> > & _areas);
 			int numberOfSquaresCoveredByGuards() const;
