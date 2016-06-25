@@ -8,7 +8,7 @@
 #include "Sink.h"
 #include "Probability.h"
 
-
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <set>
@@ -184,6 +184,23 @@ bool LearningAlgorithm::forwardOneStep()
 	{
 		//	ogni agente guardia aggiorna la prossima azione da compiere:
 		this->update(*it);
+		double x, y, theta;
+		std::vector<v_pos> v_p = this->getGuardsPosition1();
+		ofstream SaveFile("PositionsOfGuards.txt");
+
+		for (int i = 0; i < v_p.size(); i++)
+		{
+			x = v_p.at(i).x;
+			y = v_p.at(i).y;
+			theta = v_p.at(i).theta;
+			std::cout << "agente " << i << "-esimo " << " x : " << x  << " y : " << y << " theta : " << theta << endl;
+			SaveFile << "Robot " << i << endl;
+			SaveFile << x << endl;
+			SaveFile << y << endl;
+			SaveFile << theta << endl;
+		}
+
+		SaveFile.close();
 	}
 
 	updateCounterOfVisibleSquare();

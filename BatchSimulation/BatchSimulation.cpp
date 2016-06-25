@@ -24,6 +24,13 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <includezmq\zmq.h>
+#include <includezmq\zmq.hpp>
+#include <includezmq\zmq_addon.hpp>
+#include <includezmq\zmq_utils.h>
+//#include <zhelpers.hpp>
+
+
 #include "IDSBaseMath\IDSMath.h"
 
 
@@ -352,11 +359,19 @@ int main(int argc, char* argv[])
 {
 	const std::string date = currentDateTime();
 
+	//  Prepare our context and publisher
+	zmq::context_t context(1);
+	//zmq::socket_t publisher(context, ZMQ_PUB);
+	//publisher.bind("tcp://*:5556");
+	
+
+
+
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
-	Log l_positions(date + "_positionsOfRobots");
+	//Log l_positions(date + "_positionsOfRobots");
 
 	// read file.json for set os parameters simulation
 	std::string conf_file = "Scenario_5G_1T_multiAgent.json";
@@ -528,7 +543,7 @@ int main(int argc, char* argv[])
 												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti
 												
 												// in positions mette tutte le posizioni di ciascun robot ad ogni passo
-												double x, y, theta;
+												/*double x, y, theta;
 												for (int i = 0; i < l_coverage->getGuardsPosition1().size(); i++)
 												{
 													x = l_coverage->getGuardsPosition1().at(i).x;
@@ -537,13 +552,14 @@ int main(int argc, char* argv[])
 													l_positions << x << endl;
 													l_positions << y << endl;
 													l_positions << theta << endl;
-												}
+												}*/
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 
 												//l_log << endl;
-												l_positions << x << endl;
+												
+												/*l_positions << x << endl;
 												l_positions << y << endl;
-												l_positions << theta << endl;
+												l_positions << theta << endl;*/
 
 												l_potentialValue << l_potentialIndex << endl; 
 

@@ -224,7 +224,7 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 	{
 	case -1:
 		// a random position is selected (ABCDEFG)
-		std::cout << "controllo " << selectNextFeasiblePosition(_space).getPoint2D().coord(0) << " " << selectNextFeasiblePosition(_space).getPoint2D().coord(1) << std::endl;
+		//std::cout << "controllo " << selectNextFeasiblePosition(_space).getPoint2D().coord(0) << " " << selectNextFeasiblePosition(_space).getPoint2D().coord(1) << std::endl;
 		this->setNextPosition( selectNextFeasiblePosition(_space) ); // mette in m_nextPosition la Position selezionata tra le fattbili
 
 		break;
@@ -343,8 +343,8 @@ AgentPosition Guard::selectNextFeasiblePosition(std::shared_ptr<DiscretizedArea>
 	{
 		AgentPosition l_selectedPosition = this->selectNextFeasiblePositionWithoutConstraint(_space); // seleziona una posizione random tra le possibili
 
-		std::cout << "curr pos: x = " << m_currentPosition.getPoint2D().coord(0) << "y = " << m_currentPosition.getPoint2D().coord(1) << " heading: " << m_currentPosition.m_heading << std::endl;
-		std::cout << "next pos selected: x = " << l_selectedPosition.getPoint2D().coord(0) << "y = " << l_selectedPosition.getPoint2D().coord(1) << " heading: " << l_selectedPosition.m_heading << std::endl;
+		/*std::cout << "curr pos: x = " << m_currentPosition.getPoint2D().coord(0) << "y = " << m_currentPosition.getPoint2D().coord(1) << " heading: " << m_currentPosition.m_heading << std::endl;
+		std::cout << "next pos selected: x = " << l_selectedPosition.getPoint2D().coord(0) << "y = " << l_selectedPosition.getPoint2D().coord(1) << " heading: " << l_selectedPosition.m_heading << std::endl;*/
 
 		return l_selectedPosition;
 	}
@@ -362,8 +362,8 @@ AgentPosition Guard::selectNextFeasiblePosition(std::shared_ptr<DiscretizedArea>
 		//if( (k < 8) && (m_currentTrajectory.contains(l_selectedPosition)) )
 		//	continue;
 
-		std::cout << "curr pos: x = " << m_currentPosition.getPoint2D().coord(0) << "y = " << m_currentPosition.getPoint2D().coord(1) << " heading: " << m_currentPosition.m_heading << std::endl;
-		std::cout << "next pos selected: x = " << l_selectedPosition.getPoint2D().coord(0) << "y = " << l_selectedPosition.getPoint2D().coord(1) << " heading: " << l_selectedPosition.m_heading << std::endl;
+		/*std::cout << "curr pos: x = " << m_currentPosition.getPoint2D().coord(0) << "y = " << m_currentPosition.getPoint2D().coord(1) << " heading: " << m_currentPosition.m_heading << std::endl;
+		std::cout << "next pos selected: x = " << l_selectedPosition.getPoint2D().coord(0) << "y = " << l_selectedPosition.getPoint2D().coord(1) << " heading: " << l_selectedPosition.m_heading << std::endl;*/
 
 		SquarePtr l_selected = _space->getSquare( l_selectedPosition.getPoint2D() );
 
