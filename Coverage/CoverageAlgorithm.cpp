@@ -165,6 +165,9 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
                 memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
                 publisher->send(msg);
             }
+
+            //** Qui inserisci il codice relativo al thief
+            
             if (!res)
                 return false;
         }

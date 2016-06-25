@@ -25,6 +25,7 @@ if __name__ == "__main__":
             logging.info("Lauching the Qt viewer...")
             QtGui.QApplication.instance().exec_()
         th.stop()
+        exit()
 
     except KeyboardInterrupt:
         print "Keyboard Interrupt"
