@@ -24,10 +24,13 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <stdio.h>
+
 
 #include <Windows.h>
 #include <rapidjson\document.h>
 #include <rapidjson\filereadstream.h>
+
 
 struct vector_pos
 {
@@ -132,6 +135,65 @@ void Robotics::GameTheory::CoverageAlgorithm::updateMonitor()
 }
 
 //////////////////////////////////////////////////////////////////////////
+bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, bool _continuousUpdate)
+{
+    bool res = true;
+
+    if (m_count == 0)
+        m_stats.reset();
+
+    for (int i = 0; i < _nStep; ++i)
+    {
+        if (m_learning)
+        {
+            m_learning->updateTime();
+            m_learning->resetCounter();
+
+            if (m_count == 0 || (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime)))
+            {
+                this->updateMonitor();
+            }
+
+            res = m_learning->forwardOneStep();
+            std::vector<v_pos> temp = m_learning->getGuardsPosition1();
+            for (int z = 0; z <  temp.size(); z++) {
+                zmq::message_t message(50);
+                std::ostringstream stringStream;
+                stringStream << "A," << z << "," << temp[z].x << "," << temp[z].y << "," << temp[z].theta;
+                std::string copyOfStr = stringStream.str();
+                zmq::message_t msg(copyOfStr.size());
+                memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
+                publisher->send(msg);
+            }
+            if (!res)
+                return false;
+        }
+
+        if (m_count == 0)
+            this->wakeUpAgentIfSecurityIsLow();
+
+        ++m_count;
+        if (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))
+            // ... il monitor sta fermo ma il ladro si muove.
+            m_world->moveThieves(_thiefJump);
+
+        this->wakeUpAgentIfSecurityIsLow();
+
+        if (_continuousUpdate || i == _nStep - 1)
+            m_stats.addValues(
+                m_learning->getTime(),
+                this->numberOfSquaresCoveredByGuards(),
+                m_learning->getPotentialValue(),
+                m_learning->getBenefitValue(),
+                this->getMaximumPotentialValue(),
+                this->getSteadyNonCoopertativeBenefitValue(),
+                m_learning->getExplorationRate(),
+                m_learning->getBatteryValue());
+    }
+    return res;
+}
+
+
 bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpdateTime, int _thiefJump, bool _continuousUpdate)
 {
 	bool res = true;

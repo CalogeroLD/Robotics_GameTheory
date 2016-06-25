@@ -193,7 +193,7 @@ bool LearningAlgorithm::forwardOneStep()
 			x = v_p.at(i).x;
 			y = v_p.at(i).y;
 			theta = v_p.at(i).theta;
-			std::cout << "agente " << i << "-esimo " << " x : " << x  << " y : " << y << " theta : " << theta << endl;
+			//std::cout << "agente " << i << "-esimo " << " x : " << x  << " y : " << y << " theta : " << theta << endl;
 			SaveFile << "Robot " << i << endl;
 			SaveFile << x << endl;
 			SaveFile << y << endl;

@@ -2,7 +2,7 @@ from PySide import QtCore
 import json
 import zmq
 import logging
-
+import numpy as np
 
 class ZmqThread(QtCore.QThread):
     data_ready = QtCore.Signal(float, float, object)
@@ -23,7 +23,6 @@ class ZmqThread(QtCore.QThread):
             self.area_data = [data["Area"]["height"], data["Area"]["length"]] # [y_lim, x_lim] of the area
             sensors = data["Agents"]["sensors"]
             for i, val in enumerate(sensors):
-                print sensors[i]
                 self.agentData[i] = [sensors[i][0], sensors[i][3]] # [BigRadius, FovAngle_Rad]
 
     def initStage(self):
@@ -31,20 +30,23 @@ class ZmqThread(QtCore.QThread):
     
     def run(self):
         context = zmq.Context(1)
-        sock = context.socket(zmq.SUB)
+        sock = context.socket(zmq.PAIR)
         sock.bind("tcp://*:5555")
         print("ZMQ connection successfull")
         while True:
             message = sock.recv()
             if len(message) == 0:
                 continue
-            logging.info("Message received - {0}".format(message))
-            message_vec = message.split(',')
-            if message[0] == 'A':
-                id = message[1]
-                x_pos = message[2]
-                y_pos = message[3]
-                heading = message[4]
+            message_vec = message.split('\\')
+            temp = message_vec[0]
+            print temp
+            message_vec = temp.split(',')
+            print message_vec
+            if message_vec[0] == 'A':
+                id = int(message_vec[1])
+                x_pos = float(message_vec[2])
+                y_pos = float(message_vec[3])
+                heading = float(message_vec[4])
                 self.data_ready.emit(x_pos, y_pos, "A_{}".format(id))
                 # Calculate FOV
                 fov_s = heading - self.agentData[id][1] / 2

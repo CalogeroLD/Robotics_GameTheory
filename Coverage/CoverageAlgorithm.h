@@ -17,6 +17,8 @@
 #include <Agent.h>
 #include <rapidjson\document.h>
 #include <rapidjson\filereadstream.h>
+#include <zmq\zmq.h>
+#include <zmq\zmq.hpp>
 
 /*struct v_pos
 {
@@ -131,6 +133,7 @@ namespace Robotics
 			*/
 			/************************************************************************/
 			bool update(int nStep, int _monitorUpdateTime = 5, int _thiefJump = 1, bool _continuousUpdate = true);
+            bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, bool _continuousUpdate = true);
 
 			/************************************************************************/
 			/*	\brief Initialize position of agent uniformly at random in the area.

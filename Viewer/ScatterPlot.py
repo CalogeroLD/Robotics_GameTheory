@@ -53,6 +53,7 @@ class Viewer(QtGui.QWidget):
     def updateScatterData(self, x, y, name):
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         self.semaphore.acquire()
+        print name
         if name not in self.scatterData:
             # Soluzione temporanea per la selezione del colore
             scatter = self.scatterPlot.plot(x=[x], y=[y], pen=colors[int(name.split('_')[1]) % len(colors)], symbol='+', symbolSize=5, pxMode=True)

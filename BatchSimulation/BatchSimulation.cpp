@@ -27,12 +27,11 @@
 #include <zmq/zmq.h>
 #include <zmq/zmq.hpp>
 
-
-#include "IDSBaseMath\IDSMath.h"
-
-
 #include<rapidjson\document.h>
 #include<rapidjson\filereadstream.h>
+
+
+#include "IDSBaseMath\IDSMath.h"
 
 using namespace Robotics::GameTheory;
 using namespace IDS::BaseGeometry;
@@ -299,9 +298,8 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 		{
 			int tmp = Print[i].GetInt();
 			cout << Print[i].GetInt() << "\t";
-			TimeEnd_v.push_back(tmp);
+			g_config.TimeEnd.push_back(tmp);
 		}
-		g_config.TimeEnd = TimeEnd_v;
 		_log << endl;
 	}
 	else {
@@ -358,12 +356,9 @@ int main(int argc, char* argv[])
 
 	//  Prepare our context and publisher
 	zmq::context_t context(1);
-	//zmq::socket_t publisher(context, ZMQ_PUB);
-	//publisher.bind("tcp://*:5556");
+	zmq::socket_t publisher(context, ZMQ_PAIR);
+	publisher.connect("tcp://localhost:5555");
 	
-
-
-
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
@@ -497,7 +492,6 @@ int main(int argc, char* argv[])
 										// per g_test volte ripeto lo stesso scenario! con punti di partenza diversi per gli agenti
 									{
 										l_log << "-Case: " << l_testIndex << "..." << endl;
-
 										setLostBattery(g_config.Epsilon[l_epsilonIndex]);
 
 										// cerca il file di cui passo il nome e preleva agenti e area(0 o 1)
@@ -519,9 +513,8 @@ int main(int argc, char* argv[])
 												g_config.Period[l_periodIndex],
 												0.1);*/
 
-										if (g_config.TimeEnd.size() > 0)
+										if (g_config.TimeEnd.size() > 0) {
 											// Stop algorithm when number of steps reach a given value
-										{
 											for (size_t l_TimeEndIndex = 0; l_TimeEndIndex < g_config.TimeEnd.size(); ++l_TimeEndIndex)
 											{
 												if (g_config.TimeEnd[l_TimeEndIndex] == 0)
@@ -529,10 +522,13 @@ int main(int argc, char* argv[])
 
 												l_log << "End Time " << g_config.TimeEnd[l_TimeEndIndex] << endl;
 
-												l_coverage->update(
+												l_coverage->updateViewer(
 													g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
 													g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
-													g_config.ThiefJump[l_thiefJumpIndex]);
+													g_config.ThiefJump[l_thiefJumpIndex], 
+                                                    &publisher
+                                                );
+
 
 												/// print data for BoxPlot:
 												double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
@@ -656,7 +652,7 @@ int main(int argc, char* argv[])
 											}
 										}
 										else
-											// Stop algorithm at the steady configuration
+										// Stop algorithm at the steady configuration
 										{
 											int l_numberOfSteps = l_coverage->getNumberOfSteps(-1);
 
