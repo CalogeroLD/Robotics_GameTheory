@@ -155,7 +155,8 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
             }
 
             res = m_learning->forwardOneStep();
-            std::vector<v_pos> temp = m_learning->getGuardsPosition1();
+            // prelevo le posizioni dei robot
+			std::vector<v_pos> temp = m_learning->getGuardsPosition1();
             for (int z = 0; z <  temp.size(); z++) {
                 zmq::message_t message(50);
                 std::ostringstream stringStream;
@@ -166,8 +167,18 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
                 publisher->send(msg);
             }
 
-            //** Qui inserisci il codice relativo al thief
-            
+            //prelevo le posizioni dei thieves
+			std::vector<v_pos> temp1 = this->getThievesPosition1();
+			for (int h = 0; h < temp1.size(); h++) {
+				zmq::message_t message1(50);
+				std::ostringstream stringStream;
+				stringStream << "T," << h << "," << temp1[h].x << "," << temp1[h].y;
+				std::string copyOfStr = stringStream.str();
+				zmq::message_t msg1(copyOfStr.size());
+				memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
+				publisher->send(msg1);
+			}
+
             if (!res)
                 return false;
         }
@@ -614,11 +625,29 @@ std::string CoverageAlgorithm::getBatteryValueStr()
 void CoverageAlgorithm::getThievesPosition(std::vector<AgentPosition> & _pos)
 {
 	_pos.clear();
+
 	std::set< ThiefPtr > l_thieves = m_world->getThieves();
 	for(auto it = l_thieves.begin(); it != l_thieves.end(); ++it)
 	{
 		_pos.push_back( (*it)->getCurrentPosition() );
 	}
+}
+////////////// aggiunta da C. Lidestri ///////////
+std::vector<v_pos> CoverageAlgorithm::getThievesPosition1()
+{
+	v_pos vettore1;
+	std::vector<v_pos> _pos;
+	_pos.clear();
+	double x1, y1;
+	std::set< ThiefPtr > l_thieves = m_world->getThieves();
+	for (auto it = l_thieves.begin(); it != l_thieves.end(); ++it)
+	{
+		vettore1.x = (*it)->getCurrentPosition().getPoint2D().coord(0);
+		vettore1.y = (*it)->getCurrentPosition().getPoint2D().coord(1);
+		vettore1.theta = -1;
+		_pos.push_back(vettore1);
+	}
+	return _pos;
 }
 
 //////////////////////////////////////////////////////////////////////////

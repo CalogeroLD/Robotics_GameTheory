@@ -263,8 +263,6 @@ void LearningAlgorithm::monitoringThieves(std::set< ThiefPtr > const& _agents)
 	}
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////
 void LearningAlgorithm::monitoringSinks(std::set< SinkPtr > const& _agents)
 {
@@ -290,7 +288,7 @@ void LearningAlgorithm::getGuardsPosition(std::vector<AgentPosition> & _pos)
 	}
 	
 }
-
+///////////////// aggiunta da C. Li Destri /////////////////
 std::vector<v_pos> LearningAlgorithm::getGuardsPosition1()
 {
 	v_pos vettore;
@@ -310,6 +308,7 @@ std::vector<v_pos> LearningAlgorithm::getGuardsPosition1()
 	}
 	return _pos;
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////

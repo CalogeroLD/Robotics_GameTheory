@@ -44,7 +44,8 @@ namespace Robotics
 		protected:
 			int m_time;
 			std::set< std::shared_ptr<Guard> > m_guards;
-
+			// aggiunta da C. Li Destri //
+			//std::set< std::shared_ptr<Thief> > m_thief;
 			std::shared_ptr<DiscretizedArea> m_space;
 
 			double m_experimentalRate;
@@ -68,10 +69,15 @@ namespace Robotics
 			virtual void resetValue();
 
 			virtual void monitoringThieves(std::set<std::shared_ptr<Thief>> const& );
+
+			///////// aggiunta da C. Li Destri
+			//std::vector<v_pos> getThievesPositions1(std::set<ThiefPtr> const & _agents);
+			//std::vector<v_pos> getThievesPositions();
+
 			virtual void monitoringSinks(std::set<std::shared_ptr<Sink>> const& );
 
 			virtual void getGuardsPosition(std::vector<AgentPosition> & _pos);
-			///////
+			/////// aggiunta da C. Li Destri ///////////
 			std::vector<v_pos> getGuardsPosition1();
 			virtual void getGuardsSquare(std::vector< std::pair<std::shared_ptr<Square>, AgentActionIndex> > & _pos);
 			virtual void getGuardsCoverage( std::vector< std::vector<IDS::BaseGeometry::Point2D> > & _areas);

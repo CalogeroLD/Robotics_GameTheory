@@ -423,7 +423,7 @@ int main(int argc, char* argv[])
 
 
 	// prende il titolo del file e lo divide, mette i parametri di configurazione all'interno della struttura config,
-	// in l_file ci sono le info relative alla configurazione
+
 	readSimulationConfigFile(l_log, Configuration_parameters);
 
 	for (size_t o = 0; o < l_AgentFilenames.size(); ++o)

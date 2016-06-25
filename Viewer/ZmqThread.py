@@ -61,7 +61,9 @@ class ZmqThread(QtCore.QThread):
                 id = message_vec[1]
                 x_pos = message_vec[2]
                 y_pos = message_vec[3]
+                print message_vec
                 self.data_ready.emit(x_pos, y_pos, "T_{}".format(id))
+                
             #QtCore.QCoreApplication.processEvents()
     
     def stop(self):
