@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="ConfigurationFile.json">
+    <None Include="Scenario_5G_1T_multiAgent.json">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

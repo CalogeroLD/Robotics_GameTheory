@@ -124,8 +124,8 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ConfigurationFile.json" />
     <None Include="ReadMe.txt" />
+    <None Include="Scenario_5G_1T_multiAgent.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoxPlotFile.h" />
