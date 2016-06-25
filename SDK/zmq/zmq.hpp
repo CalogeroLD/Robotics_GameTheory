@@ -35,8 +35,7 @@
     #define ZMQ_EXPLICIT
 #endif
 
-#include <..\SDK\includezmq\zmq.h>
-
+#include <zmq\zmq.h>
 #include <algorithm>
 #include <cassert>
 #include <cstring>

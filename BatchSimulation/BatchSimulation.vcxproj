@@ -92,7 +92,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;ZMQ_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include\jansson;..\SDK;..\Coverage</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SDK\IDSBaseMath;..\SDK;..\Coverage</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -101,7 +101,7 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>libs;..\Coverage\Bin\$(Configuration);include;..\SDK</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Coverage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Coverage.lib;..\libs\libzmq.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>echo BaseGeometry

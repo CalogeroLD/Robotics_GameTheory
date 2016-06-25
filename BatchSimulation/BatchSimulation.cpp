@@ -24,11 +24,8 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <includezmq\zmq.h>
-#include <includezmq\zmq.hpp>
-#include <includezmq\zmq_addon.hpp>
-#include <includezmq\zmq_utils.h>
-//#include <zhelpers.hpp>
+#include <zmq/zmq.h>
+#include <zmq/zmq.hpp>
 
 
 #include "IDSBaseMath\IDSMath.h"
