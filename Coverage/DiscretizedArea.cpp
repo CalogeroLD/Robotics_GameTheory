@@ -313,6 +313,8 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 
 	m_xStep = l_xdist / double(l_numcol);
 	m_yStep = l_ydist / double(l_numrow);
+	//std::cout << m_xStep << endl;
+	//std::cout << m_yStep << endl;
 
 #ifdef _PRINT
 	//cout << "Col " << l_numcol << endl;
@@ -740,7 +742,8 @@ AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point)const
 	Point2D l_prjVertical = l_yLine.projectPoint(point); // restituisce punto proiettato sull'asse y 
 	Point2D l_prjOrizontal = l_xLine.projectPoint(point);// restituisce punto proiettato sull'asse x
 
-	cout << " getCoordinate del punto x =  " << point.coord(0) << "y = " << point.coord(1) << endl;
+	//cout << " getCoordinate del punto x =  " << point.coord(0) << "y = " << point.coord(1) << endl;
+	
 	/*cout <<" punto proiettati orizz x : " << l_prjOrizontal.coord(0) << "y : " << l_prjOrizontal.coord(1) << endl;
 	cout << "punto proiettati verti x : " << l_prjVertical.coord(0) << "y : " << l_prjVertical.coord(1) << endl;*/
 
@@ -753,7 +756,7 @@ AreaCoordinate DiscretizedArea::getCoordinate(Point2D const& point)const
 	/*std::cout << l_ydist << l_xdist <<endl;
 	std::cout << l_xdist << l_ydist << endl;*/
 
-	std::cout << " AreaCoordinate row = " << int(floor(l_xdist / m_xStep)) << " col = " << int(floor(l_ydist / m_yStep)) << endl;
+	//std::cout << " AreaCoordinate row = " << int(floor(l_xdist / m_xStep)) << " col = " << int(floor(l_ydist / m_yStep)) << endl;
 
 	AreaCoordinate l_coord(int(floor(l_xdist / m_xStep)), int(floor(l_ydist / m_yStep)));// rispettive coord in AreaCoordinate (row, col)
 
@@ -917,7 +920,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 		//if (_current.heading == IDSMath::PiDiv4 || _current.heading == IDSMath::PiDiv2 || _current.heading == 3 * IDSMath::PiDiv4)
 		//{
 			{
-				std::cout << "sono sul bordo destro" << endl;
+				//std::cout << "sono sul bordo destro" << endl;
 				AreaCoordinate pos(_current.col - 1, _current.row, 3*IDSMath::PiDiv2 ); // va indietro verso il centro
 				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 					result.push_back(pos);
@@ -929,7 +932,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 0.0 || _current.heading == IDSMath::PiDiv4)
 		//{
 			{
-				std::cout << "sono sul bordo alto" << endl;
+				//std::cout << "sono sul bordo alto" << endl;
 				AreaCoordinate pos(_current.col, _current.row - 1, IDSMath::Pi ); // va sotto verso il centro
 				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 					result.push_back(pos);
@@ -941,7 +944,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 		//if (_current.heading == 7 * IDSMath::PiDiv4 || _current.heading == 3 * IDSMath::PiDiv2 || _current.heading == 5 * IDSMath::PiDiv4)
 		//{
 			{
-				std::cout << "sono sul bordo sinistro" << endl;
+				//std::cout << "sono sul bordo sinistro" << endl;
 				AreaCoordinate pos(_current.col + 1, _current.row, IDSMath::PiDiv2 ); // va indietro verso il centro
 				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 					result.push_back(pos);
@@ -953,7 +956,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getActions(AreaCoordinate const& _c
 		//if (_current.heading == 5 * IDSMath::PiDiv4 || _current.heading == IDSMath::Pi || _current.heading == 3 * IDSMath::PiDiv4)
 		//{
 			{
-				std::cout << "sono sul bordo basso" << endl;
+				//std::cout << "sono sul bordo basso" << endl;
 				AreaCoordinate pos(_current.col, _current.row + 1, 0.0); // va indietro verso il centro
 				if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 					result.push_back(pos);

@@ -33,6 +33,7 @@ namespace Robotics
 		{
 		public:
 			DISLAlgorithm(std::shared_ptr<DiscretizedArea> _space);
+
 		protected:
 			virtual void update(std::shared_ptr<Guard> _agent);
 		};
