@@ -60,12 +60,16 @@ class ZmqThread(QtCore.QThread):
                 self.fov_ready.emit(x, y)
                 
             if message_vec[0] == 'T':
+                print 'sono qui in thief '
                 id = int(message_vec[1])
                 x_pos = float(message_vec[2])
                 y_pos = float(message_vec[3])
                 self.data_ready.emit(x_pos, y_pos, "T_{}".format(id))
 
-      
+            if message_vec[0] == 'B':
+                print 'sono qui'
+                benefit = float(message_vec[1])
+                self.data_ready.emit(10, 10, "B_{}".format(0))
     
     def stop(self):
         super(ZmqThread, self).exit()

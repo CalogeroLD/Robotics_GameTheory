@@ -178,6 +178,9 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
 				publisher->send(msg1);
 			}
+			//double benefit = m_stats.getPotentialIndexMediumValue();
+				//std::cout << "benefit fail " << benefit << std::endl;
+
 
             if (!res)
                 return false;

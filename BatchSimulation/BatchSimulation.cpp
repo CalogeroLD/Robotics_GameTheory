@@ -535,26 +535,30 @@ int main(int argc, char* argv[])
 												double l_benefitIndex = l_coverage->m_stats.getBenefitIndexMediumValue(); //errore medio
 												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti
 												
-												// in positions mette tutte le posizioni di ciascun robot ad ogni passo
-												/*double x, y, theta;
-												for (int i = 0; i < l_coverage->getGuardsPosition1().size(); i++)
-												{
-													x = l_coverage->getGuardsPosition1().at(i).x;
-												    y = l_coverage->getGuardsPosition1().at(i).y;
-													theta = l_coverage->getGuardsPosition1().at(i).theta;
-													l_positions << x << endl;
-													l_positions << y << endl;
-													l_positions << theta << endl;
-												}*/
+
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 
 												//l_log << endl;
-												
-												/*l_positions << x << endl;
-												l_positions << y << endl;
-												l_positions << theta << endl;*/
+												zmq::socket_t *publisher;
+												zmq::message_t message2(50);
+												std::ostringstream stringStream;
+												stringStream << "B," << l_benefitIndex;
+												std::string copyOfStr = stringStream.str();
+												zmq::message_t msg2(copyOfStr.size());
+												memcpy(msg2.data(), copyOfStr.c_str(), copyOfStr.size());
+												publisher->send(msg2);
 
-												l_potentialValue << l_potentialIndex << endl; 
+												l_potentialValue << l_potentialIndex << endl;
+												// message with benefitIndex information about team performance
+												/*zmq::socket_t *publisher;
+												zmq::message_t message(50);
+												std::ostringstream stringStream;
+												stringStream << "B," << l_benefitIndex ;
+												std::string copyOfStr = stringStream.str();
+												zmq::message_t msg(copyOfStr.size());
+												memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
+												publisher->send(msg);*/
+									
 
 												l_boxPlot.add(
 													"Potential Index",
