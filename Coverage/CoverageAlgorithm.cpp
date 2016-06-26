@@ -644,7 +644,7 @@ std::vector<v_pos> CoverageAlgorithm::getThievesPosition1()
 	{
 		vettore1.x = (*it)->getCurrentPosition().getPoint2D().coord(0);
 		vettore1.y = (*it)->getCurrentPosition().getPoint2D().coord(1);
-		vettore1.theta = -1;
+		vettore1.theta = 0;
 		_pos.push_back(vettore1);
 	}
 	return _pos;

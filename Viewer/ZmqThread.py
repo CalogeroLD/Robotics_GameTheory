@@ -38,6 +38,8 @@ class ZmqThread(QtCore.QThread):
             if len(message) == 0:
                 continue
             message_vec = message.split(',')
+            print ' messaggio agenti ', message_vec
+            exit
             if message_vec[0] == 'A':
                 id = int(message_vec[1])
                 x_pos = float(message_vec[2])
@@ -56,15 +58,14 @@ class ZmqThread(QtCore.QThread):
                 x = x + x_pos
                 y = y + y_pos
                 self.fov_ready.emit(x, y)
-
-            if message_vec[0] == 'T':
-                id = message_vec[1]
-                x_pos = message_vec[2]
-                y_pos = message_vec[3]
-                print message_vec
-                self.data_ready.emit(x_pos, y_pos, "T_{}".format(id))
                 
-            #QtCore.QCoreApplication.processEvents()
+            if message_vec[0] == 'T':
+                id = int(message_vec[1])
+                x_pos = float(message_vec[2])
+                y_pos = float(message_vec[3])
+                self.data_ready.emit(x_pos, y_pos, "T_{}".format(id))
+
+      
     
     def stop(self):
         super(ZmqThread, self).exit()
