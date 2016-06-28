@@ -6,7 +6,7 @@ import numpy as np
 
 class ZmqThread(QtCore.QThread):
     data_ready = QtCore.Signal(float, float, object)
-    fov_ready = QtCore.Signal(object, object)
+    fov_ready = QtCore.Signal(int, object, object)
 
     def __init__(self, sim_file):
         """
@@ -38,8 +38,6 @@ class ZmqThread(QtCore.QThread):
             if len(message) == 0:
                 continue
             message_vec = message.split(',')
-            print ' messaggio agenti ', message_vec
-            exit
             if message_vec[0] == 'A':
                 id = int(message_vec[1])
                 x_pos = float(message_vec[2])
@@ -57,7 +55,7 @@ class ZmqThread(QtCore.QThread):
                 y = np.append(y, [0])
                 x = x + x_pos
                 y = y + y_pos
-                self.fov_ready.emit(x, y)
+                self.fov_ready.emit(id, x, y)
                 
             if message_vec[0] == 'T':
                 print 'sono qui in thief '
@@ -67,9 +65,8 @@ class ZmqThread(QtCore.QThread):
                 self.data_ready.emit(x_pos, y_pos, "T_{}".format(id))
 
             if message_vec[0] == 'B':
-                print 'sono qui'
                 benefit = float(message_vec[1])
-                self.data_ready.emit(10, 10, "B_{}".format(0))
+                #self.data_ready.emit(10, 10, "B_{}".format(0))
     
     def stop(self):
         super(ZmqThread, self).exit()

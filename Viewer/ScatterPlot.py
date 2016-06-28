@@ -27,7 +27,6 @@ class Viewer(QtGui.QWidget):
         super(Viewer, self).__init__()
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
-        self.fovPlot = self.scatterPlot.plot(pen='y')
         self.fovData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
@@ -68,10 +67,14 @@ class Viewer(QtGui.QWidget):
         self.semaphore.release()
 
     @QtCore.Slot(object, object)
-    def updateFovData(self, x, y):
+    def updateFovData(self, id, x, y):
         self.semaphore.acquire()
-        self.fovData['x'] = x
-        self.fovData['y'] = y
+        if id not in self.fovData:
+            self.fovData[id] = {}
+            self.fovData[id]['plot'] = self.scatterPlot.plot(pen='y')
+        else:
+            self.fovData[id]['x'] = x
+            self.fovData[id]['y'] = y
         self.semaphore.release()
 
     def timerEvent(self, *args, **kwargs):
@@ -81,8 +84,8 @@ class Viewer(QtGui.QWidget):
             if elem[0].x_data.shape[0] > 0:
                 elem[1].setData(x=elem[0].x_data, y=elem[0].y_data)
                 elem[2].setPos(elem[0].x_data[0])
-        if "x" in self.fovData:
-            X = self.fovData['x']
-            Y = self.fovData['y']
-            self.fovPlot.setData(x=X, y=Y)
+        for i in self.fovData:
+            X = self.fovData[i]['x']
+            Y = self.fovData[i]['y']
+            self.fovData[i]['plot'].setData(x=X, y=Y)
         self.semaphore.release()
