@@ -36,7 +36,8 @@ Guard::~Guard()
 std::vector<AgentPosition> Guard::getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const
 {
 	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() );
-	
+	l_currCoord.heading = m_currentPosition.m_heading;
+
 	// getStandardApproachableValidSquares deve dipendere anche da heading che ho aggiunto
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord);
 	

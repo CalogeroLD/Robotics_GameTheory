@@ -156,27 +156,31 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 
             res = m_learning->forwardOneStep();
             // prelevo le posizioni dei robot
-			std::vector<v_pos> temp = m_learning->getGuardsPosition1();
-            for (int z = 0; z <  temp.size(); z++) {
-                zmq::message_t message(50);
-                std::ostringstream stringStream;
-                stringStream << "A," << z << "," << temp[z].x << "," << temp[z].y << "," << temp[z].theta;
-                std::string copyOfStr = stringStream.str();
-                zmq::message_t msg(copyOfStr.size());
-                memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
-                publisher->send(msg);
-            }
+			if (res) {
+				
+				std::vector<v_pos> temp = m_learning->getGuardsPosition1();
+				for (int z = 0; z < temp.size(); z++) {
+					zmq::message_t message(50);
+					std::ostringstream stringStream;
+					stringStream << "A," << z << "," << temp[z].x << "," << temp[z].y << "," << temp[z].theta;
+					//std::cout << " sono qui x: " << temp[z].x << " y: " << temp[z].y << "theta: " << temp[z].theta <<endl;
+					std::string copyOfStr = stringStream.str();
+					zmq::message_t msg(copyOfStr.size());
+					memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
+					publisher->send(msg);
+				}
 
-            //prelevo le posizioni dei thieves
-			std::vector<v_pos> temp1 = this->getThievesPosition1();
-			for (int h = 0; h < temp1.size(); h++) {
-				zmq::message_t message1(50);
-				std::ostringstream stringStream;
-				stringStream << "T," << h << "," << temp1[h].x << "," << temp1[h].y;
-				std::string copyOfStr = stringStream.str();
-				zmq::message_t msg1(copyOfStr.size());
-				memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
-				publisher->send(msg1);
+				//prelevo le posizioni dei thieves
+				std::vector<v_pos> temp1 = this->getThievesPosition1();
+				for (int h = 0; h < temp1.size(); h++) {
+					zmq::message_t message1(50);
+					std::ostringstream stringStream;
+					stringStream << "T," << h << "," << temp1[h].x << "," << temp1[h].y;
+					std::string copyOfStr = stringStream.str();
+					zmq::message_t msg1(copyOfStr.size());
+					memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
+					publisher->send(msg1);
+				}
 			}
 			//double benefit = m_stats.getPotentialIndexMediumValue();
 				//std::cout << "benefit fail " << benefit << std::endl;
@@ -641,7 +645,6 @@ std::vector<v_pos> CoverageAlgorithm::getThievesPosition1()
 	v_pos vettore1;
 	std::vector<v_pos> _pos;
 	_pos.clear();
-	double x1, y1;
 	std::set< ThiefPtr > l_thieves = m_world->getThieves();
 	for (auto it = l_thieves.begin(); it != l_thieves.end(); ++it)
 	{
@@ -939,6 +942,10 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 	for (size_t i = 0; i < l_agentDriver.size(); i++)
 	{
 		AgentDriver tmp = l_agentDriver[i];
+		/*cout << " x " << tmp.position.coord(0) << endl;
+		cout << " y " << tmp.position.coord(1) << endl;
+		cout << " prova " << tmp.heading << endl;
+		cout << " prova " << tmp.Orientation << endl;*/
 		AgentPosition l_pos(tmp.position, tmp.heading, CameraPosition(tmp.FarRadius, tmp.NearRadius, tmp.Orientation, tmp.Angle) );
 		
 		std::shared_ptr<Agent> l_agent = std::make_shared<Guard>(1, tmp.id, l_pos, _periodIndex, _type == 2 ? 1 : 2);
@@ -970,7 +977,6 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		l_algorithm->setPositionOfSink(l_pos, l_agent);
 	}
 
-
 	// Thieves setting parameters to create Algorithm
 	for (size_t i = 0; i < l_thievesDriver.size(); i++)
 	{
@@ -980,7 +986,6 @@ std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::crea
 		ThiefPtr l_agent = std::make_shared<Thief>(l_algorithm->getNumberOfAgent(), l_pos);
 		l_algorithm->setPositionOfThief(l_agent->getCurrentPosition(), l_agent);
 	}
-
 	return l_algorithm;
 }
 

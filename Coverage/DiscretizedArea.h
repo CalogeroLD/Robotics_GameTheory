@@ -209,7 +209,12 @@ namespace Robotics
 			/// 
 			void setRandomSquareValue();
 
-			std::vector<AreaCoordinate> getActions(AreaCoordinate const& _current) const;
+			std::vector<AreaCoordinate> goStraight(AreaCoordinate const& _current) const;
+			std::vector<AreaCoordinate> turnDown(AreaCoordinate const& _current) const;
+			std::vector<AreaCoordinate> turnUp(AreaCoordinate const& _current) const;
+			void changeDirection(AreaCoordinate const& _current, std::vector<AreaCoordinate>& positions) const;
+			void rotate(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const;
+
 
 			std::vector<AreaCoordinate> getStandardApproachableValidSquares(AreaCoordinate const& _current) const;
 			void addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const;

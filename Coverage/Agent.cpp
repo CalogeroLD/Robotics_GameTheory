@@ -88,6 +88,8 @@ void Agent::setStatus(Status stat)
 //////////////////////////////////////////////////////////////////////////
 std::vector<AgentPosition> Agent::getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const
 {
+
+	
 	//std::cout << m_currentPosition.getPoint2D().coord(0) << " " << m_currentPosition.getPoint2D().coord(1) << endl;
 
 	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() ); // prende punto camera
