@@ -35,8 +35,10 @@ class ZmqThread(QtCore.QThread):
         print("ZMQ connection successfull")
         while True:
             message = sock.recv()
+            #print ' messaggio ' , len(message)
             if len(message) == 0:
                 continue
+
             message_vec = message.split(',')
             if message_vec[0] == 'A':
                 id = int(message_vec[1])

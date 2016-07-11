@@ -31,7 +31,7 @@ class Viewer(QtGui.QWidget):
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
-        self.timer
+        #self.timer
         self.timer.start(10, self)
 
     def initUI(self, x_lim, y_lim):
