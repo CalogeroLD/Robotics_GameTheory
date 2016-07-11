@@ -993,25 +993,25 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	if (_current.col != 0)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row);
-		//if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	if (_current.col != DISCRETIZATION_COL)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row);
-		//if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	if (_current.row != 0)
 	{
 		AreaCoordinate pos(_current.col, _current.row - 1);
-		///if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	if (_current.row != DISCRETIZATION_ROW)
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1);
-		//if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 	}
 	return result;

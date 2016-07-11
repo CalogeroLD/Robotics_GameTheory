@@ -137,7 +137,6 @@ std::vector<AgentPosition> Agent::getFeasibleActionsThief(std::shared_ptr<Discre
 AgentPosition Agent::selectRandomFeasibleActionThief(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief)
 {
 	std::vector<AgentPosition> l_feasible = this->getFeasibleActionsThief(_space, _thief); // tutte le posizioni possibili in base a dove mi trovo
-	cout << "ciao sono il thief e non mi muovo" << endl;
 	if (l_feasible.empty()) // if is empty return currentPosition
 		return m_currentPosition;
 	else
