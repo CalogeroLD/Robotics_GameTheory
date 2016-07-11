@@ -32,7 +32,7 @@ class Viewer(QtGui.QWidget):
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
         self.timer
-        self.timer.start(10, self)
+        self.timer.start(100, self)
 
     def initUI(self, x_lim, y_lim):
         self.resize(600, 600)
@@ -85,7 +85,8 @@ class Viewer(QtGui.QWidget):
                 elem[1].setData(x=elem[0].x_data, y=elem[0].y_data)
                 elem[2].setPos(elem[0].x_data[0])
         for i in self.fovData:
-            X = self.fovData[i]['x']
-            Y = self.fovData[i]['y']
-            self.fovData[i]['plot'].setData(x=X, y=Y)
+            if 'x' in self.fovData[i]:
+                X = self.fovData[i]['x']
+                Y = self.fovData[i]['y']
+                self.fovData[i]['plot'].setData(x=X, y=Y)
         self.semaphore.release()

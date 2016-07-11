@@ -69,4 +69,4 @@ class ZmqThread(QtCore.QThread):
                 #self.data_ready.emit(10, 10, "B_{}".format(0))
     
     def stop(self):
-        super(ZmqThread, self).exit()
+        return
