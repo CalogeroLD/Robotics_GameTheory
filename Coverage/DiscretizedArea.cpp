@@ -854,11 +854,17 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		result = this->goStraight(_current);
 	if (_current.row == DISCRETIZATION_ROW && _current.heading == 0.0)
 		result = this->turnDown(_current);
-	if (_current.row == 0 && _current.heading == 3.14)
+	if (_current.row == 0 /*&& _current.heading == 3.14*/)
 		result = this->turnUp(_current);
+	if (_current.col == 0)
+		result = this->turnRight(_current);
+	if (_current.col == DISCRETIZATION_COL)
+		result = this->turnLeft(_current);
+	// in every case robot can rotate
 	this->rotate(_current, result);
 
-	std::cout << result.size() << std::endl;
+
+	//std::cout << result.size() << std::endl;
 	return result;
 }
 
@@ -882,23 +888,27 @@ std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _c
 		result.push_back(pos);
 	}
 	// diagonale
-	/*
+	
 	if (_current.heading == 0.785) {
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, _current.heading);
+		cout << "NE" << endl;
 		result.push_back(pos);
-	}*/
-	if (_current.heading == 2.355) {
+	}
+	if (_current.heading == 2.35) {
 		AreaCoordinate pos(_current.col + 1, _current.row - 1, _current.heading);
+		cout << "SE" << endl;
 		result.push_back(pos);
 	}
-	if (_current.heading == 3.925) {
+	if (_current.heading == 3.92) {
 		AreaCoordinate pos(_current.col - 1, _current.row - 1, _current.heading);
+		cout << "SO" << endl;
 		result.push_back(pos);
 	}
-	/*if (_current.heading == 5.495) {
+	if (_current.heading == 5.49) {
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, _current.heading);
 		result.push_back(pos);
-	}*/
+		cout << "NO" << endl;
+	}
 	this->changeDirection(_current, result);
 	return result;
 }
@@ -952,6 +962,61 @@ std::vector<AreaCoordinate> DiscretizedArea::turnUp(AreaCoordinate const& _curre
 
 	return result;
 }
+
+std::vector<AreaCoordinate> DiscretizedArea::turnRight(AreaCoordinate const& _current) const
+{
+	std::vector<AreaCoordinate> result;
+	std::cout << "turnRight" << endl;
+	AreaCoordinate pos(_current.col + 1, _current.row, 1.57);
+	if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		result.push_back(pos);
+
+	return result;
+}
+
+std::vector<AreaCoordinate> DiscretizedArea::turnLeft(AreaCoordinate const& _current) const
+{
+	std::vector<AreaCoordinate> result;
+	std::cout << "turnLeft" << endl;
+	AreaCoordinate pos(_current.col - 1, _current.row, 4.71);
+	if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		result.push_back(pos);
+
+	return result;
+}
+
+
+///////////////////////////////////////////THIEF MOTION///////////////////
+std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquaresThief(AreaCoordinate const& _current) const
+{
+	std::vector<AreaCoordinate> result;
+	if (_current.col != 0)
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row);
+		//if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.col != DISCRETIZATION_COL)
+	{
+		AreaCoordinate pos(_current.col + 1, _current.row);
+		//if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != 0)
+	{
+		AreaCoordinate pos(_current.col, _current.row - 1);
+		///if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	if (_current.row != DISCRETIZATION_ROW)
+	{
+		AreaCoordinate pos(_current.col, _current.row + 1);
+		//if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			result.push_back(pos);
+	}
+	return result;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const

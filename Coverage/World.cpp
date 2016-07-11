@@ -132,7 +132,8 @@ void World::moveThieves(int _thiefJump)
 			{
 				for(int j = 0; j < _thiefJump; ++j)
 				{
-					l_agent->setNextPosition(l_agent->selectRandomFeasibleAction(m_space));
+					l_agent->setNextPosition(l_agent->selectRandomFeasibleActionThief(m_space, l_agent->getCurrentPosition()));
+					//l_agent->setNextPosition(l_agent->selectRandomFeasibleAction(m_space));
 					l_agent->moveToNextPosition();
 				}
 			}

@@ -208,11 +208,16 @@ namespace Robotics
 
 			/// 
 			void setRandomSquareValue();
-
+			// function to go straight when i'm not on limit line of aerea
 			std::vector<AreaCoordinate> goStraight(AreaCoordinate const& _current) const;
+			// functions to rotate when im on the limits lines
 			std::vector<AreaCoordinate> turnDown(AreaCoordinate const& _current) const;
 			std::vector<AreaCoordinate> turnUp(AreaCoordinate const& _current) const;
+			std::vector<AreaCoordinate> turnRight(AreaCoordinate const & _current) const;
+			std::vector<AreaCoordinate> turnLeft(AreaCoordinate const & _current) const;
+			// set of two feasible actions to change my current heading not more than 45 degrees fot each step
 			void changeDirection(AreaCoordinate const& _current, std::vector<AreaCoordinate>& positions) const;
+			// function to rotate remaining on the same position
 			void rotate(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const;
 
 
@@ -220,7 +225,8 @@ namespace Robotics
 			void addKinematicsContraints(AreaCoordinate _current, std::vector<AreaCoordinate> result) const;
 			void addPossibilityToRotate(AreaCoordinate const & _current, std::vector<AreaCoordinate> _selected);
 			// aggiunta
-			
+			std::vector<AreaCoordinate> getStandardApproachableValidSquaresThief(AreaCoordinate const & _current) const;
+
 			void addSpecialApproachableValidSquares(AreaCoordinate const& _current, std::vector<AreaCoordinate> & _loci) const;
 
 			std::set<std::shared_ptr<Square> > getVisibleSquares(AgentPosition const& _pos);

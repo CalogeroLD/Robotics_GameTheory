@@ -252,10 +252,19 @@ namespace Robotics
 			virtual void moveToNextPosition();
 
 			virtual std::vector<AgentPosition> getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const;
+			//virtual std::vector<AgentPosition> getFeasibleActionsThief(std::shared_ptr<DiscretizedArea> _space) const;
+
 
 			bool getRandomFeasibleAction(std::vector<AgentPosition> const& _feasible, AgentPosition & _pos) const;
+			// aggiunta
+			AgentPosition selectRandomFeasibleAction(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief);
 
 			AgentPosition selectRandomFeasibleAction(std::shared_ptr<DiscretizedArea> _space);
+
+			// aggiunta
+			std::vector<AgentPosition> getFeasibleActionsThief(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief) const;
+			AgentPosition selectRandomFeasibleActionThief(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief);
+			//AgentPosition selectRandomFeasibleActionThief(std::shared_ptr<DiscretizedArea> _space);
 
 			bool equals(std::shared_ptr<Agent>) const;
 

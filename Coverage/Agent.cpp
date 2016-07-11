@@ -88,11 +88,10 @@ void Agent::setStatus(Status stat)
 //////////////////////////////////////////////////////////////////////////
 std::vector<AgentPosition> Agent::getFeasibleActions( std::shared_ptr<DiscretizedArea> _space ) const
 {
-
-	
 	//std::cout << m_currentPosition.getPoint2D().coord(0) << " " << m_currentPosition.getPoint2D().coord(1) << endl;
 
 	AreaCoordinate l_currCoord = _space->getCoordinate( m_currentPosition.getPoint2D() ); // prende punto camera
+	l_currCoord.heading = m_currentPosition.m_heading;
 	// aggiunto
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_currCoord); // prende 8 punti adiacenti ABCDEFG
 	
@@ -117,6 +116,33 @@ AgentPosition Agent::selectRandomFeasibleAction(std::shared_ptr<DiscretizedArea>
 		//cout << "Numero di azioni fattibili: " << l_feasible.size() << endl;
 		int l_value = getRandomValue( int( l_feasible.size() ) ); // ne prende una a caso in posizione l_value
 		//std::cout << "azione scelta " << l_feasible[l_value].getPoint2D().coord(0) << l_feasible[l_value].getPoint2D().coord(1) << std::endl;
+		return l_feasible[l_value];
+	}
+}
+
+std::vector<AgentPosition> Agent::getFeasibleActionsThief(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief) const
+{
+	AreaCoordinate l_thiefCoord = _space->getCoordinate(_thief.getPoint2D()); // prende punto camera
+	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquaresThief(l_thiefCoord); // prende 8 punti adiacenti ABCDEFG
+	// aggiunge le diagonali al robot
+	_space->addSpecialApproachableValidSquares(l_thiefCoord, l_squares);
+	std::vector<AgentPosition> l_result;
+	for (size_t i = 0; i < l_squares.size(); ++i)
+	{
+		l_result.push_back(AgentPosition(_space->getPosition(l_squares[i]), l_squares[i].heading, m_currentPosition.m_camera));
+	}
+	return l_result; // return vector of all ThievesPosition possible
+}
+
+AgentPosition Agent::selectRandomFeasibleActionThief(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief)
+{
+	std::vector<AgentPosition> l_feasible = this->getFeasibleActionsThief(_space, _thief); // tutte le posizioni possibili in base a dove mi trovo
+	cout << "ciao sono il thief e non mi muovo" << endl;
+	if (l_feasible.empty()) // if is empty return currentPosition
+		return m_currentPosition;
+	else
+	{
+		int l_value = getRandomValue(int(l_feasible.size())); // ne prende una a caso in posizione l_value
 		return l_feasible[l_value];
 	}
 }
