@@ -526,7 +526,8 @@ int main(int argc, char* argv[])
 													g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
 													g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
 													g_config.ThiefJump[l_thiefJumpIndex], 
-                                                    &publisher
+                                                    &publisher,
+													l_coverage->m_stats.getBenefitIndexMediumValue()
                                                 );
 
 
@@ -539,25 +540,9 @@ int main(int argc, char* argv[])
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 
 												//l_log << endl;
-												zmq::socket_t *publisher;
-												zmq::message_t message2(50);
-												std::ostringstream stringStream;
-												stringStream << "B," << l_benefitIndex;
-												std::string copyOfStr = stringStream.str();
-												zmq::message_t msg2(copyOfStr.size());
-												memcpy(msg2.data(), copyOfStr.c_str(), copyOfStr.size());
-												publisher->send(msg2);
+
 
 												l_potentialValue << l_potentialIndex << endl;
-												// message with benefitIndex information about team performance
-												/*zmq::socket_t *publisher;
-												zmq::message_t message(50);
-												std::ostringstream stringStream;
-												stringStream << "B," << l_benefitIndex ;
-												std::string copyOfStr = stringStream.str();
-												zmq::message_t msg(copyOfStr.size());
-												memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
-												publisher->send(msg);*/
 									
 
 												l_boxPlot.add(

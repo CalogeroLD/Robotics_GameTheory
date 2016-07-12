@@ -135,7 +135,7 @@ void Robotics::GameTheory::CoverageAlgorithm::updateMonitor()
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, bool _continuousUpdate)
+bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, double _benefit, bool _continuousUpdate)
 {
     bool res = true;
 
@@ -181,6 +181,13 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 					memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
 					publisher->send(msg1);
 				}
+				zmq::message_t message2(50);
+				std::ostringstream stringStream;
+				stringStream << "B," << _benefit;
+				std::string copyOfStr = stringStream.str();
+				zmq::message_t msg2(copyOfStr.size());
+				memcpy(msg2.data(), copyOfStr.c_str(), copyOfStr.size());
+				publisher->send(msg2);
 			}
 			//double benefit = m_stats.getPotentialIndexMediumValue();
 				//std::cout << "benefit fail " << benefit << std::endl;

@@ -841,9 +841,9 @@ void DiscretizedArea::setRandomSquareValue()
 
 
 double Mod2Pi(double angle) {
-	if (angle < 0)	return angle += IDSMath::TwoPi;
-	if (angle > IDSMath::TwoPi)	return angle -= IDSMath::TwoPi;
-	if (angle >= 0 && angle <= IDSMath::TwoPi)	return angle;
+	if (angle < 0)	return ((float)((int)((angle + IDSMath::TwoPi)*100.0f))) / 100.0f;
+	if (angle > IDSMath::TwoPi)	return ((float)((int)((angle-IDSMath::TwoPi)*100.0f))) / 100.0f;
+	if (angle >= 0 && angle <= IDSMath::TwoPi)	return ((float)((int)(angle*100.0f))) / 100.0f;
 	else std::cout << "values out of range" <<std::endl;
 }
 
@@ -862,8 +862,6 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		result = this->turnLeft(_current);
 	// in every case robot can rotate
 	this->rotate(_current, result);
-
-
 	//std::cout << result.size() << std::endl;
 	return result;
 }
@@ -871,7 +869,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _current) const
 {
 	std::vector<AreaCoordinate> result;
-	if (_current.heading == 0.0){
+	if (_current.heading == 0.00){
 	AreaCoordinate pos(_current.col, _current.row + 1, _current.heading);
 	result.push_back(pos);
 	}
@@ -889,7 +887,7 @@ std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _c
 	}
 	// diagonale
 	
-	if (_current.heading == 0.785) {
+	if (_current.heading == 0.78) {
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, _current.heading);
 		cout << "NE" << endl;
 		result.push_back(pos);
@@ -909,7 +907,7 @@ std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _c
 		result.push_back(pos);
 		cout << "NO" << endl;
 	}
-	this->changeDirection(_current, result);
+	//this->changeDirection(_current, result);
 	return result;
 }
 
@@ -923,13 +921,37 @@ void DiscretizedArea::rotate(AreaCoordinate const& _current, std::vector<AreaCoo
 
 void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const
 {
-	if (_current.heading == 0.0)
+	if (_current.heading == 0.00)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading - 0.785));
 			result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading + 0.785));
 			result.push_back(pos1);
+	}
+	if (_current.heading == 0.78)
+	{
+		AreaCoordinate pos(_current.col, _current.row + 1, Mod2Pi(_current.heading - 0.785));
+		result.push_back(pos);
+
+		AreaCoordinate pos1(_current.col + 1, _current.row, Mod2Pi(_current.heading + 0.785));
+		result.push_back(pos1);
+	}
+	if (_current.heading == 1.57)
+	{
+		AreaCoordinate pos(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading - 0.785));
+		result.push_back(pos);
+
+		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading + 0.785));
+		result.push_back(pos1);
+	}
+	if (_current.heading == 2.35)
+	{
+		AreaCoordinate pos(_current.col + 1, _current.row, Mod2Pi(_current.heading - 0.785));
+		result.push_back(pos);
+
+		AreaCoordinate pos1(_current.col, _current.row - 1, Mod2Pi(_current.heading + 0.785));
+		result.push_back(pos1);
 	}
 	if (_current.heading == 3.14)
 	{
@@ -939,6 +961,31 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading - 0.785));
 			result.push_back(pos1);
 	}
+	if (_current.heading == 3.92)
+	{
+		AreaCoordinate pos(_current.col, _current.row - 1, Mod2Pi(_current.heading - 0.785));
+		result.push_back(pos);
+
+		AreaCoordinate pos1(_current.col - 1, _current.row, Mod2Pi(_current.heading + 0.785));
+		result.push_back(pos1);
+	}
+	if (_current.heading == 4.71)
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row - 1, Mod2Pi(_current.heading - 0.785));
+		result.push_back(pos);
+
+		AreaCoordinate pos1(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading + 0.785));
+		result.push_back(pos1);
+	}
+	if (_current.heading == 5.49)
+	{
+		AreaCoordinate pos(_current.col - 1, _current.row, Mod2Pi(_current.heading - 0.785));
+		result.push_back(pos);
+
+		AreaCoordinate pos1(_current.col, _current.row + 1, Mod2Pi(_current.heading + 0.785));
+		result.push_back(pos1);
+	}
+
 }
 
 std::vector<AreaCoordinate> DiscretizedArea::turnDown(AreaCoordinate const& _current) const

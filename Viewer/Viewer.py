@@ -7,7 +7,7 @@ import logging
 from PySide import QtCore
 from pyqtgraph.Qt import QtGui
 import ScatterPlot
-import ZmqThread
+import ZmqThread   # sta importando la classe dichiarata
 
 if __name__ == "__main__":
     try:
@@ -25,7 +25,7 @@ if __name__ == "__main__":
             logging.info("Lauching the Qt viewer...")
             QtGui.QApplication.instance().exec_()
         th.stop()
-        exit()
+        exit(0)
 
     except KeyboardInterrupt:
         print "Keyboard Interrupt"

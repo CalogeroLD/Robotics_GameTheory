@@ -4,7 +4,6 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import threading
 
-
 class ScatterPlotData:
     def __init__(self, max_dim):
         self.x_data = np.ndarray((0, 0))
@@ -31,8 +30,9 @@ class Viewer(QtGui.QWidget):
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
-        #self.timer
-        self.timer.start(10, self)
+
+        self.timer
+        self.timer.start(100, self)
 
     def initUI(self, x_lim, y_lim):
         self.resize(600, 600)
@@ -43,6 +43,7 @@ class Viewer(QtGui.QWidget):
         self.scatterPlot.setLabel('bottom', "East", units='m')
         self.scatterPlot.showGrid(x=True, y=True)
         pg.setConfigOptions(antialias=True)
+
 
         layout = QtGui.QGridLayout()
         self.setLayout(layout)
@@ -71,7 +72,7 @@ class Viewer(QtGui.QWidget):
         self.semaphore.acquire()
         if id not in self.fovData:
             self.fovData[id] = {}
-            self.fovData[id]['plot'] = self.scatterPlot.plot(pen='y')
+            self.fovData[id]['plot'] = self.scatterPlot.plot(pen='y')  #colore del sensore
         else:
             self.fovData[id]['x'] = x
             self.fovData[id]['y'] = y
@@ -85,7 +86,8 @@ class Viewer(QtGui.QWidget):
                 elem[1].setData(x=elem[0].x_data, y=elem[0].y_data)
                 elem[2].setPos(elem[0].x_data[0])
         for i in self.fovData:
-            X = self.fovData[i]['x']
-            Y = self.fovData[i]['y']
-            self.fovData[i]['plot'].setData(x=X, y=Y)
+            if 'x' in self.fovData[i]:
+                X = self.fovData[i]['x']
+                Y = self.fovData[i]['y']
+                self.fovData[i]['plot'].setData(x=X, y=Y)
         self.semaphore.release()
