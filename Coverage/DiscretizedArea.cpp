@@ -847,6 +847,7 @@ double Mod2Pi(double angle) {
 	else std::cout << "values out of range" <<std::endl;
 }
 
+
 std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
 {
 	std::vector<AreaCoordinate> result; // AreaCoordinate possible
@@ -854,7 +855,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		result = this->goStraight(_current);
 	if (_current.row == DISCRETIZATION_ROW && _current.heading == 0.0)
 		result = this->turnDown(_current);
-	if (_current.row == 0 /*&& _current.heading == 3.14*/)
+	if (_current.row == 0)
 		result = this->turnUp(_current);
 	if (_current.col == 0)
 		result = this->turnRight(_current);
@@ -862,52 +863,56 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 		result = this->turnLeft(_current);
 	// in every case robot can rotate
 	this->rotate(_current, result);
-	//std::cout << result.size() << std::endl;
+	std::cout << result.size() << std::endl;
 	return result;
 }
 
 std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _current) const
 {
 	std::vector<AreaCoordinate> result;
-	if (_current.heading == 0.00){
+	if (_current.heading >= 0 && _current.heading < 0.2){ // ok
+	cout << "Nord" << endl;
 	AreaCoordinate pos(_current.col, _current.row + 1, _current.heading);
 	result.push_back(pos);
 	}
-	if (_current.heading == 1.57){
+	if (_current.heading > 1.6 && _current.heading < 1.7){ //1.57
 	AreaCoordinate pos(_current.col + 1, _current.row, _current.heading);
+	cout << "Est" << endl;
 	result.push_back(pos);
 	}
-	if (_current.heading == 3.14) {
-		AreaCoordinate pos(_current.col, _current.row - 1, _current.heading);
-		result.push_back(pos);
+	if (_current.heading < 3.2 && _current.heading > 3) { // 3.14
+	AreaCoordinate pos(_current.col, _current.row - 1, _current.heading);
+	cout << "Sud" << endl;
+	result.push_back(pos);
 	}
-	if (_current.heading == 4.71) {
-		AreaCoordinate pos(_current.col - 1, _current.row, _current.heading);
-		result.push_back(pos);
+	if (_current.heading < 4.8 && _current.heading > 4.6) { // 4.71
+	cout << "Ovest" << endl;
+	AreaCoordinate pos(_current.col - 1, _current.row, _current.heading);
+	result.push_back(pos);
 	}
 	// diagonale
 	
-	if (_current.heading == 0.78) {
+	if (_current.heading < 0.9 && _current.heading > 0.7) { // ok 0.785
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, _current.heading);
 		cout << "NE" << endl;
 		result.push_back(pos);
 	}
-	if (_current.heading == 2.35) {
+	if (_current.heading < 2.4 && _current.heading > 2.2) { // ok 2.35
 		AreaCoordinate pos(_current.col + 1, _current.row - 1, _current.heading);
 		cout << "SE" << endl;
 		result.push_back(pos);
 	}
-	if (_current.heading == 3.92) {
+	if (_current.heading < 4 && _current.heading > 3.8) { // 3.92 
 		AreaCoordinate pos(_current.col - 1, _current.row - 1, _current.heading);
 		cout << "SO" << endl;
 		result.push_back(pos);
 	}
-	if (_current.heading == 5.49) {
+	if (_current.heading > 5.4 && _current.heading < 5.6) { // ok 5.49
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, _current.heading);
 		result.push_back(pos);
 		cout << "NO" << endl;
 	}
-	//this->changeDirection(_current, result);
+	this->changeDirection(_current, result);
 	return result;
 }
 
@@ -921,7 +926,7 @@ void DiscretizedArea::rotate(AreaCoordinate const& _current, std::vector<AreaCoo
 
 void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const
 {
-	if (_current.heading == 0.00)
+	if (_current.heading >= 0 && _current.heading < 0.2)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading - 0.785));
 			result.push_back(pos);
@@ -929,7 +934,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading + 0.785));
 			result.push_back(pos1);
 	}
-	if (_current.heading == 0.78)
+	if (_current.heading < 0.9 && _current.heading > 0.7)
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, Mod2Pi(_current.heading - 0.785));
 		result.push_back(pos);
@@ -937,7 +942,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col + 1, _current.row, Mod2Pi(_current.heading + 0.785));
 		result.push_back(pos1);
 	}
-	if (_current.heading == 1.57)
+	if (_current.heading < 1.7 && _current.heading > 1.6)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading - 0.785));
 		result.push_back(pos);
@@ -945,7 +950,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading + 0.785));
 		result.push_back(pos1);
 	}
-	if (_current.heading == 2.35)
+	if (_current.heading < 2.4 && _current.heading > 2.2)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row, Mod2Pi(_current.heading - 0.785));
 		result.push_back(pos);
@@ -953,7 +958,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col, _current.row - 1, Mod2Pi(_current.heading + 0.785));
 		result.push_back(pos1);
 	}
-	if (_current.heading == 3.14)
+	if (_current.heading < 3.2 && _current.heading > 3)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row -1, Mod2Pi(_current.heading + 0.785));
 			result.push_back(pos);
@@ -961,7 +966,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading - 0.785));
 			result.push_back(pos1);
 	}
-	if (_current.heading == 3.92)
+	if (_current.heading < 4 && _current.heading > 3.8)
 	{
 		AreaCoordinate pos(_current.col, _current.row - 1, Mod2Pi(_current.heading - 0.785));
 		result.push_back(pos);
@@ -969,7 +974,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col - 1, _current.row, Mod2Pi(_current.heading + 0.785));
 		result.push_back(pos1);
 	}
-	if (_current.heading == 4.71)
+	if (_current.heading < 4.8 && _current.heading > 4.6)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row - 1, Mod2Pi(_current.heading - 0.785));
 		result.push_back(pos);
@@ -977,7 +982,7 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 		AreaCoordinate pos1(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading + 0.785));
 		result.push_back(pos1);
 	}
-	if (_current.heading == 5.49)
+	if (_current.heading > 5.4 && _current.heading < 5.6)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row, Mod2Pi(_current.heading - 0.785));
 		result.push_back(pos);
