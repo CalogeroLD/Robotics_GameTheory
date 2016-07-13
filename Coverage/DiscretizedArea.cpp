@@ -834,81 +834,121 @@ void DiscretizedArea::setRandomSquareValue()
 		int l_valueSecret = rand() % 100;
 		m_lattice[i]->setThiefValue(l_valueSecret);
 #else
-		m_lattice[i]->setThiefValue(g_reverse ? 100- i / flag:  i / flag);
+		m_lattice[i]->setThiefValue(g_reverse ? 100- i / flag:  i / flag)
+
 #endif
 	}
 }
 
 
-double Mod2Pi(double angle) {
+/*double Mod2Pi(double angle) {
 	if (angle < 0)	return ((float)((int)((angle + IDSMath::TwoPi)*100.0f))) / 100.0f;
-	if (angle > IDSMath::TwoPi)	return ((float)((int)((angle-IDSMath::TwoPi)*100.0f))) / 100.0f;
-	if (angle >= 0 && angle <= IDSMath::TwoPi)	return ((float)((int)(angle*100.0f))) / 100.0f;
-	else std::cout << "values out of range" <<std::endl;
+	if (angle >= IDSMath::TwoPi)	return ((float)((int)((angle-IDSMath::TwoPi)*100.0f))) / 100.0f;
+	if (angle >= 0 && angle < IDSMath::TwoPi)	return ((float)((int)(angle*100.0f))) / 100.0f;
+	else std::cout << " values out of range " << std::endl;
+}*/
+
+double DeleteDecErr(double _heading) {
+	
+	double value;
+
+	if (_heading >= 6.20 || (_heading >= 0 && _heading <= 0.2))	
+		value = 0;
+	if (_heading < 0.9 && _heading > 0.6)// ok 0.785
+		value = 0.78;
+	if (_heading > 1.4 && _heading < 1.7) //1.57
+		value = 1.57;
+	if (_heading < 2.4 && _heading > 2.2) // ok 2.35
+		value = 2.35;
+	if (_heading < 3.2 && _heading > 3) // 3.14
+		value = 3.14;
+	if (_heading < 4 && _heading > 3.8) // 3.92 
+		value = 3.92;
+	if (_heading < 4.8 && _heading > 4.6) // 3.14
+		value = 4.71;
+	if (_heading > 5.3 && _heading < 5.6) // ok 5.49
+		value = 5.49;
+
+	return value;
 }
 
+double Mod2Pi(double angle) {
+	if (angle < 0)	return DeleteDecErr(angle + IDSMath::TwoPi);
+	if (angle >= IDSMath::TwoPi)	return DeleteDecErr(angle - IDSMath::TwoPi);
+	if (angle >= 0 && angle < IDSMath::TwoPi)	return DeleteDecErr(angle);
+	else std::cout << " values out of range " << std::endl;
+}
 
 std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares(AreaCoordinate const& _current) const
 {
-	std::vector<AreaCoordinate> result; // AreaCoordinate possible
+	std::vector<AreaCoordinate> result;
+
 	if( _current.row != DISCRETIZATION_ROW && _current.col != DISCRETIZATION_COL && _current.row != 0 && _current.col != 0)
 		result = this->goStraight(_current);
-	if (_current.row == DISCRETIZATION_ROW && _current.heading == 0.0)
+
+	if (_current.row == DISCRETIZATION_ROW)
 		result = this->turnDown(_current);
+
 	if (_current.row == 0)
 		result = this->turnUp(_current);
+
 	if (_current.col == 0)
 		result = this->turnRight(_current);
+
 	if (_current.col == DISCRETIZATION_COL)
 		result = this->turnLeft(_current);
+
 	// in every case robot can rotate
 	this->rotate(_current, result);
-	std::cout << result.size() << std::endl;
+	
+	//std::cout << result.size() << std::endl;
+	std::cout << " heading:  " <<_current.heading << endl;
+	
 	return result;
 }
 
 std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _current) const
 {
 	std::vector<AreaCoordinate> result;
-	if (_current.heading >= 0 && _current.heading < 0.2){ // ok
+	if (_current.heading >= 6.20 || (_current.heading >= 0 && _current.heading <= 0.2)){ // ok
 	cout << "Nord" << endl;
-	AreaCoordinate pos(_current.col, _current.row + 1, _current.heading);
+	AreaCoordinate pos(_current.col, _current.row + 1, 0.0);
 	result.push_back(pos);
 	}
-	if (_current.heading > 1.6 && _current.heading < 1.7){ //1.57
-	AreaCoordinate pos(_current.col + 1, _current.row, _current.heading);
+	if (_current.heading > 1.4 && _current.heading < 1.7){ //1.57
+	AreaCoordinate pos(_current.col + 1, _current.row, 1.57);
 	cout << "Est" << endl;
 	result.push_back(pos);
 	}
 	if (_current.heading < 3.2 && _current.heading > 3) { // 3.14
-	AreaCoordinate pos(_current.col, _current.row - 1, _current.heading);
+	AreaCoordinate pos(_current.col, _current.row - 1, 3.14);
 	cout << "Sud" << endl;
 	result.push_back(pos);
 	}
 	if (_current.heading < 4.8 && _current.heading > 4.6) { // 4.71
 	cout << "Ovest" << endl;
-	AreaCoordinate pos(_current.col - 1, _current.row, _current.heading);
+	AreaCoordinate pos(_current.col - 1, _current.row, 4.71);
 	result.push_back(pos);
 	}
 	// diagonale
 	
-	if (_current.heading < 0.9 && _current.heading > 0.7) { // ok 0.785
-		AreaCoordinate pos(_current.col + 1, _current.row + 1, _current.heading);
+	if (_current.heading < 0.9 && _current.heading > 0.6) { // ok 0.785
+		AreaCoordinate pos(_current.col + 1, _current.row + 1, 0.78);
 		cout << "NE" << endl;
 		result.push_back(pos);
 	}
 	if (_current.heading < 2.4 && _current.heading > 2.2) { // ok 2.35
-		AreaCoordinate pos(_current.col + 1, _current.row - 1, _current.heading);
+		AreaCoordinate pos(_current.col + 1, _current.row - 1, 2.35);
 		cout << "SE" << endl;
 		result.push_back(pos);
 	}
 	if (_current.heading < 4 && _current.heading > 3.8) { // 3.92 
-		AreaCoordinate pos(_current.col - 1, _current.row - 1, _current.heading);
+		AreaCoordinate pos(_current.col - 1, _current.row - 1, 3.92);
 		cout << "SO" << endl;
 		result.push_back(pos);
 	}
-	if (_current.heading > 5.4 && _current.heading < 5.6) { // ok 5.49
-		AreaCoordinate pos(_current.col - 1, _current.row + 1, _current.heading);
+	if (_current.heading > 5.3 && _current.heading < 5.6) { // ok 5.49
+		AreaCoordinate pos(_current.col - 1, _current.row + 1, 5.49);
 		result.push_back(pos);
 		cout << "NO" << endl;
 	}
@@ -918,76 +958,76 @@ std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _c
 
 void DiscretizedArea::rotate(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const
 {
-	AreaCoordinate pos(_current.col, _current.row, Mod2Pi(_current.heading - 0.785));
+	AreaCoordinate pos(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 	result.push_back(pos);
-	AreaCoordinate pos1(_current.col, _current.row, Mod2Pi(_current.heading + 0.785));
+	AreaCoordinate pos1(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 	result.push_back(pos1);
 }
 
 void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const
 {
-	if (_current.heading >= 0 && _current.heading < 0.2)
+	if (_current.heading >= 6.20 || (_current.heading >= 0 && _current.heading <= 0.2) )
 	{
-		AreaCoordinate pos(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 			result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 			result.push_back(pos1);
 	}
-	if (_current.heading < 0.9 && _current.heading > 0.7)
+	if (_current.heading < 0.9 && _current.heading > 0.6)
 	{
-		AreaCoordinate pos(_current.col, _current.row + 1, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 		result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col + 1, _current.row, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col + 1, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 		result.push_back(pos1);
 	}
-	if (_current.heading < 1.7 && _current.heading > 1.6)
+	if (_current.heading < 1.7 && _current.heading > 1.4)
 	{
-		AreaCoordinate pos(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 		result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 		result.push_back(pos1);
 	}
 	if (_current.heading < 2.4 && _current.heading > 2.2)
 	{
-		AreaCoordinate pos(_current.col + 1, _current.row, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col + 1, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 		result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col, _current.row - 1, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col, _current.row - 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 		result.push_back(pos1);
 	}
 	if (_current.heading < 3.2 && _current.heading > 3)
 	{
-		AreaCoordinate pos(_current.col - 1, _current.row -1, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos(_current.col - 1, _current.row -1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 			result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 			result.push_back(pos1);
 	}
 	if (_current.heading < 4 && _current.heading > 3.8)
 	{
-		AreaCoordinate pos(_current.col, _current.row - 1, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col, _current.row - 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 		result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col - 1, _current.row, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col - 1, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 		result.push_back(pos1);
 	}
 	if (_current.heading < 4.8 && _current.heading > 4.6)
 	{
-		AreaCoordinate pos(_current.col - 1, _current.row - 1, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col - 1, _current.row - 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 		result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 		result.push_back(pos1);
 	}
-	if (_current.heading > 5.4 && _current.heading < 5.6)
+	if (_current.heading > 5.3 && _current.heading < 5.6)
 	{
-		AreaCoordinate pos(_current.col - 1, _current.row, Mod2Pi(_current.heading - 0.785));
+		AreaCoordinate pos(_current.col - 1, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 		result.push_back(pos);
 
-		AreaCoordinate pos1(_current.col, _current.row + 1, Mod2Pi(_current.heading + 0.785));
+		AreaCoordinate pos1(_current.col, _current.row + 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 		result.push_back(pos1);
 	}
 

@@ -504,7 +504,7 @@ int main(int argc, char* argv[])
 												NeutralAgents,
 												l_algorithmType, // DISL O PIPIP
 												g_config.Period[l_periodIndex],
-												0.5);
+												0.1);
 										/*std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
 											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
 												l_AreaFilename,
