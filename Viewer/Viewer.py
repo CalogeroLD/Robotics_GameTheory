@@ -8,6 +8,7 @@ from PySide import QtCore
 from pyqtgraph.Qt import QtGui
 import ScatterPlot
 import ZmqThread   # sta importando la classe dichiarata
+import pyqtgraph as pg
 
 if __name__ == "__main__":
     try:
@@ -16,10 +17,29 @@ if __name__ == "__main__":
         th = ZmqThread.ZmqThread(sys.argv[1])
         area_data = th.initStage()  # This runs the sonar map building method
         
+        w = QtGui.QWidget()
+        ## Create some widgets to be placed inside
+        plot = pg.PlotWidget()
+
+        ## Create a grid layout to manage the widgets size and position
+        layout = QtGui.QGridLayout()
+        w.setLayout(layout)
+
+         ## Add widgets to the layout in their proper positions
+        #layout.addWidget(btn, 0, 0) # button goes in upper-left
+        #layout.addWidget(text, 1, 0, 3, 1) # text edit goes in middle-left
+        #layout.addWidget(listw, 2, 0, 3, 1) # list widget goes in bottom-left
+        layout.addWidget(plot, 4, 0) # plot goes on right side, spanning 3 rows
+
+        ## Display the widget as a new window
+        w.show()
+
         viewer = ScatterPlot.Viewer(area_data[1], area_data[0])
         th.data_ready.connect(viewer.updateScatterData)
         th.fov_ready.connect(viewer.updateFovData)
         th.start()
+        layout.addWidget(viewer, 4, 1) # plot goes on right side, spanning 3 rows
+
 
         if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
             logging.info("Lauching the Qt viewer...")
