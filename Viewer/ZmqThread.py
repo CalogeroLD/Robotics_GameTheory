@@ -7,7 +7,8 @@ import numpy as np
 class ZmqThread(QtCore.QThread):
     data_ready = QtCore.Signal(float, float, object)
     fov_ready = QtCore.Signal(int, object, object) # corrisponde a id
-    
+    #aggiunto
+    data_benefit = QtCore.Signal(float)
 
     def __init__(self, sim_file):
         """

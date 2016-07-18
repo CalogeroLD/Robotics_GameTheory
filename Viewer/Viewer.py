@@ -9,6 +9,7 @@ from pyqtgraph.Qt import QtGui
 import ScatterPlot
 import ZmqThread   # sta importando la classe dichiarata
 import pyqtgraph as pg
+import numpy as np
 
 if __name__ == "__main__":
     try:
@@ -19,8 +20,13 @@ if __name__ == "__main__":
         
         w = QtGui.QWidget()
         ## Create some widgets to be placed inside
-        plot = pg.PlotWidget()
-
+        #plot = pg.PlotWidget()
+        #BENEFIT
+        pw = pg.PlotWidget()
+        #date = np.arange(8) * (3600*24*356)
+        pw.plot(y=[1,6,2,4,3,5,6,8], symbol='o')
+        pw.show()
+        pw.setWindowTitle('pyqtgraph example: customPlot')
         ## Create a grid layout to manage the widgets size and position
         layout = QtGui.QGridLayout()
         w.setLayout(layout)
@@ -29,14 +35,15 @@ if __name__ == "__main__":
         #layout.addWidget(btn, 0, 0) # button goes in upper-left
         #layout.addWidget(text, 1, 0, 3, 1) # text edit goes in middle-left
         #layout.addWidget(listw, 2, 0, 3, 1) # list widget goes in bottom-left
-        layout.addWidget(plot, 4, 0) # plot goes on right side, spanning 3 rows
+        layout.addWidget(pw, 4, 0) # plot goes on right side, spanning 3 rows
 
         ## Display the widget as a new window
         w.show()
-
+        
         viewer = ScatterPlot.Viewer(area_data[1], area_data[0])
         th.data_ready.connect(viewer.updateScatterData)
         th.fov_ready.connect(viewer.updateFovData)
+        
         th.start()
         layout.addWidget(viewer, 4, 1) # plot goes on right side, spanning 3 rows
 
