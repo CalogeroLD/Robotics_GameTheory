@@ -207,7 +207,7 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	else
 		height_value = height.GetDouble();
 
-	// dichiarate nell aclasse DiscretizedArea da C.Li Destri
+	// dichiarate nella classe DiscretizedArea da C.Li Destri
 	l_bottomLeft = makePoint(IDSReal2D(0, 0), EucMetric);
 	l_topLeft = makePoint(IDSReal2D(0, height_value), EucMetric);
 	l_topRight = makePoint(IDSReal2D(length_value, height_value), EucMetric);
@@ -911,46 +911,62 @@ std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _c
 {
 	std::vector<AreaCoordinate> result;
 	if (_current.heading >= 6.20 || (_current.heading >= 0 && _current.heading <= 0.2)){ // ok
-	cout << "Nord" << endl;
-	AreaCoordinate pos(_current.col, _current.row + 1, 0.0);
-	result.push_back(pos);
+		AreaCoordinate pos(_current.col, _current.row + 1, 0.0);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			result.push_back(pos);
+			cout << "Nord" << endl;
+		}
 	}
 	if (_current.heading > 1.4 && _current.heading < 1.7){ //1.57
-	AreaCoordinate pos(_current.col + 1, _current.row, 1.57);
-	cout << "Est" << endl;
-	result.push_back(pos);
+		AreaCoordinate pos(_current.col + 1, _current.row, 1.57);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			cout << "Est" << endl;
+			result.push_back(pos);
+		}
 	}
 	if (_current.heading < 3.2 && _current.heading > 3) { // 3.14
-	AreaCoordinate pos(_current.col, _current.row - 1, 3.14);
-	cout << "Sud" << endl;
-	result.push_back(pos);
+		AreaCoordinate pos(_current.col, _current.row - 1, 3.14);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			cout << "Sud" << endl;
+			result.push_back(pos);
+		}
 	}
 	if (_current.heading < 4.8 && _current.heading > 4.6) { // 4.71
-	cout << "Ovest" << endl;
-	AreaCoordinate pos(_current.col - 1, _current.row, 4.71);
-	result.push_back(pos);
+		AreaCoordinate pos(_current.col - 1, _current.row, 4.71);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			result.push_back(pos);
+			cout << "Ovest" << endl;
+		}
 	}
 	// diagonale
 	
 	if (_current.heading < 0.9 && _current.heading > 0.6) { // ok 0.785
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, 0.78);
-		cout << "NE" << endl;
-		result.push_back(pos);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			cout << "NE" << endl;
+			result.push_back(pos);
+		}
 	}
 	if (_current.heading < 2.4 && _current.heading > 2.2) { // ok 2.35
 		AreaCoordinate pos(_current.col + 1, _current.row - 1, 2.35);
-		cout << "SE" << endl;
-		result.push_back(pos);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			cout << "SE" << endl;
+			result.push_back(pos);
+		}
 	}
 	if (_current.heading < 4 && _current.heading > 3.8) { // 3.92 
 		AreaCoordinate pos(_current.col - 1, _current.row - 1, 3.92);
-		cout << "SO" << endl;
-		result.push_back(pos);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			cout << "SO" << endl;
+			result.push_back(pos);
+		}
 	}
 	if (_current.heading > 5.3 && _current.heading < 5.6) { // ok 5.49
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, 5.49);
-		result.push_back(pos);
-		cout << "NO" << endl;
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid()) {
+			result.push_back(pos);
+			cout << "NO" << endl;
+		}
 	}
 	this->changeDirection(_current, result);
 	return result;
@@ -959,8 +975,10 @@ std::vector<AreaCoordinate> DiscretizedArea::goStraight(AreaCoordinate const& _c
 void DiscretizedArea::rotate(AreaCoordinate const& _current, std::vector<AreaCoordinate>& result) const
 {
 	AreaCoordinate pos(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+	if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 	result.push_back(pos);
 	AreaCoordinate pos1(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+	if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 	result.push_back(pos1);
 }
 
@@ -969,65 +987,81 @@ void DiscretizedArea::changeDirection(AreaCoordinate const& _current, std::vecto
 	if (_current.heading >= 6.20 || (_current.heading >= 0 && _current.heading <= 0.2) )
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 			result.push_back(pos1);
 	}
 	if (_current.heading < 0.9 && _current.heading > 0.6)
 	{
 		AreaCoordinate pos(_current.col, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col + 1, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos1);
 	}
 	if (_current.heading < 1.7 && _current.heading > 1.4)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row + 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos1);
 	}
 	if (_current.heading < 2.4 && _current.heading > 2.2)
 	{
 		AreaCoordinate pos(_current.col + 1, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col, _current.row - 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos1);
 	}
 	if (_current.heading < 3.2 && _current.heading > 3)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row -1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
-			result.push_back(pos);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col + 1, _current.row - 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
-			result.push_back(pos1);
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+		result.push_back(pos1);
 	}
 	if (_current.heading < 4 && _current.heading > 3.8)
 	{
 		AreaCoordinate pos(_current.col, _current.row - 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col - 1, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos1);
 	}
 	if (_current.heading < 4.8 && _current.heading > 4.6)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row - 1, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col - 1, _current.row + 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos1);
 	}
 	if (_current.heading > 5.3 && _current.heading < 5.6)
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos);
 
 		AreaCoordinate pos1(_current.col, _current.row + 1, Mod2Pi(_current.heading + IDSMath::PiDiv4));
+		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 		result.push_back(pos1);
 	}
 
