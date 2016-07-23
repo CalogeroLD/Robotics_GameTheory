@@ -130,7 +130,9 @@ void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 		if (!temp_square->isValid())
 			continue;
 		int l_nq = temp_square->getTheNumberOfAgent(); // numero di agenti che vedono il quadrato
+		//std::cout << "num ag che vedono square " << l_nq << std::endl;
 		double l_value = temp_square->getThiefValue(); // valore di probabilità di vedere il thief
+		//std::cout << " valore del thief " << l_value << std::endl;
 		l_value = l_value; //* ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato	
 		l_benefit += l_value / double(l_nq);
 	}

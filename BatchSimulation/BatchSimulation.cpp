@@ -404,7 +404,6 @@ int main(int argc, char* argv[])
 	}
 
 	g_config.MonitorUpdateTime = MonitorUpdateTime;*/
-	
 
     std::string l_folname;
 	if (argc < 1)
@@ -505,13 +504,6 @@ int main(int argc, char* argv[])
 												l_algorithmType, // DISL O PIPIP
 												g_config.Period[l_periodIndex],
 												0.1);
-										/*std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
-											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
-												l_AreaFilename,
-												l_AgentFilename,
-												l_algorithmType,
-												g_config.Period[l_periodIndex],
-												0.1);*/
 
 										if (g_config.TimeEnd.size() > 0) {
 											// Stop algorithm when number of steps reach a given value
@@ -519,32 +511,25 @@ int main(int argc, char* argv[])
 											{
 												if (g_config.TimeEnd[l_TimeEndIndex] == 0)
 													continue;
-
+												
 												l_log << "End Time " << g_config.TimeEnd[l_TimeEndIndex] << endl;
 
 												l_coverage->updateViewer(
-													g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
+													g_config.TimeEnd [l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
 													g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
-													g_config.ThiefJump[l_thiefJumpIndex], 
+													g_config.ThiefJump[l_thiefJumpIndex],
                                                     &publisher,
 													l_coverage->m_stats.getBenefitIndexMediumValue()
                                                 );
-
-
 												/// print data for BoxPlot:
 												double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
 												double l_benefitIndex = l_coverage->m_stats.getBenefitIndexMediumValue(); //errore medio
-												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti
-												
-
+												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti												
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 
 												//l_log << endl;
-
-
 												l_potentialValue << l_potentialIndex << endl;
 									
-
 												l_boxPlot.add(
 													"Potential Index",
 													g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
@@ -553,13 +538,10 @@ int main(int argc, char* argv[])
 													g_config.Period[l_periodIndex],
 													g_config.TimeEnd[l_TimeEndIndex],
 													l_potentialIndex);
-
 												//l_log << "Benefit Index ";
 												//l_log << l_benefitIndex;
 												//l_log << endl;
-
 												l_benefitValue << l_benefitIndex << endl;
-												//prova << l_benefitValue << endl;
 
 												l_boxPlot.add(
 													"Benefit Index",
@@ -569,7 +551,6 @@ int main(int argc, char* argv[])
 													g_config.Period[l_periodIndex],
 													g_config.TimeEnd[l_TimeEndIndex],
 													l_benefitIndex);
-
 												//l_log << "Coverage Index ";
 												//l_log << l_coverageIndex;
 												//l_log << endl;

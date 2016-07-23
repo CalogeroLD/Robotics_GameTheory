@@ -100,6 +100,7 @@ namespace Robotics
 				l_value = tot / double(m_benefitIndex.size());
 			else
 				std::cout << "NoData" << "\t";
+				//std::cout << "dim " << m_benefitIndex.size() << std::endl;
 
 			if(fabs(l_value) < IDSMath::TOLERANCE2)
 				l_value = 0;

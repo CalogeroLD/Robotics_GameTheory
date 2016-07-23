@@ -6,9 +6,9 @@ import numpy as np
 
 class ZmqThread(QtCore.QThread):
     data_ready = QtCore.Signal(float, float, object)
-    fov_ready = QtCore.Signal(int, object, object) # corrisponde a id
+    fov_ready = QtCore.Signal(int, object, object) # corrisponde a intero, id e lettera T o A
     #aggiunto
-    data_benefit = QtCore.Signal(float)
+    data_benefit = QtCore.Signal(float, object) # corrisp al valore di benefit e alla B 
 
     def __init__(self, sim_file):
         """
@@ -29,6 +29,9 @@ class ZmqThread(QtCore.QThread):
 
     def initStage(self):
         return self.area_data
+
+    def initBenefit(self):
+        return self.data_benefit
     
     def run(self):
         context = zmq.Context(1)
@@ -69,8 +72,8 @@ class ZmqThread(QtCore.QThread):
 
             if message_vec[0] == 'B':
                 benefit = float(message_vec[1])
-                self.data_ready.emit(10, 10, "B_{}".format(0))
-
+                print benefit
+                self.data_benefit.emit(benefit, "B")
                
     
     def stop(self):

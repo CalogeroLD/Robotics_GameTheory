@@ -137,29 +137,33 @@ void Robotics::GameTheory::CoverageAlgorithm::updateMonitor()
 //////////////////////////////////////////////////////////////////////////
 bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, double _benefit, bool _continuousUpdate)
 {
-    bool res = true;
+	bool res = true;
 
-    if (m_count == 0)
-        m_stats.reset();
+	if (m_count == 0)
+		m_stats.reset();
 
-    for (int i = 0; i < _nStep; ++i)
-    {
-        if (m_learning)
-        {
-            m_learning->updateTime();
-            m_learning->resetCounter();
+	for (int i = 0; i < _nStep; ++i) // il valore di print
+	{
+		if (m_learning)
+		{
+			m_learning->updateTime();
+			m_learning->resetCounter();
 
-            if (m_count == 0 || (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime)))
-            {
-                this->updateMonitor();
-            }
+			if (m_count == 0 || (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))) // muove theives ogni M
+			{
+				this->updateMonitor();
+			}
 
-            res = m_learning->forwardOneStep();
-            // prelevo le posizioni dei robot
-			if (res) {
-				
+			res = m_learning->forwardOneStep();
+
+			if (!res)
+				return false;
+			// prelevo le posizioni dei robot
+			if (res && (m_count % 10) == 0)
+			{
 				std::vector<v_pos> temp = m_learning->getGuardsPosition1();
-				for (int z = 0; z < temp.size(); z++) {
+				for (int z = 0; z < temp.size(); z++)
+				{
 					zmq::message_t message(50);
 					std::ostringstream stringStream;
 					stringStream << "A," << z << "," << temp[z].x << "," << temp[z].y << "," << temp[z].theta;
@@ -172,7 +176,8 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 
 				//prelevo le posizioni dei thieves
 				std::vector<v_pos> temp1 = this->getThievesPosition1();
-				for (int h = 0; h < temp1.size(); h++) {
+				for (int h = 0; h < temp1.size(); h++)
+				{
 					zmq::message_t message1(50);
 					std::ostringstream stringStream;
 					stringStream << "T," << h << "," << temp1[h].x << "," << temp1[h].y;
@@ -188,80 +193,74 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				zmq::message_t msg2(copyOfStr.size());
 				memcpy(msg2.data(), copyOfStr.c_str(), copyOfStr.size());
 				publisher->send(msg2);
-			}
-			//double benefit = m_stats.getPotentialIndexMediumValue();
-				//std::cout << "benefit fail " << benefit << std::endl;
+			}// chiude learing
+		}
+			if (m_count == 0)
+				this->wakeUpAgentIfSecurityIsLow();
 
+			++m_count;
+			if (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))
+				// ... il monitor sta fermo ma il ladro si muove.
+				m_world->moveThieves(_thiefJump);
 
-            if (!res)
-                return false;
-        }
+			this->wakeUpAgentIfSecurityIsLow();
 
-        if (m_count == 0)
-            this->wakeUpAgentIfSecurityIsLow();
-
-        ++m_count;
-        if (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))
-            // ... il monitor sta fermo ma il ladro si muove.
-            m_world->moveThieves(_thiefJump);
-
-        this->wakeUpAgentIfSecurityIsLow();
-
-        if (_continuousUpdate || i == _nStep - 1)
-            m_stats.addValues(
-                m_learning->getTime(),
-                this->numberOfSquaresCoveredByGuards(),
-                m_learning->getPotentialValue(),
-                m_learning->getBenefitValue(),
-                this->getMaximumPotentialValue(),
-                this->getSteadyNonCoopertativeBenefitValue(),
-                m_learning->getExplorationRate(),
-                m_learning->getBatteryValue());
-    }
-    return res;
+			if (_continuousUpdate || i == _nStep - 1)
+				m_stats.addValues(
+					m_learning->getTime(),
+					this->numberOfSquaresCoveredByGuards(),
+					m_learning->getPotentialValue(),
+					m_learning->getBenefitValue(),
+					this->getMaximumPotentialValue(),
+					this->getSteadyNonCoopertativeBenefitValue(),
+					m_learning->getExplorationRate(),
+					m_learning->getBatteryValue());
+	}
+	return res;
 }
 
 
+//////////////////////////////////////////////////////////////////
 bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpdateTime, int _thiefJump, bool _continuousUpdate)
 {
 	bool res = true;
 
-	if(m_count == 0)
+	if (m_count == 0)
 		m_stats.reset();
 
-	for(int i = 0; i < _nStep; ++i)
+	for (int i = 0; i < _nStep; ++i)
 	{
-		if(m_learning)
+		if (m_learning)
 		{
 			m_learning->updateTime();
 			m_learning->resetCounter();
 
-			if( m_count == 0 || (_monitorUpdateTime > 0 && !( m_count % _monitorUpdateTime )) )
+			if (m_count == 0 || (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime)))
 			{
 				this->updateMonitor();
 			}
 
 			res = m_learning->forwardOneStep();
-			if(!res)
+			if (!res)
 				return false;
 		}
 
-		if(m_count == 0)
+		if (m_count == 0)
 			this->wakeUpAgentIfSecurityIsLow();
 
 		++m_count;
-		if(_monitorUpdateTime > 0 && !( m_count % _monitorUpdateTime ) ) 
+		if (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))
 			// ... il monitor sta fermo ma il ladro si muove.
 			m_world->moveThieves(_thiefJump);
 
 		this->wakeUpAgentIfSecurityIsLow();
 
-		if(_continuousUpdate || i == _nStep-1)
+		if (_continuousUpdate || i == _nStep - 1)
 			m_stats.addValues(
-				m_learning->getTime(), 
-				this->numberOfSquaresCoveredByGuards(), 
-				m_learning->getPotentialValue(), 
-				m_learning->getBenefitValue(), 
+				m_learning->getTime(),
+				this->numberOfSquaresCoveredByGuards(),
+				m_learning->getPotentialValue(),
+				m_learning->getBenefitValue(),
 				this->getMaximumPotentialValue(),
 				this->getSteadyNonCoopertativeBenefitValue(),
 				m_learning->getExplorationRate(),
@@ -269,7 +268,8 @@ bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpd
 	}
 	return res;
 }
-#if 0
+
+//#if 0
 //
 ////////////////////////////////////////////////////////////////////////////
 //void Robotics::GameTheory::CoverageAlgorithm::update(int nStep, int _monitorUpdateTime, int _thiefJump)
@@ -362,7 +362,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpd
 //	return;
 //#endif
 //}
-#endif
+//
 
 //////////////////////////////////////////////////////////////////////////
 void Robotics::GameTheory::CoverageAlgorithm::wakeUpAgentIfSecurityIsLow()

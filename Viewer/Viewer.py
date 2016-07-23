@@ -17,7 +17,8 @@ if __name__ == "__main__":
 
         th = ZmqThread.ZmqThread(sys.argv[1])
         area_data = th.initStage()  # This runs the sonar map building method
-        
+        data_benefit = th.initBenefit()
+
         w = QtGui.QWidget()
         ## Create some widgets to be placed inside
         #plot = pg.PlotWidget()
@@ -35,16 +36,17 @@ if __name__ == "__main__":
         #layout.addWidget(btn, 0, 0) # button goes in upper-left
         #layout.addWidget(text, 1, 0, 3, 1) # text edit goes in middle-left
         #layout.addWidget(listw, 2, 0, 3, 1) # list widget goes in bottom-left
-        layout.addWidget(pw, 4, 0) # plot goes on right side, spanning 3 rows
+        layout.addWidget(pw, 1, 0) # plot goes on right side, spanning 3 rows
 
         ## Display the widget as a new window
         w.show()
         
-        viewer = ScatterPlot.Viewer(area_data[1], area_data[0])
+        viewer = ScatterPlot.Viewer(area_data[1], area_data[0], data_benefit)
         th.data_ready.connect(viewer.updateScatterData)
         th.fov_ready.connect(viewer.updateFovData)
+        th.data_benefit.connect(viewer.updatebenefit)
         th.start()
-        layout.addWidget(viewer, 4, 1) # plot goes on right side, spanning 3 rows
+        layout.addWidget(viewer, 1, 1) # plot goes on right side, spanning 3 rows
 
 
         if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
