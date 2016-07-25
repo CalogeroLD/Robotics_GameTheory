@@ -11,14 +11,9 @@ import ZmqThread   # sta importando la classe dichiarata
 import pyqtgraph as pg
 import numpy as np
 
-if __name__ == "__main__":
-    try:
-        app = QtGui.QApplication([])
 
-        th = ZmqThread.ZmqThread(sys.argv[1])
-        area_data = th.initStage()  # This runs the sonar map building method
-        data_benefit = th.initBenefit()
 
+'''
         w = QtGui.QWidget()
         ## Create some widgets to be placed inside
         #plot = pg.PlotWidget()
@@ -40,13 +35,18 @@ if __name__ == "__main__":
 
         ## Display the widget as a new window
         w.show()
-        
-        viewer = ScatterPlot.Viewer(area_data[1], area_data[0], data_benefit)
+'''    
+if __name__ == "__main__":
+    try:
+        app = QtGui.QApplication([])
+        th = ZmqThread.ZmqThread(sys.argv[1])
+        area_data = th.initStage()  
+        viewer = ScatterPlot.Viewer(area_data[1], area_data[0])
         th.data_ready.connect(viewer.updateScatterData)
         th.fov_ready.connect(viewer.updateFovData)
         th.data_benefit.connect(viewer.updatebenefit)
         th.start()
-        layout.addWidget(viewer, 1, 1) # plot goes on right side, spanning 3 rows
+        # layout.addWidget(viewer, 1, 1) # plot goes on right side, spanning 3 rows
 
 
         if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):

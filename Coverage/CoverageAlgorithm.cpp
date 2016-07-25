@@ -155,7 +155,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 			}
 
 			res = m_learning->forwardOneStep();
-
+			
 			if (!res)
 				return false;
 			// prelevo le posizioni dei robot
@@ -190,7 +190,8 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				double Potential = m_learning->getPotentialValue();
 				cout << "Potential Value " << Potential << endl;
 
-				
+				double benefitSquadra = m_learning->getBenefitValue();
+				cout << "Benefit Squadra: " << benefitSquadra << endl;
 
 				zmq::message_t message2(50);
 				std::ostringstream stringStream;

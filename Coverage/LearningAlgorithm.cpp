@@ -219,6 +219,7 @@ bool LearningAlgorithm::forwardOneStep()
 	return true;
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 bool LearningAlgorithm::forwardOneStep(std::shared_ptr<Guard> _agent)
 {

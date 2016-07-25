@@ -60,6 +60,8 @@ namespace Robotics
 			virtual bool forwardOneStep(std::shared_ptr<Guard> _agent);
 			virtual bool forwardOneStep();
 
+			//double getRobotUtility(set<GuardPtr>::iterator it);
+
 			inline void setGuards(std::set< std::shared_ptr<Guard> > _guards) {m_guards = _guards;}
 
 			virtual void updateTime() {++m_time;}

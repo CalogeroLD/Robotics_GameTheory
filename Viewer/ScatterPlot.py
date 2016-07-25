@@ -4,12 +4,13 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import threading
 
+max_plot_dim = 100
+
 class ScatterPlotData:
     def __init__(self, max_dim):
         self.x_data = np.ndarray((0, 0))
         self.y_data = np.ndarray((0, 0))
         self.max_dim = max_dim
-        self.b_data = np.ndarray((0, 0))
 
     def add_data(self, x, y):
         if self.x_data.shape[0] >= self.max_dim:
@@ -21,27 +22,20 @@ class ScatterPlotData:
         else:
             self.x_data = np.append(self.x_data, x)
             self.y_data = np.append(self.y_data, y)
-    
-    def add_benefit(self, b):
-        if self.b_data.shape[0] >= self.max_dim: 
-            self.b_data = np.roll(self.b_data, -1)
-            self.b_data[-1] = b
-        else:
-            self.b_data = np.append(self.b_data, b)
-
 
 
 class Viewer(QtGui.QWidget):
-    def __init__(self, x_lim, y_lim, b):
+    def __init__(self, x_lim, y_lim):
         super(Viewer, self).__init__()
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
+        self.benefitPlot = pg.PlotWidget(setWindowTitle="Benefit")
         self.fovData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
-        self.timer
         self.timer.start(100, self)
+        self.benefitValue = np.ndarray((0,0))
         
 
     def initUI(self, x_lim, y_lim):
@@ -51,12 +45,16 @@ class Viewer(QtGui.QWidget):
         self.scatterPlot.setLabel('left', "North", units='m')
         self.scatterPlot.setLabel('bottom', "East", units='m')
         self.scatterPlot.showGrid(x=True, y=True)
+        self.benefitPlot.showGrid(x=True, y=True)
+        self.benefitPlot.enableAutoRange()
+        self.benefit_p = self.benefitPlot.plot(y=[0])
+        self.scatterPlot.setLabel('bottom', "Time")
         pg.setConfigOptions(antialias=True)
-
 
         layout = QtGui.QGridLayout()
         self.setLayout(layout)
         layout.addWidget(self.scatterPlot, 0, 0)
+        layout.addWidget(self.benefitPlot, 1, 0)
         self.show()
 
     @QtCore.Slot(float, float, object)
@@ -69,9 +67,9 @@ class Viewer(QtGui.QWidget):
             ## Create text object, use HTML tags to specify color/size
             text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 0, 255))
             self.scatterPlot.addItem(text)
-            text.setPos(7, 7)
+            text.setPos(30, 30)
 
-            r = pg.CircleROI(7.0, 7.0)
+            r = pg.CircleROI(30.0, 30.0)
             self.scatterPlot.addItem(r)
 
             # Soluzione temporanea per la selezione del colore
@@ -108,13 +106,16 @@ class Viewer(QtGui.QWidget):
                 X = self.fovData[i]['x']
                 Y = self.fovData[i]['y']
                 self.fovData[i]['plot'].setData(x=X, y=Y)
+        if self.benefitValue.shape[0] > 0:
+            self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue)
         self.semaphore.release()
 
-    QtCore.Slot(object, float)
+    QtCore.Slot(float)
     def updatebenefit(self, benefit):
         self.semaphore.acquire()
-        for h in self.scatterData:
-            elem = self.scatterData[h]
-            if elem[0].b_data.shape[0] > 0:
-                elem[1].setData(x=elem[0].b_data)      
+        if self.benefitValue.shape[0] > max_plot_dim: 
+            self.benefitValue = np.roll(self.benefitValue, -1)
+            self.benefitValue[-1] = benefit
+        else:
+            self.benefitValue = np.append(self.benefitValue, benefit)
         self.semaphore.release()
