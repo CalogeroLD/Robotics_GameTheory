@@ -9,7 +9,7 @@
 
 //	Coverage
 #include "CoverageExport.h"
-
+#include "DiscretizedArea.h"
 #include "BaseGeometry/Point2D.h"
 #include "Agent.h"
 #include <memory>
@@ -44,8 +44,7 @@ namespace Robotics
 		protected:
 			int m_time;
 			std::set< std::shared_ptr<Guard> > m_guards;
-			// aggiunta da C. Li Destri //
-			//std::set< std::shared_ptr<Thief> > m_thief;
+			
 			std::shared_ptr<DiscretizedArea> m_space;
 
 			double m_experimentalRate;

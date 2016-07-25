@@ -159,7 +159,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 			if (!res)
 				return false;
 			// prelevo le posizioni dei robot
-			if (res && (m_count % 10) == 0)
+			if (res && (m_count % 5) == 0)
 			{
 				std::vector<v_pos> temp = m_learning->getGuardsPosition1();
 				for (int z = 0; z < temp.size(); z++)
@@ -186,9 +186,15 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 					memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
 					publisher->send(msg1);
 				}
+				// Potenziale di gioco
+				double Potential = m_learning->getPotentialValue();
+				cout << "Potential Value " << Potential << endl;
+
+				
+
 				zmq::message_t message2(50);
 				std::ostringstream stringStream;
-				stringStream << "B," << _benefit;
+				stringStream << "B," << Potential;
 				std::string copyOfStr = stringStream.str();
 				zmq::message_t msg2(copyOfStr.size());
 				memcpy(msg2.data(), copyOfStr.c_str(), copyOfStr.size());
@@ -557,12 +563,6 @@ void CoverageAlgorithm::getSinksCoverage( std::vector< std::vector<IDS::BaseGeom
 	return m_world->getSinksCoverage(_areas);
 }
 
-////////////////////////////////////////////////////////////////////////////
-//int CoverageAlgorithm::getTime() const
-//{
-//	return m_time;
-//}
-
 //////////////////////////////////////////////////////////////////////////
 int CoverageAlgorithm::getNumberOfSteps(double _stopRate)
 {
@@ -858,8 +858,6 @@ void importThievesFromFile(rapidjson::Value & _thieves, std::vector<AgentDriver>
 	}
 	
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////
 /*std::shared_ptr<CoverageAlgorithm> Robotics::GameTheory::CoverageAlgorithm::createFromFile(std::string const & _filename, int _type, int _period)

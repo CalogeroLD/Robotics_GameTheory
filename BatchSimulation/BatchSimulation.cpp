@@ -280,8 +280,8 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 		_log << "Epsilon";
 		for (int i = 0; i < Epsilon.Size(); i++)
 		{
-			int tmp = Epsilon[i].GetDouble();
-			cout << Epsilon[i].GetDouble();
+			double tmp = Epsilon[i].GetDouble();
+			cout << Epsilon[i].GetDouble() << '\t';
 			Epsilon_v.push_back(tmp);
 		}
 		g_config.Epsilon = Epsilon_v;

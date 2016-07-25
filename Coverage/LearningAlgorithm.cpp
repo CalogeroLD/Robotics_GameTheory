@@ -27,7 +27,8 @@ double LearningAlgorithm::computeExplorationRate(std::shared_ptr<Guard> _agent)
 
 	if(!_agent)
 		_agent = *m_guards.begin();
-
+	
+	//double rate = max(double(Robotics::GameTheory::DiscretizedArea::m_numCol), double(Robotics::GameTheory::DiscretizedArea::m_numCol)) + 1.;
 	double rate = max(double(Robotics::GameTheory::DISCRETIZATION_COL), double(Robotics::GameTheory::DISCRETIZATION_ROW)) + 1.;
 	return pow(double(m_time)/double(_agent->getTrajectoryLength()) , -double(m_guards.size())/rate);
 }
@@ -212,6 +213,7 @@ bool LearningAlgorithm::forwardOneStep()
 	{
 		//	ogni agente guardia calcola la prima utilità:
 		this->compute(*it);
+		double payoff = (*it)->getCurrentPayoff();
 	}
 
 	return true;
