@@ -188,10 +188,10 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				}
 				// Potenziale di gioco
 				double potential = m_learning->getPotentialValue();
-				cout << "Potential Value " << potential << endl;
+				//cout << "Potential Value " << potential << endl;
 
 				double benefitSquadra = m_learning->getBenefitValue();
-				cout << "Benefit Squadra: " << benefitSquadra << endl;
+				//cout << "Benefit Squadra: " << benefitSquadra << endl;
 
 				zmq::message_t message2(50);
 				std::ostringstream stringStream;
@@ -201,13 +201,13 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				memcpy(msg2.data(), copyOfStr.c_str(), copyOfStr.size());
 				publisher->send(msg2);
 
-				/*zmq::message_t message3(50);
-				std::ostringstream stringStream;
-				stringStream << "P," << potential;
-				std::string copyOfStr = stringStream.str();
-				zmq::message_t msg3(copyOfStr.size());
-				memcpy(msg3.data(), copyOfStr.c_str(), copyOfStr.size());
-				publisher->send(msg3);*/
+				zmq::message_t message3(50);
+				std::ostringstream stringStream_p;
+				stringStream_p << "P," << potential;
+				std::string copyOfStr_p = stringStream_p.str();
+				zmq::message_t msg3(copyOfStr_p.size());
+				memcpy(msg3.data(), copyOfStr_p.c_str(), copyOfStr_p.size());
+				publisher->send(msg3);
 
 			}// chiude learing
 		}

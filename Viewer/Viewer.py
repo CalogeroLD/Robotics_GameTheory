@@ -45,6 +45,7 @@ if __name__ == "__main__":
         th.data_ready.connect(viewer.updateScatterData) #creates a connection between QtSignal and QtCore
         th.fov_ready.connect(viewer.updateFovData)
         th.data_benefit.connect(viewer.updatebenefit)
+        th.data_potential.connect(viewer.updatePotential)
         th.start()
         # layout.addWidget(viewer, 1, 1) # plot goes on right side, spanning 3 rows
 

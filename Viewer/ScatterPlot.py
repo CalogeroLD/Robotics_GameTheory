@@ -30,13 +30,15 @@ class Viewer(QtGui.QWidget):
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
         self.benefitPlot = pg.PlotWidget(setWindowTitle="Benefit")  #plot widget added for benefit
-
+        self.potentialPlot = pg.PlotWidget(setWindowTitle="Benefit")    #plot widget added for potential of game 
         self.fovData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
         self.timer.start(100, self)
+        
         self.benefitValue = np.ndarray((0,0)) #array with stored benefit values
+        self.potentialValue = np.ndarray((0,0)) #array with storedo potential data
         
 
     def initUI(self, x_lim, y_lim):
@@ -46,17 +48,23 @@ class Viewer(QtGui.QWidget):
         self.scatterPlot.setLabel('left', "North", units='m')
         self.scatterPlot.setLabel('bottom', "East", units='m')
         self.scatterPlot.showGrid(x=True, y=True)
+
         self.benefitPlot.showGrid(x=True, y=True)
         self.benefitPlot.enableAutoRange()
         self.benefit_p = self.benefitPlot.plot(y=[0])
-        self.scatterPlot.setLabel('bottom', "Time")
+
+        self.potentialPlot.showGrid(x=True, y=True)
+        self.potentialPlot.enableAutoRange()
+        self.potential_p = self.potentialPlot.plot(y=[0])
+
         pg.setConfigOptions(antialias=True)
 
         # setting of layout od viwer
         layout = QtGui.QGridLayout()
         self.setLayout(layout)
-        layout.addWidget(self.scatterPlot, 0, 0)
+        layout.addWidget(self.scatterPlot, 0, 0, 2, 1)
         layout.addWidget(self.benefitPlot, 0, 1)
+        layout.addWidget(self.potentialPlot, 1, 1)
         self.show()
 
     @QtCore.Slot(float, float, object)  #definition of Slot referring to a Signal
@@ -95,7 +103,8 @@ class Viewer(QtGui.QWidget):
             self.fovData[id]['x'] = x
             self.fovData[id]['y'] = y
         self.semaphore.release()
-
+    
+    # takes data and updates plots
     def timerEvent(self, *args, **kwargs):
         self.semaphore.acquire()
         for e in self.scatterData:
@@ -110,14 +119,31 @@ class Viewer(QtGui.QWidget):
                 self.fovData[i]['plot'].setData(x=X, y=Y)
         if self.benefitValue.shape[0] > 0:  #se arrivano dati
             self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue) # setta gli assi del plot
+        if self.potentialValue.shape[0] > 0:
+            self.potential_p.setData(np.arange(self.potentialValue.shape[0]), self.potentialValue) #arange returns a ndarray
         self.semaphore.release()
 
     QtCore.Slot(float)
     def updatebenefit(self, benefit):
         self.semaphore.acquire()
+        print self.benefitValue.shape[0], ' dim del range dati '
         if self.benefitValue.shape[0] > max_plot_dim: 
             self.benefitValue = np.roll(self.benefitValue, -1)
             self.benefitValue[-1] = benefit
         else:
             self.benefitValue = np.append(self.benefitValue, benefit)
         self.semaphore.release()
+
+
+    QtCore.Slot(float)
+    def updatePotential(self, potential):
+        self.semaphore.acquire()
+        if self.potentialValue.shape[0] > max_plot_dim:
+            self.potentialValue = np.roll(self.potentialValue, -1)
+            self.potentialValue[-1] = potential
+        else:
+            self.potentialValue = np.append(self.potentialValue, potential)
+        self.semaphore.release()
+
+
+        
