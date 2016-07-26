@@ -77,10 +77,15 @@ class Viewer(QtGui.QWidget):
             ## Create text object, use HTML tags to specify color/size
             text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 0, 255))
             self.scatterPlot.addItem(text)
-            text.setPos(30, 30)
+            text.setPos(1500, 1500)
             # create a circle too indicate position of mothership
-            r = pg.CircleROI(30.0, 30.0)
+            r = pg.CircleROI(1000.0, 1000.0)
             self.scatterPlot.addItem(r)
+
+            r1 = pg.QtGui.QGraphicsRectItem(1000, 1000, 166, 166)
+            r1.setPen(pg.mkPen((0, 0, 0, 100)))
+            r1.setBrush(pg.mkBrush('r'))
+            self.scatterPlot.addItem(r1)
 
             # Soluzione temporanea per la selezione del colore
             scatter = self.scatterPlot.plot(x=[x], y=[y], pen=colors[int(name.split('_')[1]) % len(colors)], symbol='+', symbolSize=5, pxMode=True)
@@ -126,7 +131,7 @@ class Viewer(QtGui.QWidget):
     QtCore.Slot(float)
     def updatebenefit(self, benefit):
         self.semaphore.acquire()
-        print self.benefitValue.shape[0], ' dim del range dati '
+        print self.benefitValue.shape[0], # dim del range dati
         if self.benefitValue.shape[0] > max_plot_dim: 
             self.benefitValue = np.roll(self.benefitValue, -1)
             self.benefitValue[-1] = benefit
