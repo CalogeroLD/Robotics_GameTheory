@@ -42,7 +42,7 @@ if __name__ == "__main__":
         th = ZmqThread.ZmqThread(sys.argv[1])
         area_data = th.initStage()  
         viewer = ScatterPlot.Viewer(area_data[1], area_data[0])
-        th.data_ready.connect(viewer.updateScatterData)
+        th.data_ready.connect(viewer.updateScatterData) #creates a connection between QtSignal and QtCore
         th.fov_ready.connect(viewer.updateFovData)
         th.data_benefit.connect(viewer.updatebenefit)
         th.start()

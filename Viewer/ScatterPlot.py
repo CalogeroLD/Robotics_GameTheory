@@ -4,7 +4,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import threading
 
-max_plot_dim = 100
+max_plot_dim = 100 #benefit che vedo sono relativi agli ultimi 100 step
 
 class ScatterPlotData:
     def __init__(self, max_dim):
@@ -29,13 +29,14 @@ class Viewer(QtGui.QWidget):
         super(Viewer, self).__init__()
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
-        self.benefitPlot = pg.PlotWidget(setWindowTitle="Benefit")
+        self.benefitPlot = pg.PlotWidget(setWindowTitle="Benefit")  #plot widget added for benefit
+
         self.fovData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
         self.timer.start(100, self)
-        self.benefitValue = np.ndarray((0,0))
+        self.benefitValue = np.ndarray((0,0)) #array with stored benefit values
         
 
     def initUI(self, x_lim, y_lim):
@@ -51,13 +52,14 @@ class Viewer(QtGui.QWidget):
         self.scatterPlot.setLabel('bottom', "Time")
         pg.setConfigOptions(antialias=True)
 
+        # setting of layout od viwer
         layout = QtGui.QGridLayout()
         self.setLayout(layout)
         layout.addWidget(self.scatterPlot, 0, 0)
-        layout.addWidget(self.benefitPlot, 1, 0)
+        layout.addWidget(self.benefitPlot, 0, 1)
         self.show()
 
-    @QtCore.Slot(float, float, object)
+    @QtCore.Slot(float, float, object)  #definition of Slot referring to a Signal
     def updateScatterData(self, x, y, name):
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         self.semaphore.acquire()
@@ -68,7 +70,7 @@ class Viewer(QtGui.QWidget):
             text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 0, 255))
             self.scatterPlot.addItem(text)
             text.setPos(30, 30)
-
+            # create a circle too indicate position of mothership
             r = pg.CircleROI(30.0, 30.0)
             self.scatterPlot.addItem(r)
 
@@ -106,8 +108,8 @@ class Viewer(QtGui.QWidget):
                 X = self.fovData[i]['x']
                 Y = self.fovData[i]['y']
                 self.fovData[i]['plot'].setData(x=X, y=Y)
-        if self.benefitValue.shape[0] > 0:
-            self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue)
+        if self.benefitValue.shape[0] > 0:  #se arrivano dati
+            self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue) # setta gli assi del plot
         self.semaphore.release()
 
     QtCore.Slot(float)
