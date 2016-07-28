@@ -1,5 +1,6 @@
 import numpy as np
 from PySide import QtCore
+import PySide
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import threading
@@ -29,8 +30,8 @@ class Viewer(QtGui.QWidget):
         super(Viewer, self).__init__()
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
-        self.benefitPlot = pg.PlotWidget(setWindowTitle="Benefit")  #plot widget added for benefit
-        self.potentialPlot = pg.PlotWidget(setWindowTitle="Benefit")    #plot widget added for potential of game 
+        self.benefitPlot = pg.PlotWidget(title="Team Benefit")  #plot widget added for benefit
+        self.potentialPlot = pg.PlotWidget(title="Potential of Game")    #plot widget added for potential of game 
         self.fovData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
@@ -51,10 +52,12 @@ class Viewer(QtGui.QWidget):
 
         self.benefitPlot.showGrid(x=True, y=True)
         self.benefitPlot.enableAutoRange()
-        self.benefit_p = self.benefitPlot.plot(y=[0])
+        self.benefitPlot.setLabel('bottom', "time step")
+        self.benefit_p = self.benefitPlot.plot(y=[0], pen = 'b')
 
         self.potentialPlot.showGrid(x=True, y=True)
         self.potentialPlot.enableAutoRange()
+        self.potentialPlot.setLabel('bottom', "time step")
         self.potential_p = self.potentialPlot.plot(y=[0])
 
         pg.setConfigOptions(antialias=True)
@@ -73,23 +76,30 @@ class Viewer(QtGui.QWidget):
         self.semaphore.acquire()
         print name
         if name not in self.scatterData:
-
-            ## Create text object, use HTML tags to specify color/size
-            text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 0, 255))
-            self.scatterPlot.addItem(text)
-            text.setPos(1500, 1500)
+            
             # create a circle too indicate position of mothership
-            r = pg.CircleROI(1000.0, 1000.0)
-            self.scatterPlot.addItem(r)
-
-            r1 = pg.QtGui.QGraphicsRectItem(1000, 1000, 166, 166)
+            #r = pg.CircleROI(1000.0, 1000.0)
+            #self.scatterPlot.addItem(r)
+            
+            # radar of mother-ship
+            r2 = pg.QtGui.QGraphicsRectItem(750, 750, 500, 500)
+            r2.setPen(pg.mkPen((0, 0, 0, 100)))
+            r2.setBrush(pg.mkBrush('b'))
+            self.scatterPlot.addItem(r2)
+            # mothership
+            r1 = pg.QtGui.QGraphicsRectItem(950, 995, 100, 10) #centered in (r,c) : (r, c, r-r_span/2, c-c_span/2)
             r1.setPen(pg.mkPen((0, 0, 0, 100)))
             r1.setBrush(pg.mkBrush('r'))
             self.scatterPlot.addItem(r1)
 
+            ## Create text object, use HTML tags to specify color/size
+            text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 255, 0))
+            self.scatterPlot.addItem(text)
+            text.setPos(900, 950)
+
             # Soluzione temporanea per la selezione del colore
             scatter = self.scatterPlot.plot(x=[x], y=[y], pen=colors[int(name.split('_')[1]) % len(colors)], symbol='+', symbolSize=5, pxMode=True)
-            self.scatterData[name] = [ScatterPlotData(50), scatter]
+            self.scatterData[name] = [ScatterPlotData(10), scatter]
             cPoint = pg.CurvePoint(scatter)
             self.scatterData[name].append(cPoint)  # Construction of curve point
             self.scatterPlot.addItem(cPoint)  # Add to scatterPlot

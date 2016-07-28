@@ -36,7 +36,7 @@ namespace Robotics
 	namespace GameTheory 
 	{
 		const double g_maxValue = 100.;
-		const double g_maxValuePossible = 1;// (g_maxValue / 8. + g_maxValue / 7. * 2. + g_maxValue / 6. * 3. + g_maxValue / 5. * 4. + g_maxValue / 4. * 3. + g_maxValue / 3. * 2. + g_maxValue / 2.) * 4 + g_maxValue*5. + g_maxValue / 2. * 4 + g_maxValue / 3. * 4 + g_maxValue / 4. * 4;
+		const double g_maxValuePossible = (g_maxValue / 8. + g_maxValue / 7. * 2. + g_maxValue / 6. * 3. + g_maxValue / 5. * 4. + g_maxValue / 4. * 3. + g_maxValue / 3. * 2. + g_maxValue / 2.) * 4 + g_maxValue*5. + g_maxValue / 2. * 4 + g_maxValue / 3. * 4 + g_maxValue / 4. * 4;
 
 		class Graph;
 		class Agent;
