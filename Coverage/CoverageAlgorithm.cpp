@@ -135,7 +135,7 @@ void Robotics::GameTheory::CoverageAlgorithm::updateMonitor()
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, double _benefit, bool _continuousUpdate)
+bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, int SquareCovered, bool _continuousUpdate)
 {
 	bool res = true;
 
@@ -164,6 +164,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				std::vector<v_pos> temp = m_learning->getGuardsPosition1();
 				for (int z = 0; z < temp.size(); z++)
 				{
+					
 					zmq::message_t message(50);
 					std::ostringstream stringStream;
 					stringStream << "A," << z << "," << temp[z].x << "," << temp[z].y << "," << temp[z].theta;
@@ -191,7 +192,16 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				//cout << "Potential Value " << potential << endl;
 
 				double benefitSquadra = m_learning->getBenefitValue();
+				std::set<std::shared_ptr<Guard>> gruppoGuardie = m_world->getGuards();
+
+				/*for (std::set<std::shared_ptr<Guard>>::iterator it = gruppoGuardie.begin(); it != gruppoGuardie.end(); ++it) {
+
+				}*/
 				//cout << "Benefit Squadra: " << benefitSquadra << endl;
+
+				int IndexOfCoverage = m_world->getSpace()->numberOfSquaresCoveredByGuards();
+				
+				cout << "SquareCovered: " << IndexOfCoverage << endl;
 
 				zmq::message_t message2(50);
 				std::ostringstream stringStream;
@@ -209,7 +219,15 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				memcpy(msg3.data(), copyOfStr_p.c_str(), copyOfStr_p.size());
 				publisher->send(msg3);
 
-			}// chiude learing
+				zmq::message_t message4(50);
+				std::ostringstream stringStream_c;
+				stringStream_c << "C," << IndexOfCoverage;
+				std::string copyOfStr_c = stringStream_c.str();
+				zmq::message_t msg4(copyOfStr_c.size());
+				memcpy(msg4.data(), copyOfStr_c.c_str(), copyOfStr_c.size());
+				publisher->send(msg4);
+
+			}// chiude learning
 		}
 			if (m_count == 0)
 				this->wakeUpAgentIfSecurityIsLow();

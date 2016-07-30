@@ -519,8 +519,10 @@ int main(int argc, char* argv[])
 													g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
 													g_config.ThiefJump[l_thiefJumpIndex],
                                                     &publisher,
-													l_coverage->m_stats.getBenefitIndexMediumValue()
+													l_coverage->numberOfSquaresCoveredByGuards()
                                                 );
+
+											
 												/// print data for BoxPlot:
 												double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
 												double l_benefitIndex = l_coverage->m_stats.getBenefitIndexMediumValue(); //errore medio

@@ -133,7 +133,7 @@ namespace Robotics
 			*/
 			/************************************************************************/
 			bool update(int nStep, int _monitorUpdateTime = 5, int _thiefJump = 1, bool _continuousUpdate = true);
-            bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, double _benefit, bool _continuousUpdate = true);
+            bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, int SquareCovered, bool _continuousUpdate = true);
 
 			/************************************************************************/
 			/*	\brief Initialize position of agent uniformly at random in the area.

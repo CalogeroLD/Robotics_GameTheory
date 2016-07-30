@@ -32,6 +32,7 @@ class Viewer(QtGui.QWidget):
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
         self.benefitPlot = pg.PlotWidget(title="Team Benefit")  #plot widget added for benefit
         self.potentialPlot = pg.PlotWidget(title="Potential of Game")    #plot widget added for potential of game 
+        self.coveredsquarePlot = pg.PlotWidget(title="Squares Covered") #plot widget for number of viewed squared
         self.fovData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
@@ -40,7 +41,7 @@ class Viewer(QtGui.QWidget):
         
         self.benefitValue = np.ndarray((0,0)) #array with stored benefit values
         self.potentialValue = np.ndarray((0,0)) #array with storedo potential data
-        
+        self.coveredsquareValue = np.ndarray((0,0))
 
     def initUI(self, x_lim, y_lim):
         self.resize(600, 600)
@@ -60,14 +61,20 @@ class Viewer(QtGui.QWidget):
         self.potentialPlot.setLabel('bottom', "time step")
         self.potential_p = self.potentialPlot.plot(y=[0])
 
+        self.coveredsquarePlot.showGrid(x=True, y=True)
+        self.coveredsquarePlot.enableAutoRange()
+        self.coveredsquarePlot.setLabel('bottom', "time step")
+        self.coveredsquare_p = self.coveredsquarePlot.plot(y=[0], pen = 'g')
+
         pg.setConfigOptions(antialias=True)
 
         # setting of layout od viwer
         layout = QtGui.QGridLayout()
         self.setLayout(layout)
-        layout.addWidget(self.scatterPlot, 0, 0, 2, 1)
+        layout.addWidget(self.scatterPlot, 0, 0, 3, 1)
         layout.addWidget(self.benefitPlot, 0, 1)
         layout.addWidget(self.potentialPlot, 1, 1)
+        layout.addWidget(self.coveredsquarePlot, 2, 1)
         self.show()
 
     @QtCore.Slot(float, float, object)  #definition of Slot referring to a Signal
@@ -136,6 +143,8 @@ class Viewer(QtGui.QWidget):
             self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue) # setta gli assi del plot
         if self.potentialValue.shape[0] > 0:
             self.potential_p.setData(np.arange(self.potentialValue.shape[0]), self.potentialValue) #arange returns a ndarray
+        if self.coveredsquareValue.shape[0] > 0:
+            self.coveredsquare_p.setData(np.arange(self.coveredsquareValue.shape[0]), self.coveredsquareValue)
         self.semaphore.release()
 
     QtCore.Slot(float)
@@ -149,7 +158,6 @@ class Viewer(QtGui.QWidget):
             self.benefitValue = np.append(self.benefitValue, benefit)
         self.semaphore.release()
 
-
     QtCore.Slot(float)
     def updatePotential(self, potential):
         self.semaphore.acquire()
@@ -160,5 +168,13 @@ class Viewer(QtGui.QWidget):
             self.potentialValue = np.append(self.potentialValue, potential)
         self.semaphore.release()
 
-
+    QtCore.Slot(float)
+    def updatecoveredSquare(self, coveredsquare):
+        self.semaphore.acquire()
+        if self.coveredsquareValue.shape[0] > max_plot_dim:
+            self.coveredsquareValue = np.roll(self.coveredsquareValue, -1)
+            self.coveredsquareValue[-1] = coveredsquare
+        else:
+            self.coveredsquareValue = np.append(self.coveredsquareValue, coveredsquare)
+        self.semaphore.release()
         
