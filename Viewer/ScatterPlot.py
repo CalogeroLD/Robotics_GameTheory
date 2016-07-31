@@ -54,7 +54,7 @@ class Viewer(QtGui.QWidget):
         self.benefitPlot.showGrid(x=True, y=True)
         self.benefitPlot.enableAutoRange()
         self.benefitPlot.setLabel('bottom', "time step")
-        self.benefit_p = self.benefitPlot.plot(y=[0], pen = 'b')
+        self.benefit_p = self.benefitPlot.plot(y=[0], pen = 'r')
 
         self.potentialPlot.showGrid(x=True, y=True)
         self.potentialPlot.enableAutoRange()
@@ -81,7 +81,10 @@ class Viewer(QtGui.QWidget):
     def updateScatterData(self, x, y, name):
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         self.semaphore.acquire()
-        print name
+        if name == "T_0":
+            print " Thief ", name
+        else:
+            print name
         if name not in self.scatterData:
             
             # create a circle too indicate position of mothership
@@ -150,7 +153,7 @@ class Viewer(QtGui.QWidget):
     QtCore.Slot(float)
     def updatebenefit(self, benefit):
         self.semaphore.acquire()
-        print self.benefitValue.shape[0], # dim del range dati
+        #print self.benefitValue.shape[0], # dim del range dati
         if self.benefitValue.shape[0] > max_plot_dim: 
             self.benefitValue = np.roll(self.benefitValue, -1)
             self.benefitValue[-1] = benefit

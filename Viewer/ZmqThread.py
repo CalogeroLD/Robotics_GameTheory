@@ -80,17 +80,17 @@ class ZmqThread(QtCore.QThread):
 
             if message_vec[0] == 'B':
                 benefit = float(message_vec[1])
-                print benefit
+                #print benefit
                 self.data_benefit.emit(benefit, "B")
 
             if message_vec[0] == 'P':
                 potential = float(message_vec[1])
-                print potential
+                #print potential
                 self.data_potential.emit(potential, "P")
             
             if message_vec[0] == 'C':
                 coveredsquare = float(message_vec[1])
-                print coveredsquare
+                #print coveredsquare
                 self.data_coveredsquare.emit(coveredsquare, "P")
     
     def stop(self):

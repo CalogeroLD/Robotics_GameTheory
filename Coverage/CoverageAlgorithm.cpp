@@ -152,6 +152,20 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 			if (m_count == 0 || (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))) // muove theives ogni M
 			{
 				this->updateMonitor();
+
+				std::cout << "Qui " << _monitorUpdateTime << endl;
+				//prelevo le posizioni dei thieves
+				std::vector<v_pos> temp1 = this->getThievesPosition1();
+				for (int h = 0; h < temp1.size(); h++)
+				{
+					zmq::message_t message1(50);
+					std::ostringstream stringStream;
+					stringStream << "T," << h << "," << temp1[h].x << "," << temp1[h].y;
+					std::string copyOfStr = stringStream.str();
+					zmq::message_t msg1(copyOfStr.size());
+					memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
+					publisher->send(msg1);
+				}
 			}
 
 			res = m_learning->forwardOneStep();
@@ -159,7 +173,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 			if (!res)
 				return false;
 			// prelevo le posizioni dei robot
-			if (res && (m_count % 5) == 0)
+			if (res /*&& (m_count % 5) == 0*/)
 			{
 				std::vector<v_pos> temp = m_learning->getGuardsPosition1();
 				for (int z = 0; z < temp.size(); z++)
@@ -175,28 +189,18 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 					publisher->send(msg);
 				}
 
-				//prelevo le posizioni dei thieves
-				std::vector<v_pos> temp1 = this->getThievesPosition1();
-				for (int h = 0; h < temp1.size(); h++)
-				{
-					zmq::message_t message1(50);
-					std::ostringstream stringStream;
-					stringStream << "T," << h << "," << temp1[h].x << "," << temp1[h].y;
-					std::string copyOfStr = stringStream.str();
-					zmq::message_t msg1(copyOfStr.size());
-					memcpy(msg1.data(), copyOfStr.c_str(), copyOfStr.size());
-					publisher->send(msg1);
-				}
 				// Potenziale di gioco
 				double potential = m_learning->getPotentialValue();
 				//cout << "Potential Value " << potential << endl;
 
 				double benefitSquadra = m_learning->getBenefitValue();
 				std::set<std::shared_ptr<Guard>> gruppoGuardie = m_world->getGuards();
-
-				/*for (std::set<std::shared_ptr<Guard>>::iterator it = gruppoGuardie.begin(); it != gruppoGuardie.end(); ++it) {
-
-				}*/
+				int num = -1;
+				for (std::set<std::shared_ptr<Guard>>::iterator it = gruppoGuardie.begin(); it != gruppoGuardie.end(); ++it) {
+					std::shared_ptr<Guard> agent = *it;
+					++num;
+					cout << "robot " << num << "esimo" << " payoff = " << agent->getCurrentPayoff() << endl;
+				}
 				//cout << "Benefit Squadra: " << benefitSquadra << endl;
 
 				int IndexOfCoverage = m_world->getSpace()->numberOfSquaresCoveredByGuards();
