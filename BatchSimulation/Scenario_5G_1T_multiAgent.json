@@ -49,7 +49,7 @@
   },
 
   "Configuration": {
-    "Monitor": [ 5 ],
+    "Monitor": [ 1 ],
     "Jump": [ 1 ],
     "Epsilon": [ 0.1 ],
     "Print": [ 5000 ],

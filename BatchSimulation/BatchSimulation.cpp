@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
 												NeutralAgents,
 												l_algorithmType, // DISL O PIPIP
 												g_config.Period[l_periodIndex],
-												0.1);
+												g_config.Epsilon[l_epsilonIndex]);
 
 										if (g_config.TimeEnd.size() > 0) {
 											// Stop algorithm when number of steps reach a given value
