@@ -30,6 +30,9 @@ class Viewer(QtGui.QWidget):
         super(Viewer, self).__init__()
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
+
+        self.PayoffPlot = pg.PlotWidget(title = "Single benefit ")
+        
         self.benefitPlot = pg.PlotWidget(title="Team Benefit")  #plot widget added for benefit
         self.potentialPlot = pg.PlotWidget(title="Potential of Game")    #plot widget added for potential of game 
         self.coveredsquarePlot = pg.PlotWidget(title="Squares Covered") #plot widget for number of viewed squared
@@ -42,6 +45,7 @@ class Viewer(QtGui.QWidget):
         self.benefitValue = np.ndarray((0,0)) #array with stored benefit values
         self.potentialValue = np.ndarray((0,0)) #array with storedo potential data
         self.coveredsquareValue = np.ndarray((0,0))
+
 
     def initUI(self, x_lim, y_lim):
         self.resize(600, 600)
@@ -65,6 +69,11 @@ class Viewer(QtGui.QWidget):
         self.coveredsquarePlot.enableAutoRange()
         self.coveredsquarePlot.setLabel('bottom', "time step")
         self.coveredsquare_p = self.coveredsquarePlot.plot(y=[0], pen = 'g')
+
+        self.PayoffPlot.showGrid(x=True, y=True)
+        self.PayoffPlot.enableAutoRange()
+        self.PayoffPlot.setLabel('bottom', "time step")
+        self.Payoff_p = self.PayoffPlot.plot(y=[0], pen = 'g')
 
         pg.setConfigOptions(antialias=True)
 
@@ -180,4 +189,4 @@ class Viewer(QtGui.QWidget):
         else:
             self.coveredsquareValue = np.append(self.coveredsquareValue, coveredsquare)
         self.semaphore.release()
-        
+     

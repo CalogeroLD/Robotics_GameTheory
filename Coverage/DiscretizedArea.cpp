@@ -277,21 +277,22 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 		l_row.clear();
 	}
 
-	// fills the subregions covered by ship with false 
-	for (int i = 0; i < l_numcol; i++)
+	// it fills with false the subregions covered by ship 
+	for (int i = 0; i < l_numrow-1; i++)
 	{
-		for (int j = 0; j < l_numcol; j++)
+		for (int j = 0; j < l_numcol-1; j++)
 		{
 			for (int k = 0; k < pointCoveredByShip.size(); k++)
 			{
-				if (i == pointCoveredByShip.at(k).col && j == pointCoveredByShip.at(k).row)
+				if (j == pointCoveredByShip.at(k).col && i == pointCoveredByShip.at(k).row)
 					l_grid.at(i).at(j) = false;
-			}
+			} 
 		}
 	}
 	
 	// only for visualization of grid points
-	/*for (int i = 0; i < l_numrow; i++)
+	/*
+	for (int i = 0; i < l_numrow; i++)
 	{
 		int c;
 		std::vector<bool> Riga = l_grid.at(i);
@@ -306,7 +307,8 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 		std::cout << " " << endl;
 
 	}
-	std::cout << "dim grid: " << l_grid.size() << "  per   " << l_grid.at(0).size() << endl;*/
+	std::cout << "dim grid: " << l_grid.size() << "  per   " << l_grid.at(0).size() << endl;
+	*/
 
 	double l_xdist = l_bottomLeft.distance(l_bottomRight);
 	double l_ydist = l_bottomLeft.distance(l_topLeft);

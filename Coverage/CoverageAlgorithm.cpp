@@ -135,7 +135,7 @@ void Robotics::GameTheory::CoverageAlgorithm::updateMonitor()
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, int SquareCovered, bool _continuousUpdate)
+bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, bool _continuousUpdate)
 {
 	bool res = true;
 
@@ -152,8 +152,8 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 			if (m_count == 0 || (_monitorUpdateTime > 0 && !(m_count % _monitorUpdateTime))) // muove theives ogni M
 			{
 				this->updateMonitor();
-
-				std::cout << "Qui " << _monitorUpdateTime << endl;
+				//std::cout << "Qui " << _monitorUpdateTime << endl;
+				
 				//prelevo le posizioni dei thieves
 				std::vector<v_pos> temp1 = this->getThievesPosition1();
 				for (int h = 0; h < temp1.size(); h++)
@@ -188,12 +188,16 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 					memcpy(msg.data(), copyOfStr.c_str(), copyOfStr.size());
 					publisher->send(msg);
 				}
-
+				
 				// Potenziale di gioco
 				double potential = m_learning->getPotentialValue();
 				//cout << "Potential Value " << potential << endl;
 
+				// team Benefit
 				double benefitSquadra = m_learning->getBenefitValue();
+				//cout << "Benefit Squadra: " << benefitSquadra << endl;
+
+				// Benefit of single player
 				std::set<std::shared_ptr<Guard>> gruppoGuardie = m_world->getGuards();
 				int num = -1;
 				for (std::set<std::shared_ptr<Guard>>::iterator it = gruppoGuardie.begin(); it != gruppoGuardie.end(); ++it) {
@@ -201,12 +205,11 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 					++num;
 					cout << "robot " << num << "esimo" << " payoff = " << agent->getCurrentPayoff() << endl;
 				}
-				//cout << "Benefit Squadra: " << benefitSquadra << endl;
-
-				int IndexOfCoverage = m_world->getSpace()->numberOfSquaresCoveredByGuards();
 				
-				cout << "SquareCovered: " << IndexOfCoverage << endl;
-
+				// Coverage Index
+				int IndexOfCoverage = m_world->getSpace()->numberOfSquaresCoveredByGuards();
+				//cout << "SquareCovered: " << IndexOfCoverage << endl;
+				
 				zmq::message_t message2(50);
 				std::ostringstream stringStream;
 				stringStream << "B," << benefitSquadra;
@@ -230,7 +233,6 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				zmq::message_t msg4(copyOfStr_c.size());
 				memcpy(msg4.data(), copyOfStr_c.c_str(), copyOfStr_c.size());
 				publisher->send(msg4);
-
 			}// chiude learning
 		}
 			if (m_count == 0)

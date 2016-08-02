@@ -11,6 +11,7 @@ class ZmqThread(QtCore.QThread):
     data_benefit = QtCore.Signal(float, object) # corrisp al valore di benefit e alla B
     data_potential = QtCore.Signal(float, object)
     data_coveredsquare = QtCore.Signal(float, object)
+    data_payoff = QtCore.Signal(float)
 
     def __init__(self, sim_file):
         """
@@ -91,7 +92,11 @@ class ZmqThread(QtCore.QThread):
             if message_vec[0] == 'C':
                 coveredsquare = float(message_vec[1])
                 #print coveredsquare
-                self.data_coveredsquare.emit(coveredsquare, "P")
+                self.data_coveredsquare.emit(coveredsquare, "C")
+
+            if message_vec[0] == 'M':
+                payoff = float(message_vec[1])
+                self.data_payoff.emit(payoff, "M")
     
     def stop(self):
         return

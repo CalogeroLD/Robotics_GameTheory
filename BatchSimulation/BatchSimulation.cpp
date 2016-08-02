@@ -140,6 +140,7 @@ struct SimulationConfig
 	std::vector<int> TimeEnd;
 	std::vector<int> Period;
 	int TestCase;
+	int BatchSimulations;
 } g_config;
 
 /*void readSimulationConfigFile(Log & _log, std::string const& _filename)
@@ -240,6 +241,7 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 	std::vector<int> TimeEnd_v;
 	std::vector<int> Period_v;
 	int TestCase_v;
+	int BatchSimulation;
 
 	// Prelevo gli elementi dei vari Array
 	if (Config_Param.HasMember("Monitor")) {
@@ -332,6 +334,29 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 	else {
 		cout << "TestCase field hasn't been decleared" << endl;
 	}
+	if (Config_Param.HasMember("BatchSimulations")) {
+		rapidjson::Value& BatchSimulation_doc = Config_Param["BatchSimulations"];
+		_log << "BatchSimulations switch" << endl;
+		g_config.BatchSimulations = BatchSimulation_doc.GetInt();
+		cout << BatchSimulation_doc.GetInt() << endl;
+		
+		if (g_config.BatchSimulations == 1)
+		{
+			cout << " BatchSimulations Enabled " << endl;
+		}
+		if (g_config.BatchSimulations == 0)
+		{
+			cout << "Visualization-App Enabled" << endl;
+		}
+		if(g_config.BatchSimulations != 1 && g_config.BatchSimulations != 0) { 
+			cout << "Value of BatchSimulations is not valid (choose 1 for Visualization-App or 0 for BatchSimulations)";
+		}
+		_log << endl;
+	}
+	else{
+		cout << "BatchSimulations index hasn't been decleared " << endl;
+	}
+
 }
 
 ////////////////// new ///////////////////////////////////////////
@@ -355,6 +380,7 @@ int main(int argc, char* argv[])
 	const std::string date = currentDateTime();
 
 	//  Prepare our context and publisher
+	
 	zmq::context_t context(1);
 	zmq::socket_t publisher(context, ZMQ_PAIR);
 	publisher.connect("tcp://localhost:5555");
@@ -513,14 +539,23 @@ int main(int argc, char* argv[])
 													continue;
 												
 												l_log << "End Time " << g_config.TimeEnd[l_TimeEndIndex] << endl;
-
-												l_coverage->updateViewer(
-													g_config.TimeEnd [l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
-													g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
-													g_config.ThiefJump[l_thiefJumpIndex],
-                                                    &publisher,
-													l_coverage->numberOfSquaresCoveredByGuards()
-                                                );
+												if (g_config.BatchSimulations == 0) {
+													l_coverage->updateViewer(
+														g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
+														g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
+														g_config.ThiefJump[l_thiefJumpIndex],
+														&publisher,
+														l_coverage->numberOfSquaresCoveredByGuards()
+														);
+												}
+												else
+												{
+													l_coverage->update(
+														g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
+														g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
+														g_config.ThiefJump[l_thiefJumpIndex]
+														);
+												}
 
 											
 												/// print data for BoxPlot:
