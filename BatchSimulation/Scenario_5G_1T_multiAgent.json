@@ -51,10 +51,10 @@
     "Monitor": [ 1 ],
     "Jump": [ 1 ],
     "Epsilon": [ 0.1 ],
-    "Print": [ 1000 ],
+    "Print": [ 10 ],
     "Period": [ 1 ],
     "TestCase": 50,
-    "BatchSimulations": 0
+    "BatchSimulations": 1
   }
 
 }
