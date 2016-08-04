@@ -14,6 +14,7 @@ class ZmqThread(QtCore.QThread):
     data_payoff = QtCore.Signal(float)
 
     def __init__(self, sim_file):
+        #print 'nome del file cambiato : ', sim_file
         """
             Constructor of the ProdifconThread.
             At this stage the principal args from the configuration file are parsed
@@ -49,7 +50,6 @@ class ZmqThread(QtCore.QThread):
         print("ZMQ connection successfull")
         while True:
             message = sock.recv()
-            #print ' messaggio ' , len(message)
             if len(message) == 0:
                 continue
 
@@ -94,9 +94,9 @@ class ZmqThread(QtCore.QThread):
                 #print coveredsquare
                 self.data_coveredsquare.emit(coveredsquare, "C")
 
-            if message_vec[0] == 'M':
-                payoff = float(message_vec[1])
-                self.data_payoff.emit(payoff, "M")
+            #if message_vec[0] == 'M':
+                #payoff = float(message_vec[1])
+                #self.data_payoff.emit(payoff, "M")
     
     def stop(self):
         return

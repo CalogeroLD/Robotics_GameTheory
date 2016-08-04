@@ -19,6 +19,9 @@
     <None Include="Scenario_5G_1T_multiAgent.json">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Scenario_10G_1T_multiAgent.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

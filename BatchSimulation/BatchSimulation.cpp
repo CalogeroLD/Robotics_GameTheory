@@ -141,6 +141,7 @@ struct SimulationConfig
 	std::vector<int> Period;
 	int TestCase;
 	int BatchSimulations;
+	int AlgorithmType;
 } g_config;
 
 /*void readSimulationConfigFile(Log & _log, std::string const& _filename)
@@ -242,6 +243,7 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 	std::vector<int> Period_v;
 	int TestCase_v;
 	int BatchSimulation;
+	int AlgorithmType;
 
 	// Prelevo gli elementi dei vari Array
 	if (Config_Param.HasMember("Monitor")) {
@@ -356,6 +358,15 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 	else{
 		cout << "BatchSimulations index hasn't been decleared " << endl;
 	}
+	if (Config_Param.HasMember("AlgorithmType")) {
+		rapidjson::Value& AlgorithmType_doc = Config_Param["AlgorithmType"];
+		_log << "AlgorithmType" << endl;
+		g_config.AlgorithmType = AlgorithmType_doc.GetInt();
+		cout << AlgorithmType_doc.GetInt() << endl;
+	}
+	else {
+		cout << "Value of AlgorithmType is not valid (choose 1 for DISL 2 for PIPIP)" << endl;
+	}
 
 }
 
@@ -373,6 +384,23 @@ const std::string currentDateTime() {
 	return date;
 }
 
+/*int AlgorithmType() {
+	std::string l_algName;
+	if (g_config.AlgorithmType == 1) {
+		l_algName = "DISL";
+		cout << "---------Algorithm: " << l_algName << endl;
+		l_name += "_";
+		l_name += l_algName;
+	}
+	if (g_config.AlgorithmType == 2) {
+		l_algName = "PIPIP";
+		l_log << "---------Algorithm: " << l_algName << endl;
+		l_name += "_";
+		l_name += l_algName;
+	}
+	if (g_config.AlgorithmType = !1 && g_config.AlgorithmType = !2)
+		cout << "Scegli 0 DISL e 1 PIPIP " << endl;
+}*/
 
 //////////////////////////////////////// MAIN ////////////////////////////////////////////////
 int main(int argc, char* argv[])
@@ -384,7 +412,6 @@ int main(int argc, char* argv[])
 	zmq::context_t context(1);
 	zmq::socket_t publisher(context, ZMQ_PAIR);
 	publisher.connect("tcp://localhost:5555");
-	
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
@@ -439,6 +466,7 @@ int main(int argc, char* argv[])
 
 	std::vector<std::string> l_AgentFilenames;
 	l_AgentFilenames.push_back("Scenario_5G_1T_multiAgent.json");
+	//l_AgentFilenames.push_back("Scenario_5G_1T_multiAgent.json");
 
 	std::vector<std::string> l_AreaFilenames;
 	rapidjson::Value& AreaName = Area["Area_name"];
@@ -475,12 +503,16 @@ int main(int argc, char* argv[])
 			try
 			{
 				// per decidere gli algoritmi: per ora scelgo solo DISL o PIPIP, no PARETO
-				for (int l_algorithmType = 0; l_algorithmType < 2; ++l_algorithmType)
+
+				for(int l_algorithmType = 0; l_algorithmType < 2; ++l_algorithmType)
+				//for (int l_algorithmType = g_config.AlgorithmType; l_algorithmType < g_config.AlgorithmType + 1; ++l_algorithmType)
 				{
+
 					std::string l_algName = (l_algorithmType == 0 ? "DISL" : l_algorithmType == 1 ? "PIPIP" : "PARETO");
 					l_log << "---------Algorithm: " << l_algName << endl;
 					l_name += "_";
 					l_name += l_algName;
+
 
 					BoxPlotFile l_boxPlot;
 					for (size_t l_periodIndex = 0; l_periodIndex < g_config.Period.size(); ++l_periodIndex)
@@ -519,6 +551,10 @@ int main(int argc, char* argv[])
 										l_log << "-Case: " << l_testIndex << "..." << endl;
 										setLostBattery(g_config.Epsilon[l_epsilonIndex]);
 
+										if (g_config.BatchSimulations == 0 && g_config.AlgorithmType == 0)
+											l_algorithmType = 0;
+										if (g_config.BatchSimulations == 0 && g_config.AlgorithmType == 1)
+											l_algorithmType = 1;
 										// cerca il file di cui passo il nome e preleva agenti e area(0 o 1)
 										std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
 											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(
@@ -539,13 +575,13 @@ int main(int argc, char* argv[])
 													continue;
 												
 												l_log << "End Time " << g_config.TimeEnd[l_TimeEndIndex] << endl;
+												
 												if (g_config.BatchSimulations == 0) {
 													l_coverage->updateViewer(
 														g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
 														g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
 														g_config.ThiefJump[l_thiefJumpIndex],
-														&publisher,
-														l_coverage->numberOfSquaresCoveredByGuards()
+														&publisher
 														);
 												}
 												else
