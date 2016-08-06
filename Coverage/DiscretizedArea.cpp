@@ -678,12 +678,15 @@ DiscretizedArea::DiscretizedArea(IDS::BaseGeometry::Shape2D const& _external, st
 	double l_xdist = l_bottomLeft.distance(l_bottomRight);
 	double l_ydist = l_bottomLeft.distance(l_topLeft);
 
-	m_xStep = l_xdist / double(DISCRETIZATION_COL); //aggiunto int
-	m_yStep = l_ydist / double(DISCRETIZATION_ROW);
+	int DISCRETIZATION_C = m_numCol - 1;
+	int DISCRETIZATION_R = m_numRow - 1;
+
+	m_xStep = l_xdist / double(DISCRETIZATION_C); //aggiunto int
+	m_yStep = l_ydist / double(DISCRETIZATION_R);
 
 	m_listGraph = std::make_shared<lemon::ListGraph>();
-	m_listGraph->reserveNode(DISCRETIZATION_COL*DISCRETIZATION_ROW);
-	m_listGraph->reserveEdge( (DISCRETIZATION_COL-1)*(DISCRETIZATION_ROW-1)*4);
+	m_listGraph->reserveNode(DISCRETIZATION_C*DISCRETIZATION_R);
+	m_listGraph->reserveEdge( (DISCRETIZATION_C-1)*(DISCRETIZATION_R-1)*4);
 
 	double l_xpos = 0.;
 	double l_ypos = 0.;
@@ -841,14 +844,6 @@ void DiscretizedArea::setRandomSquareValue()
 #endif
 	}
 }
-
-
-/*double Mod2Pi(double angle) {
-	if (angle < 0)	return ((float)((int)((angle + IDSMath::TwoPi)*100.0f))) / 100.0f;
-	if (angle >= IDSMath::TwoPi)	return ((float)((int)((angle-IDSMath::TwoPi)*100.0f))) / 100.0f;
-	if (angle >= 0 && angle < IDSMath::TwoPi)	return ((float)((int)(angle*100.0f))) / 100.0f;
-	else std::cout << " values out of range " << std::endl;
-}*/
 
 double DeleteDecErr(double _heading) {
 	
@@ -1142,6 +1137,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 	{
 		AreaCoordinate pos(_current.col - 1, _current.row);
 		if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+			//cout << this->getSquare(pos) << " e " << this->getSquare(pos)->isValid() << endl;
 			result.push_back(pos);
 	}
 	if (_current.col != DISCRETIZATION_C)
@@ -1203,6 +1199,67 @@ void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _
 			AreaCoordinate pos(_current.col+1, _current.row+1);
 			if(this->getSquare(pos) && this->getSquare(pos)->isValid())
 				_loci.push_back(pos);
+		}
+	}
+	// complementare
+	if (_current.col == 0)
+	{
+		if (_current.row == 0)
+		{
+			AreaCoordinate pos(_current.col + 1, _current.row + 1);
+			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+				_loci.push_back(pos);
+		}
+
+		if (_current.row == DISCRETIZATION_R)
+		{
+			AreaCoordinate pos(_current.col + 1, _current.row - 1);
+			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+				_loci.push_back(pos);
+		}
+	}
+
+	if (_current.col == DISCRETIZATION_C)
+	{
+		if (_current.row == 0)
+		{
+			AreaCoordinate pos(_current.col - 1, _current.row + 1);
+			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+				_loci.push_back(pos);
+		}
+
+		if (_current.row == DISCRETIZATION_R)
+		{
+			AreaCoordinate pos(_current.col - 1, _current.row - 1);
+			//cout << " è valida ? " << this->getSquare(pos) << "e questa ?" << this->getSquare(pos)->isValid() << endl;
+			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+				_loci.push_back(pos);
+		}
+	}
+	//
+	if (_current.col == 0)
+	{
+		if (_current.row != 0 && _current.row != DISCRETIZATION_R)
+		{
+			AreaCoordinate pos(_current.col + 1, _current.row + 1);
+			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+				_loci.push_back(pos);
+			AreaCoordinate pos1(_current.col + 1, _current.row - 1);
+			if (this->getSquare(pos1) && this->getSquare(pos1)->isValid())
+				_loci.push_back(pos1);
+		}
+	}
+
+	if (_current.col == DISCRETIZATION_C)
+	{
+		if (_current.row != 0 && _current.row != DISCRETIZATION_R)
+		{
+			AreaCoordinate pos(_current.col - 1, _current.row + 1);
+			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
+				_loci.push_back(pos);
+			AreaCoordinate pos1(_current.col - 1, _current.row - 1);
+			if (this->getSquare(pos1) && this->getSquare(pos1)->isValid())
+				_loci.push_back(pos1);
 		}
 	}
 }

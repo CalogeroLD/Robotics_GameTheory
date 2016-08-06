@@ -55,11 +55,12 @@
     "Monitor": [ 1 ],
     "Jump": [ 1 ],
     "Epsilon": [ 0.1 ],
-    "Print": [ 50 ],
+    "Print": [ 500 ],
     "Period": [ 1 ],
     "TestCase": 1,
     "BatchSimulations": 0,
-    "AlgorithmType": 0
+    "AlgorithmType": [ 1 ],
+    "ProbabilityOfDetection": [ "y" ]
   }
 
 }

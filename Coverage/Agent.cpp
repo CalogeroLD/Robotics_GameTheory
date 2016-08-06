@@ -126,11 +126,13 @@ std::vector<AgentPosition> Agent::getFeasibleActionsThief(std::shared_ptr<Discre
 	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquaresThief(l_thiefCoord); // prende 8 punti adiacenti ABCDEFG
 	// aggiunge le diagonali al robot
 	_space->addSpecialApproachableValidSquares(l_thiefCoord, l_squares);
+
 	std::vector<AgentPosition> l_result;
 	for (size_t i = 0; i < l_squares.size(); ++i)
 	{
 		l_result.push_back(AgentPosition(_space->getPosition(l_squares[i]), l_squares[i].heading, m_currentPosition.m_camera));
 	}
+
 	return l_result; // return vector of all ThievesPosition possible
 }
 

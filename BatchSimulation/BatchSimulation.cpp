@@ -141,7 +141,7 @@ struct SimulationConfig
 	std::vector<int> Period;
 	int TestCase;
 	int BatchSimulations;
-	int AlgorithmType;
+	std::vector<int> AlgorithmType;
 } g_config;
 
 /*void readSimulationConfigFile(Log & _log, std::string const& _filename)
@@ -243,7 +243,7 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 	std::vector<int> Period_v;
 	int TestCase_v;
 	int BatchSimulation;
-	int AlgorithmType;
+	std::vector<int> AlgorithmType;
 
 	// Prelevo gli elementi dei vari Array
 	if (Config_Param.HasMember("Monitor")) {
@@ -361,8 +361,11 @@ void readSimulationConfigFile(Log & _log, rapidjson::Value& Config_Param) {
 	if (Config_Param.HasMember("AlgorithmType")) {
 		rapidjson::Value& AlgorithmType_doc = Config_Param["AlgorithmType"];
 		_log << "AlgorithmType" << endl;
-		g_config.AlgorithmType = AlgorithmType_doc.GetInt();
-		cout << AlgorithmType_doc.GetInt() << endl;
+		for (int r = 0; r < AlgorithmType_doc.Size(); r++)
+		{
+			g_config.AlgorithmType.push_back(AlgorithmType_doc[r].GetInt());
+			cout << AlgorithmType_doc[r].GetInt() << endl;
+		}
 	}
 	else {
 		cout << "Value of AlgorithmType is not valid (choose 1 for DISL 2 for PIPIP)" << endl;
@@ -478,7 +481,7 @@ int main(int argc, char* argv[])
 	// prende il titolo del file e lo divide, mette i parametri di configurazione all'interno della struttura config,
 
 	readSimulationConfigFile(l_log, Configuration_parameters);
-
+	int count_algorithm = -1; // tiene conto degli algorithm type selezionati
 	for (size_t o = 0; o < l_AgentFilenames.size(); ++o)
 	{
 		std::string l_AgentFilename = l_AgentFilenames[o];
@@ -504,10 +507,10 @@ int main(int argc, char* argv[])
 			{
 				// per decidere gli algoritmi: per ora scelgo solo DISL o PIPIP, no PARETO
 
-				for(int l_algorithmType = 0; l_algorithmType < 2; ++l_algorithmType)
-				//for (int l_algorithmType = g_config.AlgorithmType; l_algorithmType < g_config.AlgorithmType + 1; ++l_algorithmType)
+				for(int l_algorithm = 0; l_algorithm < g_config.AlgorithmType.size(); ++l_algorithm)
 				{
-
+					int l_algorithmType = g_config.AlgorithmType.at(l_algorithm);
+					cout << "tipo di algoritmo selezionato " << l_algorithmType << endl;
 					std::string l_algName = (l_algorithmType == 0 ? "DISL" : l_algorithmType == 1 ? "PIPIP" : "PARETO");
 					l_log << "---------Algorithm: " << l_algName << endl;
 					l_name += "_";
@@ -551,10 +554,6 @@ int main(int argc, char* argv[])
 										l_log << "-Case: " << l_testIndex << "..." << endl;
 										setLostBattery(g_config.Epsilon[l_epsilonIndex]);
 
-										if (g_config.BatchSimulations == 0 && g_config.AlgorithmType == 0)
-											l_algorithmType = 0;
-										if (g_config.BatchSimulations == 0 && g_config.AlgorithmType == 1)
-											l_algorithmType = 1;
 										// cerca il file di cui passo il nome e preleva agenti e area(0 o 1)
 										std::shared_ptr<Robotics::GameTheory::CoverageAlgorithm> l_coverage =
 											Robotics::GameTheory::CoverageAlgorithm::createFromAreaFile(

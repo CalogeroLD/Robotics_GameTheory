@@ -204,18 +204,6 @@ void Guard::followBestTrajectory(double _explorationRate, bool best)
 	m_exploring = getBestTrajectoryIndex(best);
 }
 
-/*double ComputeHeading(AgentPosition _nextPosition, AgentPosition _currentPosition) {
-	//getPoint2D
-	Point2D nextPosition = _nextPosition.getPoint2D();
-	Point2D currentPosition = _currentPosition.getPoint2D();
-
-	double y_delta = nextPosition.coord(1) - currentPosition.coord(1);
-	double x_delta = nextPosition.coord(0) - currentPosition.coord(0);
-
-	double heading = IDSMath::PiDiv2 - atan2(y_delta, x_delta); // naval convention
-	return heading;
-}*/
-
 ///
 void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 {
@@ -232,6 +220,12 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 	default:
 		// a position from past ones is selected
 		AgentPosition nextAgentPosition = m_memory.getNextPosition(m_exploring, m_currentTrajectory.size());
+		if(m_currentPosition.getPoint2D().coord(0) != nextAgentPosition.getPoint2D().coord(0) || m_currentPosition.getPoint2D().coord(1) != nextAgentPosition.getPoint2D().coord(1))
+		{
+			std::cout << "posizion: " << m_currentPosition.getPoint2D().coord(0) << " " << m_currentPosition.getPoint2D().coord(1) << " " << m_currentPosition.getHeading() << std::endl;
+			std::cout << "prossima: " << nextAgentPosition.getPoint2D().coord(0) << " " << nextAgentPosition.getPoint2D().coord(1) << " " << nextAgentPosition.getHeading() << std::endl;
+		}
+		// posso scegliere di ritornare alla posizione precedente ??? no se cambia heading e posizione
 		this->setNextPosition( nextAgentPosition ); // (indexBest, indexNext)
 	}
 }

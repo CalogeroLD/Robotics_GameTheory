@@ -189,7 +189,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 					publisher->send(msg);
 				}
 				
-				// Potenziale di gioco
+				// Potenziale di gioco: deriva dal benefit splittato per il n° robot che guardano la stessa regione
 				double potential = m_learning->getPotentialValue();
 				//cout << "Potential Value " << potential << endl;
 
@@ -200,11 +200,11 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 				// Benefit of single player
 				std::set<std::shared_ptr<Guard>> gruppoGuardie = m_world->getGuards();
 				int num = -1;
-				for (std::set<std::shared_ptr<Guard>>::iterator it = gruppoGuardie.begin(); it != gruppoGuardie.end(); ++it) {
+				/*for (std::set<std::shared_ptr<Guard>>::iterator it = gruppoGuardie.begin(); it != gruppoGuardie.end(); ++it) {
 					std::shared_ptr<Guard> agent = *it;
 					++num;
 					cout << "robot " << num << "esimo" << " payoff = " << agent->getCurrentPayoff() << endl;
-				}
+				}*/
 				
 				// Coverage Index
 				int IndexOfCoverage = m_world->getSpace()->numberOfSquaresCoveredByGuards();

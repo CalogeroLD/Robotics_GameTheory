@@ -28,8 +28,11 @@ double LearningAlgorithm::computeExplorationRate(std::shared_ptr<Guard> _agent)
 	if(!_agent)
 		_agent = *m_guards.begin();
 	
-	//double rate = max(double(Robotics::GameTheory::DiscretizedArea::m_numCol), double(Robotics::GameTheory::DiscretizedArea::m_numCol)) + 1.;
-	double rate = max(double(Robotics::GameTheory::DISCRETIZATION_COL), double(Robotics::GameTheory::DISCRETIZATION_ROW)) + 1.;
+	int Discretization_Col = m_space->getNumCol();
+	int Discretization_Row = m_space->getNumRow();
+
+	double rate = max(double(Discretization_Col), double(Discretization_Row)) + 1.;
+	//double rate = max(double(Robotics::GameTheory::DISCRETIZATION_COL), double(Robotics::GameTheory::DISCRETIZATION_ROW)) + 1.;
 	return pow(double(m_time)/double(_agent->getTrajectoryLength()) , -double(m_guards.size())/rate);
 }
 
@@ -109,7 +112,7 @@ double ProbabilityOfDetection(AreaCoordinate _center, int _row, int _col) {
 	double distance = sqrt(pow((x_c - _row), 2) + pow((y_c - _col), 2));
 	double probability;
 
-	probability = exp(-(pow(distance, 2)) / 25);
+	probability = exp(-(pow(distance, 2)) / 100);
 	return probability;
 }
 
@@ -133,8 +136,7 @@ void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 		int l_nq = temp_square->getTheNumberOfAgent(); // numero di agenti che vedono il quadrato
 		//std::cout << "num ag che vedono square " << l_nq << std::endl;
 		double l_value = temp_square->getThiefValue(); // valore di probabilità di vedere il thief
-		//std::cout << " valore del thief " << l_value << std::endl;
-		l_value = l_value; //* ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato	
+		l_value = l_value; //* ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato
 		l_benefit += l_value / double(l_nq);
 	}
 
