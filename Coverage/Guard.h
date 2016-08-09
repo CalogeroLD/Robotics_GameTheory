@@ -229,6 +229,14 @@ namespace Robotics
 			void startExperiment(double _explorationRate);
 
 			void followBestTrajectory(double _explorationRate, bool best = true);
+			// aggiunti
+
+			AgentPosition rotateRandomly(int number, AgentPosition _agentPosition, double _angle);
+			// aggiunti
+
+			AgentPosition chooseRandomRotation(int number, AgentPosition _agentPosition, double _angle1, double _angle2);
+			// aggiunti
+			AgentPosition SquareFree(std::shared_ptr<DiscretizedArea> _space, AgentPosition _position);
 
 			void selectNextAction(std::shared_ptr<DiscretizedArea> _space);
 

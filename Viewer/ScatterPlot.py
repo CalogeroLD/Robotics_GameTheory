@@ -5,7 +5,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import threading
 
-max_plot_dim = 100 #benefit che vedo sono relativi agli ultimi 100 step
+max_plot_dim = 1000 #benefit che vedo sono relativi agli ultimi 100 step
 
 class ScatterPlotData:
     def __init__(self, max_dim):

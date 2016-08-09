@@ -5,6 +5,8 @@
 #include <utility> 
 #include <utility>
 
+//#define _PRINT
+
 using namespace Robotics::GameTheory;
 using namespace IDS::BaseGeometry;
 
@@ -204,30 +206,240 @@ void Guard::followBestTrajectory(double _explorationRate, bool best)
 	m_exploring = getBestTrajectoryIndex(best);
 }
 
+double DeleteDecErr1(double _heading) {
+
+	double value;
+
+	if (_heading >= 6.20 || (_heading >= 0 && _heading <= 0.2))
+		value = 0;
+	if (_heading < 0.9 && _heading > 0.6)// ok 0.785
+		value = 0.78;
+	if (_heading > 1.4 && _heading < 1.7) //1.57
+		value = 1.57;
+	if (_heading < 2.4 && _heading > 2.2) // ok 2.35
+		value = 2.35;
+	if (_heading < 3.2 && _heading > 3) // 3.14
+		value = 3.14;
+	if (_heading < 4 && _heading > 3.8) // 3.92 
+		value = 3.92;
+	if (_heading < 4.8 && _heading > 4.6) // 3.14
+		value = 4.71;
+	if (_heading > 5.3 && _heading < 5.6) // ok 5.49
+		value = 5.49;
+
+	return value;
+}
+
+double Mod2Pig(double angle) {
+	if (angle < 0)	return DeleteDecErr1(angle + IDSMath::TwoPi);
+	if (angle >= IDSMath::TwoPi)	return DeleteDecErr1(angle - IDSMath::TwoPi);
+	if (angle >= 0 && angle < IDSMath::TwoPi)	return DeleteDecErr1(angle);
+	else std::cout << " values out of range " << std::endl;
+}
+
+AgentPosition Guard::rotateRandomly(int number, AgentPosition _agentPosition, double _angle) //number = 2 perche ho 2 possibilita antiorario o orario
+{
+	int value = rand() % number;
+	//std::cout << value << std::endl;
+	if (value == 1)
+	{
+		_agentPosition.m_heading = _agentPosition.m_heading - _angle;
+		return _agentPosition;
+	}
+	if (value == 0)
+	{
+		_agentPosition.m_heading = _agentPosition.m_heading + _angle;
+		return _agentPosition;
+	}
+}
+
+AgentPosition Guard::chooseRandomRotation(int number, AgentPosition _agentPosition, double _angle1, double _angle2) {
+	// _angle1 clockwise, _angle2 counterclockwise
+	int value = rand() % number;
+	//std::cout << value << std::endl;
+	if (value == 1)
+	{
+		_agentPosition.m_heading = _agentPosition.m_heading + _angle1;
+		return _agentPosition;
+	}
+	if (value == 0)
+	{
+		_agentPosition.m_heading = _agentPosition.m_heading - _angle2;
+		return _agentPosition;
+	}
+}
+
+AgentPosition Guard::SquareFree(std::shared_ptr<DiscretizedArea> _space, AgentPosition _position) {
+	AreaCoordinate Coordinate = _space->getCoordinate(_position.getPoint2D());
+	SquarePtr square = _space->getSquare(Coordinate);
+	// controllo che sia libero la square
+	if (square->isValid())
+		return _position; // (indexBest, indexNext)
+	if (!square->isValid())
+	{
+		return m_currentPosition;
+	}
+}
+
 ///
 void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 {
 	// Seleziona la nuova posizione sulla base se Experiments o No
 
-	switch(m_exploring)
+	switch (m_exploring)
 	{
 	case -1:
 		// a random position is selected (ABCDEFG)
 		//std::cout << "controllo " << selectNextFeasiblePosition(_space).getPoint2D().coord(0) << " " << selectNextFeasiblePosition(_space).getPoint2D().coord(1) << std::endl;
-		this->setNextPosition( selectNextFeasiblePosition(_space) ); // mette in m_nextPosition la Position selezionata tra le fattbili
+		this->setNextPosition(SquareFree(_space, selectNextFeasiblePosition(_space))); // mette in m_nextPosition la Position selezionata tra le fattbili
 
 		break;
 	default:
 		// a position from past ones is selected
 		AgentPosition nextAgentPosition = m_memory.getNextPosition(m_exploring, m_currentTrajectory.size());
-		if(m_currentPosition.getPoint2D().coord(0) != nextAgentPosition.getPoint2D().coord(0) || m_currentPosition.getPoint2D().coord(1) != nextAgentPosition.getPoint2D().coord(1))
+		// take the coordinates current and next position
+		double x_curr = m_currentPosition.getPoint2D().coord(0);
+		double y_curr = m_currentPosition.getPoint2D().coord(1);
+		double x_prox = nextAgentPosition.getPoint2D().coord(0);
+		double y_prox = nextAgentPosition.getPoint2D().coord(1);
+		// caso in cui i vincoli lo cosentono
+		if (x_curr == x_prox && y_curr == y_prox) 
 		{
-			std::cout << "posizion: " << m_currentPosition.getPoint2D().coord(0) << " " << m_currentPosition.getPoint2D().coord(1) << " " << m_currentPosition.getHeading() << std::endl;
-			std::cout << "prossima: " << nextAgentPosition.getPoint2D().coord(0) << " " << nextAgentPosition.getPoint2D().coord(1) << " " << nextAgentPosition.getHeading() << std::endl;
+		#ifdef _PRINT
+			std::cout << "feasible action " << std::endl;
+		#endif // _PRINT
+
+			AreaCoordinate Coordinate = _space->getCoordinate(nextAgentPosition.getPoint2D());
+			SquarePtr square = _space->getSquare(Coordinate);
+			// controllo che sia libero la square
+			if(square->isValid())
+				this->setNextPosition(nextAgentPosition); // (indexBest, indexNext)
+			if (!square->isValid())
+			{
+				nextAgentPosition = m_currentPosition;
+				this->setNextPosition(nextAgentPosition);
+			}
 		}
-		// posso scegliere di ritornare alla posizione precedente ??? no se cambia heading e posizione
-		this->setNextPosition( nextAgentPosition ); // (indexBest, indexNext)
-	}
+		// since previous last two actions cannot be choose without rotate (kinematic constraint) We have to check coordinate 
+		// of next position chosed by algorithm and we have to rotate the robot towards the desidered next position first.
+		// after rotation if the  best position is still that the robot will be able to reach it according to its new direction.
+		if (x_curr != x_prox || y_curr != y_prox)
+		{
+			if (x_prox < x_curr)
+			{
+				if (y_prox == y_curr)	// lungo x a sinistra
+				{
+					nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi);
+					#ifdef _PRINT
+					std::cout << "lungo x a sx " << std::endl;
+					#endif
+				}
+				if (y_prox > y_curr)	// obliquo alto vs sinistra
+				{
+					if (m_currentPosition.m_heading >= 2.30 && m_currentPosition.m_heading <= 2.40) 
+					{
+						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
+					#ifdef _PRINT
+						std::cout << "obliquo vs alto" << std::endl;
+					#endif
+					}
+					if (m_currentPosition.m_heading < 2.30 && m_currentPosition.m_heading > 2.40) 
+					{
+					#ifdef _PRINT
+						std::cout << "non dovrebbe mai capitare" << std::endl;
+					#endif
+					}
+				}
+				if (y_prox < y_curr)	// obliquo basso vs sx
+				{
+					if (m_currentPosition.m_heading >= 5.40 && m_currentPosition.m_heading <= 5.55) 
+					{
+						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
+					#ifdef _PRINT
+						std::cout << "obliquo basso a sx " << std::endl;
+					#endif
+					}
+					if (m_currentPosition.m_heading < 5.40 && m_currentPosition.m_heading > 5.55)
+					{
+					#ifdef _PRINT
+						std::cout << "non dovrebbe mai capitare" << std::endl;
+					#endif
+					}
+				}
+			}
+			if (x_prox > x_curr)
+			{
+				if (y_prox == y_curr)	// lungo x vs destra
+				{
+					nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi);
+				#ifdef _PRINT
+					std::cout << "lungo x vs destra" << std::endl;
+
+				#endif
+				}
+				if (y_prox > y_curr)	//obliquo alto verso destra
+				{
+					if (m_currentPosition.m_heading >= 3.87 && m_currentPosition.m_heading <= 3.97)
+					{
+						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
+					#ifdef _PRINT
+						std::cout << "obliquo alto vs destra" << std::endl;
+					#endif
+					}
+					if (m_currentPosition.m_heading < 3.87 && m_currentPosition.m_heading > 3.97)
+					{
+					#ifdef _PRINT
+						std::cout << "non dovrebbe mai capitare" << std::endl;
+					#endif
+					}
+				}
+				if (y_prox < y_curr)	//obliquo basso verso destra
+				{
+					if (m_currentPosition.m_heading >= 0.70 && m_currentPosition.m_heading <= 0.85) {
+						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
+					#ifdef _PRINT
+						std::cout << "obliquo basso vs destra" << std::endl;
+					#endif
+					}
+					if (m_currentPosition.m_heading < 0.70 && m_currentPosition.m_heading > 0.85)
+					{
+					#ifdef _PRINT
+						std::cout << "non dovrebbe mai capitare" << std::endl;
+					#endif
+					}
+				}
+			}
+			if (x_prox == x_curr)
+			{
+				if (y_prox > y_curr)	//lungo y verso alto
+				{
+					nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi);
+				#ifdef _PRINT
+					std::cout << "lungo y vs alto" << std::endl;
+				#endif
+				}
+				if (y_prox < y_curr)	//lungo y verso basso
+				{
+					nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi);
+				#ifdef _PRINT
+					std::cout << "lungo y vs basso" << std::endl;
+				#endif
+				}
+			}
+
+			AreaCoordinate Coordinate = _space->getCoordinate(nextAgentPosition.getPoint2D());
+			SquarePtr square = _space->getSquare(Coordinate);
+			// controllo che sia libero la square
+			if (square->isValid())
+				this->setNextPosition(nextAgentPosition); // (indexBest, indexNext)
+			if (square->isValid()) 
+			{
+				nextAgentPosition = m_currentPosition;
+				this->setNextPosition(nextAgentPosition); // (indexBest, indexNext)
+			}
+			//this->setNextPosition(SquareFree(_space, nextAgentPosition));
+		}// chiude il primo if
+	}// switch
 }
 
 ///

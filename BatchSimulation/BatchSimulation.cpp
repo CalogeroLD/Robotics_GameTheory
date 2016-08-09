@@ -419,6 +419,7 @@ int main(int argc, char* argv[])
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
 	Log l_coverageValue(date + "_coverageValue.txt");
+
 	//Log l_positions(date + "_positionsOfRobots");
 
 	// read file.json for set os parameters simulation
@@ -596,7 +597,8 @@ int main(int argc, char* argv[])
 												/// print data for BoxPlot:
 												double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
 												double l_benefitIndex = l_coverage->m_stats.getBenefitIndexMediumValue(); //errore medio
-												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti												
+												double l_coverageIndex = l_coverage->getGlobalTrajectoryCoverage();// numero di quadrati coperti
+												
 												//l_log << "Potential Index ";
 												//l_log << l_potentialIndex; 
 												//l_log << endl;

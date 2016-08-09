@@ -25,13 +25,94 @@
 #include <vector>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
 
 #include <Windows.h>
 #include <rapidjson\document.h>
 #include <rapidjson\filereadstream.h>
 
+using namespace std;
 
+struct Log
+{
+	ofstream m_logFile;
+	Log(const std::string & name = "end.txt")
+	{
+		//cout << name ;
+		m_logFile.open(name.c_str());
+		if (m_logFile.fail())
+			throw std::exception("Unable to open log file");
+	}
+
+	Log& operator<<(const std::string & str)
+	{
+		if (m_logFile.is_open())
+			m_logFile << str;
+		//cout << str;
+		return *this;
+	}
+
+	Log& operator<<(const double & num)
+	{
+		if (m_logFile.is_open())
+			m_logFile << num;
+		//cout << num;
+		return *this;
+	}
+
+	Log& operator<<(const int & num)
+	{
+		if (m_logFile.is_open())
+			m_logFile << num;
+		//cout << num;
+		return *this;
+	}
+
+	void flush()
+	{
+		if (m_logFile.is_open())
+			m_logFile.flush();
+	}
+
+	void close()
+	{
+		if (m_logFile.is_open())
+			m_logFile.close();
+	}
+
+	// this is the type of std::cout
+	typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
+
+	// this is the function signature of std::endl
+	typedef CoutType& (*StandardEndLine)(CoutType&);
+
+	// define an operator<< to take in std::endl
+	Log& operator<<(StandardEndLine manip)
+	{
+		// call the function, but we cannot return it's value
+		manip(m_logFile);
+		manip(std::cout);
+
+		return *this;
+	}
+};
+
+////////////////// new ///////////////////////////////////////////
+// Returns the local date/time formatted as 2014-03-19 11:11:52
+const std::string currentDateTime() {
+	time_t     now = time(0);
+	struct tm  tstruct;
+	char       buf[80];
+	tstruct = *localtime(&now);
+
+	// for more information about date/time format
+	strftime(buf, sizeof(buf), "Prova_%Y_%m_%d_%H_%M_%S", &tstruct);
+	std::string date = string(buf);
+	return date;
+}
+
+//aggiunto da C. Li Destri
 struct vector_pos
 {
 	double x;
@@ -259,11 +340,17 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 	return res;
 }
 
+const std::string date = currentDateTime();
+Log l_benefit(date + "_benefitSingle.txt"); // di tutti sommata 
+Log l_potential(date + "_potentialSingle.txt"); // splitto
+Log l_coverage(date + "_coverageSingle.txt"); //
 
 //////////////////////////////////////////////////////////////////
 bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpdateTime, int _thiefJump, bool _continuousUpdate)
 {
 	bool res = true;
+	const std::string date = currentDateTime();
+	
 
 	if (m_count == 0)
 		m_stats.reset();
@@ -284,6 +371,14 @@ bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpd
 			if (!res)
 				return false;
 		}
+
+		double benefit_Value = m_learning->getBenefitValue();
+		double potential_Value = m_learning->getPotentialValue();
+		double coveredSquares = m_world->getSpace()->numberOfSquaresCoveredByGuards();
+
+		/*l_benefit << benefit_Value << endl;
+		l_potential << potential_Value << endl;
+		l_coverage << coveredSquares << endl;*/
 
 		if (m_count == 0)
 			this->wakeUpAgentIfSecurityIsLow();
