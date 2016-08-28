@@ -90,10 +90,10 @@ class Viewer(QtGui.QWidget):
     def updateScatterData(self, x, y, name):
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         self.semaphore.acquire()
-        if name == "T_0":
-            print " Thief ", name
-        else:
-            print name
+        #if name == "T_0":
+         #   print " Thief ", name
+        #else:
+          #  print name
         if name not in self.scatterData:
             
             # create a circle too indicate position of mothership
@@ -110,6 +110,13 @@ class Viewer(QtGui.QWidget):
             r1.setPen(pg.mkPen((0, 0, 0, 100)))
             r1.setBrush(pg.mkBrush('r'))
             self.scatterPlot.addItem(r1)
+
+            '''r = QtGui.QPolygonF([
+                    QtCore.QPointF(-100, 0), QtCore.QPointF(0, 100),
+                    QtCore.QPointF(100, 0), QtCore.QPointF(0, -100),
+                    QtCore.QPointF(-100, 0)])
+            self.scatterPlot = QtGui.QGraphicsPolygonItem()
+            self.scatterPlot.setPolygon(r)'''
 
             ## Create text object, use HTML tags to specify color/size
             text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 255, 0))

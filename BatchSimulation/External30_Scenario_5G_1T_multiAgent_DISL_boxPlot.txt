@@ -1,0 +1,61 @@
+Index	Monitor	Thief Jump	Epsilon	Period	End Time
+Benefit Index	1	1	0.1	1	5000
+0.606959;
+Benefit Index	2	1	0.1	1	5000
+0.562406;
+Benefit Index	3	1	0.1	1	5000
+0.597508;
+Benefit Index	4	1	0.1	1	5000
+0.580807;
+Benefit Index	5	1	0.1	1	5000
+0.451719;
+Benefit Index	6	1	0.1	1	5000
+0.73973;
+Benefit Index	7	1	0.1	1	5000
+0.642746;
+Benefit Index	8	1	0.1	1	5000
+0.911639;
+Benefit Index	9	1	0.1	1	5000
+0.468629;
+Benefit Index	10	1	0.1	1	5000
+0.412937;
+Coverage Index	1	1	0.1	1	5000
+183;
+Coverage Index	2	1	0.1	1	5000
+116;
+Coverage Index	3	1	0.1	1	5000
+167;
+Coverage Index	4	1	0.1	1	5000
+176;
+Coverage Index	5	1	0.1	1	5000
+144;
+Coverage Index	6	1	0.1	1	5000
+135;
+Coverage Index	7	1	0.1	1	5000
+181;
+Coverage Index	8	1	0.1	1	5000
+159;
+Coverage Index	9	1	0.1	1	5000
+137;
+Coverage Index	10	1	0.1	1	5000
+128;
+Potential Index	1	1	0.1	1	5000
+13.6475;
+Potential Index	2	1	0.1	1	5000
+18.1741;
+Potential Index	3	1	0.1	1	5000
+8.94174;
+Potential Index	4	1	0.1	1	5000
+17.2503;
+Potential Index	5	1	0.1	1	5000
+15.5709;
+Potential Index	6	1	0.1	1	5000
+5.67446;
+Potential Index	7	1	0.1	1	5000
+13.5648;
+Potential Index	8	1	0.1	1	5000
+1.33888;
+Potential Index	9	1	0.1	1	5000
+13.3638;
+Potential Index	10	1	0.1	1	5000
+9.37909;

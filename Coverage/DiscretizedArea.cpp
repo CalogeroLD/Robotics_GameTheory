@@ -82,6 +82,7 @@ bool DiscretizedArea::getRandomPosition(IDS::BaseGeometry::Point2D & _point) con
 	{
 		int l_colSecret = rand() % m_numCol;
 		int l_rowSecret = rand() % m_numRow;
+		cout << "da qui" << m_numCol << endl;
 
 		SquarePtr l_square	= this->getSquare(l_rowSecret, l_colSecret);
 
@@ -242,7 +243,7 @@ DiscretizedArea::DiscretizedArea(rapidjson::Value& Area)
 	coord_shipCol = ship_coord.GetArray()[0].GetInt();
 	coord_shipRow = ship_coord.GetArray()[1].GetInt();
 
-	std::cout << "ship_coord : " << coord_shipCol << "," << coord_shipRow << std::endl;
+	//std::cout << "ship_coord : " << coord_shipCol << "," << coord_shipRow << std::endl;
 
 	// catch the points covered by ship to protect
 	std::vector<AreaCoordinate> pointCoveredByShip;

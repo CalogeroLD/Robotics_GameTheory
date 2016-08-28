@@ -126,6 +126,8 @@ xcopy /Y "..\SDK\IDSGraphics\$(Platform)\$(Configuration)\*.pdb" $(OutDir)</Comm
   <ItemGroup>
     <None Include="ReadMe.txt" />
     <None Include="Scenario_10G_1T_multiAgent.json" />
+    <None Include="Scenario_15G_1T_multiAgent.json" />
+    <None Include="Scenario_20G_1T_multiAgent.json" />
     <None Include="Scenario_5G_1T_multiAgent.json" />
   </ItemGroup>
   <ItemGroup>

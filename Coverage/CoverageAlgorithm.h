@@ -20,12 +20,6 @@
 #include <zmq\zmq.h>
 #include <zmq\zmq.hpp>
 
-/*struct v_pos
-{
-	double x;
-	double y;
-	double theta;
-};*/
 
 namespace IDS 
 {
@@ -175,7 +169,6 @@ namespace Robotics
 			void setPositionOfSink(AgentPosition const& pos, std::shared_ptr<Sink> _agent/* = nullptr*/);
 			void removeAllSinks();
 
-			//int getTime() const;
 			void printPotential(std::string const& name, bool printOnFile = true);
 			void printBenefit(std::string const& name, bool printOnFile = true);
 			void printPotentialIndex(std::string const& name, bool printOnFile = true);

@@ -22,6 +22,12 @@
     <None Include="Scenario_10G_1T_multiAgent.json">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Scenario_20G_1T_multiAgent.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Scenario_15G_1T_multiAgent.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
