@@ -263,7 +263,7 @@ std::vector<AreaCoordinate> CameraPosition::getCoverage(AreaCoordinate _center, 
 	if (result.size() == 0) {
 		result.push_back(_center);
 	}
-//	printArray(result, _center.row, _center.col);
+	//printArray(result, _center.row, _center.col);
 	return result;
 
 }
@@ -307,6 +307,9 @@ try
 	Point2D l_near_right = l_right_line.pointFromOrigin(m_nearRadius);
 	Point2D l_far_left = l_left_line.pointFromOrigin(m_farRadius);
 	Point2D l_far_right = l_right_line.pointFromOrigin(m_farRadius);
+	/*cout << "far" <<  m_farRadius << endl;
+	cout << "near " << m_nearRadius << endl;
+	cout << "head" << m_orientation << endl;*/
 
 	std::vector<Curve2D> l_boundary;
 	Segment2D l_first = BaseGeometry::makeSegment(l_near_right, l_far_right);

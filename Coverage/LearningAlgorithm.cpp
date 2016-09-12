@@ -120,7 +120,7 @@ double ProbabilityOfDetection(AreaCoordinate _center, int _row, int _col) {
 //////////////////////////////////////////////////////////////////////////
 void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 {
-	//	ogni agente guardia identifica la propria utilità:
+	//ogni agente guardia identifica la propria utilità:
 	double l_benefit = 0;
 	AgentPosition p = _agent->getCurrentPosition();
 	AreaCoordinate p_center = m_space->getCoordinate(p.getPoint2D()); // centro del sensore
@@ -136,23 +136,32 @@ void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 		int l_nq = temp_square->getTheNumberOfAgent(); // numero di agenti che vedono il quadrato
 		//std::cout << "num ag che vedono square " << l_nq << std::endl;
 		double l_value = temp_square->getThiefValue(); // valore di probabilità di vedere il thief
-		l_value = l_value; //* ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato
+
+		int dist_x = abs(p_center.col - l_coord[i].col);
+		int dist_y = abs(p_center.row - l_coord[i].row);
+		double distan = pow( dist_x*dist_x + dist_y*dist_y , 0.5);
 		l_benefit += l_value / double(l_nq);
+
+		/* Probability of detection */
+		
+		if (distan > 3) {
+			l_value = l_value * ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato
+			l_benefit += l_value / double(l_nq);
+		}
+		if (distan <= 3) {
+			l_benefit += l_value/ double(l_nq);
+		}
 	}
 
 	l_benefit -= _agent->computeCurrentCosts();
-
 	//l_benefit -= _agent->computeBatteryCosts(m_space);
-
 	_agent->setCurrentPayoff(l_benefit); // aggiorna il valore di benefit
-
 	// Battery
 	std::shared_ptr<Square> l_square = m_space->getSquare(_agent->getCurrentPosition().getPoint2D());
 	if( m_space->isThereASink() )
 		_agent->updateBattery(MAXIMUM_BATTERY*LOSTBATTERY_PERSTEP*l_square->getEnergyValue());
 	else
 		_agent->updateBattery(MAXIMUM_BATTERY);
-
 	//	ogni agente guardia identifica le nuove azioni feasible:
 	//this->computeFeasibleActions(_agent);
 	return;

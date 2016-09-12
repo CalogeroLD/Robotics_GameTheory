@@ -341,9 +341,9 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 }
 
 const std::string date = currentDateTime();
-Log l_benefit(date + "_benefitSingle.txt"); // di tutti sommata 
-Log l_potential(date + "_potentialSingle.txt"); // splitto
-Log l_coverage(date + "_coverageSingle.txt"); //
+//Log l_benefit(date + "_benefitSingle.txt"); // di tutti sommata 
+//Log l_potential(date + "_potentialSingle.txt"); // splitto
+//Log l_coverage(date + "_coverageSingle.txt"); //
 
 //////////////////////////////////////////////////////////////////
 bool Robotics::GameTheory::CoverageAlgorithm::update(int _nStep, int _monitorUpdateTime, int _thiefJump, bool _continuousUpdate)

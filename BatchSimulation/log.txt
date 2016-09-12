@@ -18,8 +18,10 @@ Agent File: Scenario_5G_1T_multiAgent
 Area File: Open_Sea
 ---------Algorithm: DISL
 -------Period: 1
------Monitor Update: 10
+-----Monitor Update: 1
 ---Thief Jump: 1
 -Epsilon: 0.1
 -Case: 0...
+End Time 1000
+-Case: 1...
 End Time 1000

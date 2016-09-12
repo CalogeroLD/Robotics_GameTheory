@@ -14,6 +14,7 @@
 #include "Agent.h"
 #include <memory>
 #include <set>
+#include "math.h"
 
 /*struct v_pos
 {
