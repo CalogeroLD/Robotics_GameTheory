@@ -137,20 +137,10 @@ void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 		//std::cout << "num ag che vedono square " << l_nq << std::endl;
 		double l_value = temp_square->getThiefValue(); // valore di probabilità di vedere il thief
 
-		int dist_x = abs(p_center.col - l_coord[i].col);
-		int dist_y = abs(p_center.row - l_coord[i].row);
-		double distan = pow( dist_x*dist_x + dist_y*dist_y , 0.5);
-		l_benefit += l_value / double(l_nq);
-
 		/* Probability of detection */
-		
-		if (distan > 3) {
-			l_value = l_value * ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato
-			l_benefit += l_value / double(l_nq);
-		}
-		if (distan <= 3) {
-			l_benefit += l_value/ double(l_nq);
-		}
+		l_value = l_value * ProbabilityOfDetection(p_center, l_coord[i].row, l_coord[i].col); // valore prob modificato
+		l_benefit += l_value/ double(l_nq);
+
 	}
 
 	l_benefit -= _agent->computeCurrentCosts();
