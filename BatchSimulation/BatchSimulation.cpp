@@ -1,6 +1,8 @@
 // BatchSimulation.cpp : Defines the entry point for the console application.
 //
 
+#define _ZMQ
+
 #include "stdafx.h"
 
 #include <string>
@@ -24,8 +26,10 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <zmq/zmq.h>
-#include <zmq/zmq.hpp>
+#ifndef _ZMQ
+	#include <zmq/zmq.h>
+	#include <zmq/zmq.hpp>
+#endif
 
 #include<rapidjson\document.h>
 #include<rapidjson\filereadstream.h>
@@ -411,10 +415,12 @@ int main(int argc, char* argv[])
 	const std::string date = currentDateTime();
 
 	//  Prepare our context and publisher
-	
+#ifndef _ZMQ
 	zmq::context_t context(1);
 	zmq::socket_t publisher(context, ZMQ_PAIR);
 	publisher.connect("tcp://localhost:5555");
+#endif
+
 	Log l_log("log.txt");
 	Log l_benefitValue(date + "_benefitvalue.txt");
 	Log l_potentialValue(date + "_potentialValue.txt");
@@ -587,6 +593,7 @@ int main(int argc, char* argv[])
 														continue;
 
 													l_log << "End Time " << g_config.TimeEnd[l_TimeEndIndex] << endl;
+									#ifndef _ZMQ
 
 													if (g_config.BatchSimulations == 0) {
 														l_coverage->updateViewer(
@@ -597,14 +604,17 @@ int main(int argc, char* argv[])
 															);
 													}
 													else
-													{
+
+													//{
+#endif
 														l_coverage->update(
 															g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
 															g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
 															g_config.ThiefJump[l_thiefJumpIndex]
 															);
-													}
-
+#ifndef _ZMQ
+													//}
+#endif
 
 													/// print data for BoxPlot:
 													double l_potentialIndex = l_coverage->m_stats.getPotentialIndexMediumValue();
