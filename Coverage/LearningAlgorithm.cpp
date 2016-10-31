@@ -253,7 +253,7 @@ void LearningAlgorithm::compute(std::shared_ptr<Guard> _agent)
 		}
 		double l_value = W_q * (Pod_agent + (1 - Pod_agent) * ProbOtherDetect);
 		//cout << "ciao " << Pod_agent + (1 - Pod_agent) * ProbOtherDetect << endl;
-		cout << "Prob single " << Pod_agent << endl;
+		//cout << "Prob single " << Pod_agent << endl;
 		l_benefit += l_value / double(l_nq);
 	}
 	l_benefit -= _agent->computeCurrentCosts();

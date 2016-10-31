@@ -305,10 +305,9 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 		// caso in cui i vincoli lo cosentono
 		if (x_curr == x_prox && y_curr == y_prox) 
 		{
-		#ifdef _PRINT
-			std::cout << "feasible action " << std::endl;
-		#endif // _PRINT
-
+			#ifdef _PRINT
+				//std::cout << "feasible action " << std::endl;
+			#endif // _PRINT
 			AreaCoordinate Coordinate = _space->getCoordinate(nextAgentPosition.getPoint2D());
 			SquarePtr square = _space->getSquare(Coordinate);
 			// controllo che sia libero la square
@@ -320,18 +319,18 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 				this->setNextPosition(nextAgentPosition);
 			}
 		}
-		// since previous last two actions cannot be choose without rotate (kinematic constraint) We have to check coordinate 
+		// since previous last two actions cannot be choose with olny rotation (kinematic constraint) We have to check coordinate 
 		// of next position chosed by algorithm and we have to rotate the robot towards the desidered next position first.
 		// after rotation if the  best position is still that the robot will be able to reach it according to its new direction.
 		if (x_curr != x_prox || y_curr != y_prox)
 		{
-			if (x_prox < x_curr)
+			if (x_prox < x_curr) // verso ovest
 			{
 				if (y_prox == y_curr)	// lungo x a sinistra
 				{
 					nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi);
 					#ifdef _PRINT
-					std::cout << "lungo x a sx " << std::endl;
+						std::cout << "lungo x a sx " << std::endl;
 					#endif
 				}
 				if (y_prox > y_curr)	// obliquo alto vs sinistra
@@ -340,7 +339,7 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 					{
 						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
 					#ifdef _PRINT
-						std::cout << "obliquo vs alto" << std::endl;
+						std::cout << "obliquo alto vs sx" << std::endl;
 					#endif
 					}
 					if (m_currentPosition.m_heading < 2.30 && m_currentPosition.m_heading > 2.40) 
@@ -352,14 +351,14 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 				}
 				if (y_prox < y_curr)	// obliquo basso vs sx
 				{
-					if (m_currentPosition.m_heading >= 5.40 && m_currentPosition.m_heading <= 5.55) 
+					if (m_currentPosition.m_heading >= 0.7 && m_currentPosition.m_heading <= 0.85) 
 					{
 						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
 					#ifdef _PRINT
 						std::cout << "obliquo basso a sx " << std::endl;
 					#endif
 					}
-					if (m_currentPosition.m_heading < 5.40 && m_currentPosition.m_heading > 5.55)
+					if (m_currentPosition.m_heading < 0.7 && m_currentPosition.m_heading > 0.85)
 					{
 					#ifdef _PRINT
 						std::cout << "non dovrebbe mai capitare" << std::endl;
@@ -367,7 +366,7 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 					}
 				}
 			}
-			if (x_prox > x_curr)
+			if (x_prox > x_curr) // verso est
 			{
 				if (y_prox == y_curr)	// lungo x vs destra
 				{
@@ -395,13 +394,13 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 				}
 				if (y_prox < y_curr)	//obliquo basso verso destra
 				{
-					if (m_currentPosition.m_heading >= 0.70 && m_currentPosition.m_heading <= 0.85) {
+					if (m_currentPosition.m_heading >= 5.40 && m_currentPosition.m_heading <= 5.55) {
 						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
 					#ifdef _PRINT
 						std::cout << "obliquo basso vs destra" << std::endl;
 					#endif
 					}
-					if (m_currentPosition.m_heading < 0.70 && m_currentPosition.m_heading > 0.85)
+					if (m_currentPosition.m_heading < 5.40 && m_currentPosition.m_heading > 5.55)
 					{
 					#ifdef _PRINT
 						std::cout << "non dovrebbe mai capitare" << std::endl;
@@ -431,11 +430,11 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 			SquarePtr square = _space->getSquare(Coordinate);
 			// controllo che sia libero la square
 			if (square->isValid())
-				this->setNextPosition(nextAgentPosition); // (indexBest, indexNext)
+				this->setNextPosition(SquareFree(_space, nextAgentPosition)); // (indexBest, indexNext)
 			if (square->isValid()) 
 			{
 				nextAgentPosition = m_currentPosition;
-				this->setNextPosition(nextAgentPosition); // (indexBest, indexNext)
+				this->setNextPosition(SquareFree(_space, nextAgentPosition)); // (indexBest, indexNext)
 			}
 			//this->setNextPosition(SquareFree(_space, nextAgentPosition));
 		}// chiude il primo if
