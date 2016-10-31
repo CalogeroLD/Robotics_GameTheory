@@ -123,10 +123,14 @@ AgentPosition Agent::selectRandomFeasibleAction(std::shared_ptr<DiscretizedArea>
 std::vector<AgentPosition> Agent::getFeasibleActionsThief(std::shared_ptr<DiscretizedArea> _space, AgentPosition _thief) const
 {
 	AreaCoordinate l_thiefCoord = _space->getCoordinate(_thief.getPoint2D()); // prende punto camera
-	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquaresThief(l_thiefCoord); // prende 8 punti adiacenti ABCDEFG
+	l_thiefCoord.heading = m_currentPosition.m_heading;
+	std::vector<AreaCoordinate> l_squares = _space->getStandardApproachableValidSquares(l_thiefCoord); // prende 8 punti adiacenti ABCDEFG
+	//std::cout << "Pos col: " << _thief.getPoint2D().coord(0) << " row: " << _thief.getPoint2D().coord(1) << endl;
 	// aggiunge le diagonali al robot
-	_space->addSpecialApproachableValidSquares(l_thiefCoord, l_squares);
 
+	if (l_squares.size() <= 1) {
+		_space->addSpecialApproachableValidSquares(l_thiefCoord, l_squares);
+	}
 	std::vector<AgentPosition> l_result;
 	for (size_t i = 0; i < l_squares.size(); ++i)
 	{

@@ -204,7 +204,7 @@ namespace Robotics
 			~Agent() {}
 
 			//aggiunta
-
+			int getID() { return m_id; }
 			/// Get the position of the agent.
 
 

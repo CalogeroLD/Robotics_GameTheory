@@ -993,7 +993,7 @@ void DiscretizedArea::rotate(AreaCoordinate const& _current, std::vector<AreaCoo
 	AreaCoordinate pos(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
 	if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 	result.push_back(pos);
-	AreaCoordinate pos1(_current.col, _current.row, Mod2Pi(_current.heading - IDSMath::PiDiv4));
+	AreaCoordinate pos1(_current.col, _current.row, Mod2Pi(_current.heading + IDSMath::PiDiv4));
 	if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 	result.push_back(pos1);
 }
@@ -1160,6 +1160,7 @@ std::vector<AreaCoordinate> DiscretizedArea::getStandardApproachableValidSquares
 			result.push_back(pos);
 	}
 	
+	
 	return result;
 }
 
@@ -1240,12 +1241,12 @@ void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _
 	//
 	if (_current.col == 0)
 	{
-		if (_current.row != 0 && _current.row != DISCRETIZATION_R)
+		if (_current.row != 0 && _current.row != DISCRETIZATION_R) //sui bordi non su angolo
 		{
-			AreaCoordinate pos(_current.col + 1, _current.row + 1);
+			AreaCoordinate pos(_current.col + 1, _current.row + 1); //sali obliquo
 			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 				_loci.push_back(pos);
-			AreaCoordinate pos1(_current.col + 1, _current.row - 1);
+			AreaCoordinate pos1(_current.col + 1, _current.row - 1); //scendi obliquo
 			if (this->getSquare(pos1) && this->getSquare(pos1)->isValid())
 				_loci.push_back(pos1);
 		}
@@ -1255,10 +1256,10 @@ void DiscretizedArea::addSpecialApproachableValidSquares(AreaCoordinate const& _
 	{
 		if (_current.row != 0 && _current.row != DISCRETIZATION_R)
 		{
-			AreaCoordinate pos(_current.col - 1, _current.row + 1);
+			AreaCoordinate pos(_current.col - 1, _current.row + 1); // sali obliquo
 			if (this->getSquare(pos) && this->getSquare(pos)->isValid())
 				_loci.push_back(pos);
-			AreaCoordinate pos1(_current.col - 1, _current.row - 1);
+			AreaCoordinate pos1(_current.col - 1, _current.row - 1); // scendo obliquo
 			if (this->getSquare(pos1) && this->getSquare(pos1)->isValid())
 				_loci.push_back(pos1);
 		}

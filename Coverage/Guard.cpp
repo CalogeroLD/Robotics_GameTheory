@@ -336,7 +336,7 @@ void Guard::selectNextAction(std::shared_ptr<DiscretizedArea> _space)
 				}
 				if (y_prox > y_curr)	// obliquo alto vs sinistra
 				{
-					if (m_currentPosition.m_heading >= 2.30 && m_currentPosition.m_heading <= 2.40) 
+					if (m_currentPosition.m_heading >= 2.30 && m_currentPosition.m_heading <= 2.40) // in questa posizione ci arrivo con 2.35 di orientazione
 					{
 						nextAgentPosition = rotateRandomly(2, m_currentPosition, IDSMath::Pi); // antioraria di Pi
 					#ifdef _PRINT

@@ -1,7 +1,7 @@
 // BatchSimulation.cpp : Defines the entry point for the console application.
 //
 
-#define _ZMQ
+//#define _ZMQ
 
 #include "stdafx.h"
 
@@ -429,10 +429,10 @@ int main(int argc, char* argv[])
 	//Log l_positions(date + "_positionsOfRobots");
 	std::vector<std::string> configurationfiles;
 
-	//configurationfiles.push_back("Scenario_5G_1T_multiAgent.json");
+	configurationfiles.push_back("Scenario_5G_1T_multiAgent.json");
 	//configurationfiles.push_back("Scenario_10G_1T_multiAgent.json");
 	//configurationfiles.push_back("Scenario_15G_1T_multiAgent.json");
-	configurationfiles.push_back("Scenario_20G_1T_multiAgent.json");
+	//configurationfiles.push_back("Scenario_20G_1T_multiAgent.json");
 
 	for (int u = 0; u < configurationfiles.size(); u++)
 	{
@@ -485,10 +485,10 @@ int main(int argc, char* argv[])
 			l_folname = argv[1];
 
 		std::vector<std::string> l_AgentFilenames;
-		//l_AgentFilenames.push_back("Scenario_5G_1T_multiAgent.json");
+		l_AgentFilenames.push_back("Scenario_5G_1T_multiAgent.json");
 		//l_AgentFilenames.push_back("Scenario_10G_1T_multiAgent.json");
 		//l_AgentFilenames.push_back("Scenario_15G_1T_multiAgent.json");
-		l_AgentFilenames.push_back("Scenario_20G_1T_multiAgent.json");
+		//l_AgentFilenames.push_back("Scenario_20G_1T_multiAgent.json");
 
 		std::vector<std::string> l_AreaFilenames;
 		rapidjson::Value& AreaName = Area["Area_name"];
@@ -605,7 +605,7 @@ int main(int argc, char* argv[])
 													}
 													else
 
-													//{
+													{
 #endif
 														l_coverage->update(
 															g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
@@ -613,7 +613,7 @@ int main(int argc, char* argv[])
 															g_config.ThiefJump[l_thiefJumpIndex]
 															);
 #ifndef _ZMQ
-													//}
+													}
 #endif
 
 													/// print data for BoxPlot:

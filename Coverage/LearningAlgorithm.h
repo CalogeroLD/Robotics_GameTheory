@@ -106,6 +106,10 @@ namespace Robotics
 
 			virtual void communicate(std::shared_ptr<Guard> _agent);
 
+			std::vector<double> ProbOfNeighbour(AreaCoordinate l_coord, int _id);
+
+			double InclusioEsclusionPrinciple(std::vector<double> p);
+
 			virtual void compute(std::shared_ptr<Guard> _agent);
 
 			virtual void updateCounterOfVisibleSquare( );
