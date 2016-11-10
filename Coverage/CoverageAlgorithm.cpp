@@ -32,7 +32,7 @@
 #include <rapidjson\document.h>
 #include <rapidjson\filereadstream.h>
 
-//#define _ZMQ
+#define _ZMQ
 using namespace std;
 
 struct Log
@@ -216,7 +216,7 @@ void Robotics::GameTheory::CoverageAlgorithm::updateMonitor()
 	m_learning->monitoringSinks(m_world->getSinks());
 }
 
-//#ifndef _ZMQ
+#ifdef _ZMQ
 //////////////////////////////////////////////////////////////////////////
 bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _monitorUpdateTime, int _thiefJump, zmq::socket_t *publisher, bool _continuousUpdate)
 {
@@ -341,7 +341,7 @@ bool Robotics::GameTheory::CoverageAlgorithm::updateViewer(int _nStep, int _moni
 	}
 	return res;
 }
-//#endif
+#endif
 
 const std::string date = currentDateTime();
 //Log l_benefit(date + "_benefitSingle.txt"); // di tutti sommata 

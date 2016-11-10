@@ -114,7 +114,7 @@ double ProbabilityOfDetection(AreaCoordinate _center, int _row, int _col) {
 	double distance = sqrt(pow((x_c - _row), 2) + pow((y_c - _col), 2));
 	double probability;
 
-	probability = exp(-(pow(distance, 2)) / 20);
+	probability = exp(-(pow(distance, 2)) / 100);
 	return probability;
 }
 

@@ -1,12 +1,12 @@
 {
   "Area": {
     "Area_name": "Open_Sea",
-    "height": 2000.0,
-    "length": 2000.0,
-    "cols": 24,
-    "rows": 24,
+    "height": 2833.0,
+    "length": 2833.0,
+    "cols": 34,
+    "rows": 34,
     "ship": {
-      "coord": [ 12, 12 ],
+      "coord": [ 17, 17 ],
       "dim_col": 4,
       "dim_row": 4
     }
@@ -37,7 +37,7 @@
       [ 583.33334, 83.33334, 3.14, 1.57 ],
       [ 583.33334, 83.33334, 3.14, 1.57 ]
     ]
-	},
+  },
 
 
   "Thieves": {
@@ -58,13 +58,13 @@
   },
 
   "Configuration": {
-    "Monitor": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
+    "Monitor": [ 1, 4, 7, 10 ],
     "Jump": [ 1 ],
     "Epsilon": [ 0.1 ],
-    "Print": [ 5000 ],
+    "Print": [ 1000 ],
     "Period": [ 1 ],
-    "TestCase": 50,
+    "TestCase": 25,
     "BatchSimulations": 1,
-    "AlgorithmType": [0, 1]
+    "AlgorithmType": [ 0, 1 ]
   }
 }
