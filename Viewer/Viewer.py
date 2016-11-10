@@ -7,7 +7,7 @@ import logging
 from PySide import QtCore
 from pyqtgraph.Qt import QtGui
 import ScatterPlot
-import ZmqThread   # sta importando la classe dichiarata
+import ZmqThread  
 import pyqtgraph as pg
 import numpy as np
 
@@ -16,9 +16,8 @@ if __name__ == "__main__":
     try:
         app = QtGui.QApplication([])
         th = ZmqThread.ZmqThread(sys.argv[1])
-        #print 'maremma maiala', sys.argv
         area_data = th.initStage()  
-        viewer = ScatterPlot.Viewer(area_data[1], area_data[0])
+        viewer = ScatterPlot.Viewer(area_data[1], area_data[0], sys.argv[1])
         th.data_ready.connect(viewer.updateScatterData) #creates a connection between QtSignal and QtCore
         th.fov_ready.connect(viewer.updateFovData)
         th.data_benefit.connect(viewer.updatebenefit)

@@ -1,9 +1,11 @@
 import numpy as np
 from PySide import QtCore
+from PySide import QtGui as QG
 import PySide
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import threading
+import json
 
 max_plot_dim = 1000 #benefit che vedo sono relativi agli ultimi 100 step
 
@@ -26,13 +28,13 @@ class ScatterPlotData:
 
 
 class Viewer(QtGui.QWidget):
-    def __init__(self, x_lim, y_lim):
+    def __init__(self, x_lim, y_lim, sim_file):
         super(Viewer, self).__init__()
+        self.sim_file = sim_file
+
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
-
         self.PayoffPlot = pg.PlotWidget(title = "Single benefit ")
-        
         self.benefitPlot = pg.PlotWidget(title="Team Benefit")  #plot widget added for benefit
         self.potentialPlot = pg.PlotWidget(title="Potential of Game")    #plot widget added for potential of game 
         self.coveredsquarePlot = pg.PlotWidget(title="Squares Covered") #plot widget for number of viewed squared
@@ -45,7 +47,6 @@ class Viewer(QtGui.QWidget):
         self.benefitValue = np.ndarray((0,0)) #array with stored benefit values
         self.potentialValue = np.ndarray((0,0)) #array with storedo potential data
         self.coveredsquareValue = np.ndarray((0,0))
-
 
     def initUI(self, x_lim, y_lim):
         self.resize(600, 600)
@@ -85,44 +86,38 @@ class Viewer(QtGui.QWidget):
         layout.addWidget(self.potentialPlot, 1, 1)
         layout.addWidget(self.coveredsquarePlot, 2, 1)
         self.show()
+        self.draw_mothership()
+
+
+    def draw_mothership(self):
+        # radar of mother-ship
+        with open(self.sim_file) as s_f:
+            data = json.load(s_f)
+        center = data['Area']['ship']['coord']
+        dims = ((data['Area']['length'] / data['Area']['cols'])*data['Area']['ship']['dim_col'], (data['Area']['length'] / data['Area']['rows'])*data['Area']['ship']['dim_row'])
+        center_xy = ( (data['Area']['length'] / data['Area']['cols'])*center[0], (data['Area']['height'] / data['Area']['rows'])*center[1])
+
+        r2 = pg.QtGui.QGraphicsRectItem(pg.QtCore.QRectF(center_xy[0] -dims[0]/2, center_xy[1] - dims[1]/2, dims[0], dims[1]))
+        r2.setPen(pg.mkPen((0, 0, 0, 100)))
+        r2.setBrush(pg.mkBrush('b'))
+        self.scatterPlot.addItem(r2)
+        # mothership
+        r1 = pg.QtGui.QGraphicsRectItem(pg.QtCore.QRectF(center_xy[0] -50, center_xy[1] - 5, 100, 10))
+        r1.setPen(pg.mkPen((0, 0, 0, 100)))
+        r1.setBrush(pg.mkBrush('r'))
+        self.scatterPlot.addItem(r1)
+
+        # Create text object, use HTML tags to specify color/size
+        text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 255, 0))
+        self.scatterPlot.addItem(text)
+        text.setPos(center_xy[0], center_xy[1])
 
     @QtCore.Slot(float, float, object)  #definition of Slot referring to a Signal
     def updateScatterData(self, x, y, name):
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         self.semaphore.acquire()
-        #if name == "T_0":
-         #   print " Thief ", name
-        #else:
-          #  print name
+
         if name not in self.scatterData:
-            
-            # create a circle too indicate position of mothership
-            #r = pg.CircleROI(1000.0, 1000.0)
-            #self.scatterPlot.addItem(r)
-            
-            # radar of mother-ship
-            r2 = pg.QtGui.QGraphicsRectItem(750, 750, 500, 500)
-            r2.setPen(pg.mkPen((0, 0, 0, 100)))
-            r2.setBrush(pg.mkBrush('b'))
-            self.scatterPlot.addItem(r2)
-            # mothership
-            r1 = pg.QtGui.QGraphicsRectItem(950, 995, 100, 10) #centered in (r,c) : (r, c, r-r_span/2, c-c_span/2)
-            r1.setPen(pg.mkPen((0, 0, 0, 100)))
-            r1.setBrush(pg.mkBrush('r'))
-            self.scatterPlot.addItem(r1)
-
-            '''r = QtGui.QPolygonF([
-                    QtCore.QPointF(-100, 0), QtCore.QPointF(0, 100),
-                    QtCore.QPointF(100, 0), QtCore.QPointF(0, -100),
-                    QtCore.QPointF(-100, 0)])
-            self.scatterPlot = QtGui.QGraphicsPolygonItem()
-            self.scatterPlot.setPolygon(r)'''
-
-            ## Create text object, use HTML tags to specify color/size
-            text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 255, 0))
-            self.scatterPlot.addItem(text)
-            text.setPos(900, 950)
-
             # Soluzione temporanea per la selezione del colore
             scatter = self.scatterPlot.plot(x=[x], y=[y], pen=colors[int(name.split('_')[1]) % len(colors)], symbol='+', symbolSize=5, pxMode=True)
             self.scatterData[name] = [ScatterPlotData(10), scatter]
@@ -134,15 +129,20 @@ class Viewer(QtGui.QWidget):
         self.scatterData[name][0].add_data(x, y)
         self.semaphore.release()
 
-    @QtCore.Slot(object, object)
-    def updateFovData(self, id, x, y):
+    @QtCore.Slot(int, object, object, object)
+    def updateFovData(self, id, x, y, heading):
         self.semaphore.acquire()
         if id not in self.fovData:
             self.fovData[id] = {}
-            self.fovData[id]['plot'] = self.scatterPlot.plot(pen='y')  #colore del sensore
-        else:
-            self.fovData[id]['x'] = x
-            self.fovData[id]['y'] = y
+            #self.fovData[id]['shape'] = QG.QGraphicsPathItem()
+            #self.fovData[id]['shape'].setPen(pg.mkPen('y'))
+            self.fovData[id]['ellipse'] = QG.QGraphicsEllipseItem()
+            self.scatterPlot.addItem(self.fovData[id]['ellipse'])
+            self.fovData[id]['ellipse'].setBrush(pg.mkBrush('b'))
+
+        self.fovData[id]['x'] = x
+        self.fovData[id]['y'] = y
+        self.fovData[id]['h'] = heading
         self.semaphore.release()
     
     # takes data and updates plots
@@ -157,7 +157,17 @@ class Viewer(QtGui.QWidget):
             if 'x' in self.fovData[i]:
                 X = self.fovData[i]['x']
                 Y = self.fovData[i]['y']
-                self.fovData[i]['plot'].setData(x=X, y=Y)
+
+                self.fovData[i]['ellipse'].setRect(QtCore.QRectF(X-250,Y-250,500,500))
+                self.fovData[i]['ellipse'].setStartAngle((np.rad2deg(self.fovData[i]['h'])+ 90  - 90/2 +180)*16)
+                self.fovData[i]['ellipse'].setSpanAngle(360*4)
+
+                radialGrad = QG.QRadialGradient(QtCore.QPointF(X, Y), 250)
+                radialGrad.setColorAt(0, QtCore.Qt.red)
+                radialGrad.setColorAt(0.5, QtCore.Qt.blue)
+                radialGrad.setColorAt(1, QtCore.Qt.green)
+                self.fovData[i]['ellipse'].setBrush(radialGrad)
+
         if self.benefitValue.shape[0] > 0:  #se arrivano dati
             self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue) # setta gli assi del plot
         if self.potentialValue.shape[0] > 0:
