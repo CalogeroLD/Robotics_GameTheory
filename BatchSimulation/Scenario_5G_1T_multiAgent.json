@@ -55,7 +55,7 @@
     "Print": [ 1000 ],
     "Period": [ 1 ],
     "TestCase": 25,
-    "BatchSimulations": 1,
+    "BatchSimulations": 0,
     "AlgorithmType": [ 0, 1 ]
   }
 }
