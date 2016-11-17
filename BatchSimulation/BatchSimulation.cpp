@@ -1,7 +1,7 @@
 // BatchSimulation.cpp : Defines the entry point for the console application.
 //
 
-//#define _ZMQ
+#define _ZMQ
 
 #include "stdafx.h"
 
@@ -26,7 +26,7 @@
 #include <cstring>
 #include <stdexcept>
 
-#ifndef _ZMQ
+#ifdef _ZMQ
 	#include <zmq/zmq.h>
 	#include <zmq/zmq.hpp>
 #endif
@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
 	const std::string date = currentDateTime();
 
 	//  Prepare our context and publisher
-#ifndef _ZMQ
+#ifdef _ZMQ
 	zmq::context_t context(1);
 	zmq::socket_t publisher(context, ZMQ_PAIR);
 	publisher.connect("tcp://localhost:5555");
@@ -430,9 +430,9 @@ int main(int argc, char* argv[])
 	std::vector<std::string> configurationfiles;
 
 	configurationfiles.push_back("Scenario_5G_1T_multiAgent.json");
-	//configurationfiles.push_back("Scenario_10G_1T_multiAgent.json");
-	//configurationfiles.push_back("Scenario_15G_1T_multiAgent.json");
-	//configurationfiles.push_back("Scenario_20G_1T_multiAgent.json");
+	configurationfiles.push_back("Scenario_10G_1T_multiAgent.json");
+	configurationfiles.push_back("Scenario_15G_1T_multiAgent.json");
+	configurationfiles.push_back("Scenario_20G_1T_multiAgent.json");
 
 	for (int u = 0; u < configurationfiles.size(); u++)
 	{
@@ -486,9 +486,9 @@ int main(int argc, char* argv[])
 
 		std::vector<std::string> l_AgentFilenames;
 		l_AgentFilenames.push_back("Scenario_5G_1T_multiAgent.json");
-		//l_AgentFilenames.push_back("Scenario_10G_1T_multiAgent.json");
-		//l_AgentFilenames.push_back("Scenario_15G_1T_multiAgent.json");
-		//l_AgentFilenames.push_back("Scenario_20G_1T_multiAgent.json");
+		l_AgentFilenames.push_back("Scenario_10G_1T_multiAgent.json");
+		l_AgentFilenames.push_back("Scenario_15G_1T_multiAgent.json");
+		l_AgentFilenames.push_back("Scenario_20G_1T_multiAgent.json");
 
 		std::vector<std::string> l_AreaFilenames;
 		rapidjson::Value& AreaName = Area["Area_name"];
@@ -593,7 +593,7 @@ int main(int argc, char* argv[])
 														continue;
 
 													l_log << "End Time " << g_config.TimeEnd[l_TimeEndIndex] << endl;
-									#ifndef _ZMQ
+									#ifdef _ZMQ
 
 													if (g_config.BatchSimulations == 0) {
 														l_coverage->updateViewer(
@@ -606,13 +606,13 @@ int main(int argc, char* argv[])
 													else
 
 													{
-#endif
+									#endif
 														l_coverage->update(
 															g_config.TimeEnd[l_TimeEndIndex] - (l_TimeEndIndex == 0 ? 0 : g_config.TimeEnd[l_TimeEndIndex - 1]),
 															g_config.MonitorUpdateTime[l_monitorUpdateTimeIndex],
 															g_config.ThiefJump[l_thiefJumpIndex]
 															);
-#ifndef _ZMQ
+#ifdef _ZMQ
 													}
 #endif
 
