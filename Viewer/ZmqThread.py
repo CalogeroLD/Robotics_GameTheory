@@ -6,6 +6,7 @@ import numpy as np
 
 class ZmqThread(QtCore.QThread):
     data_ready = QtCore.Signal(float, float, object)
+    thief_ready = QtCore.Signal(float, float, float)
     fov_ready = QtCore.Signal(int, object, object, object) # corrisponde a intero, x_pos, y_pos, heading
     data_benefit = QtCore.Signal(float, object) # corrisp al valore di benefit e alla B
     data_potential = QtCore.Signal(float, object)
@@ -77,6 +78,7 @@ class ZmqThread(QtCore.QThread):
                 x_pos = float(message_vec[2])
                 y_pos = float(message_vec[3])
                 self.data_ready.emit(x_pos, y_pos, "T_{}".format(id))
+                self.thief_ready.emit(id, x_pos, y_pos)
 
             if message_vec[0] == 'B':
                 benefit = float(message_vec[1])

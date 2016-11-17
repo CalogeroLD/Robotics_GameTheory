@@ -31,6 +31,11 @@ class Viewer(QtGui.QWidget):
     def __init__(self, x_lim, y_lim, sim_file):
         super(Viewer, self).__init__()
         self.sim_file = sim_file
+        with open(self.sim_file) as s_f:
+            data = json.load(s_f)
+        self.sensors = data["Agents"]["sensors"]
+        self.x_subs = 0
+        self.y_subs = 0
 
         self.scatterData = {}  # Dictionary [Index][[ScatterPlotData],[plotCurve],[curvePoint]]
         self.scatterPlot = pg.PlotWidget(title="Prodifcon Viewer")
@@ -39,11 +44,11 @@ class Viewer(QtGui.QWidget):
         self.potentialPlot = pg.PlotWidget(title="Potential of Game")    #plot widget added for potential of game 
         self.coveredsquarePlot = pg.PlotWidget(title="Squares Covered") #plot widget for number of viewed squared
         self.fovData = {}
+        self.thiefData = {}
         self.initUI(x_lim, y_lim)
         self.semaphore = threading.Lock()
         self.timer = QtCore.QBasicTimer()
         self.timer.start(100, self)
-        
         self.benefitValue = np.ndarray((0,0)) #array with stored benefit values
         self.potentialValue = np.ndarray((0,0)) #array with storedo potential data
         self.coveredsquareValue = np.ndarray((0,0))
@@ -93,6 +98,8 @@ class Viewer(QtGui.QWidget):
         # radar of mother-ship
         with open(self.sim_file) as s_f:
             data = json.load(s_f)
+        self.x_subs = data['Area']['length'] / data['Area']['cols']
+        self.y_subs = data['Area']['height'] / data['Area']['rows']
         center = data['Area']['ship']['coord']
         dims = ((data['Area']['length'] / data['Area']['cols'])*data['Area']['ship']['dim_col'], (data['Area']['length'] / data['Area']['rows'])*data['Area']['ship']['dim_row'])
         center_xy = ( (data['Area']['length'] / data['Area']['cols'])*center[0], (data['Area']['height'] / data['Area']['rows'])*center[1])
@@ -109,25 +116,34 @@ class Viewer(QtGui.QWidget):
 
         # Create text object, use HTML tags to specify color/size
         text = pg.TextItem(html='<div style="text-align: font-size: 12pt;">MOTHERSHIP</span></div>', border='y', fill=(0, 255, 0))
-        self.scatterPlot.addItem(text)
         text.setPos(center_xy[0], center_xy[1])
+        self.scatterPlot.addItem(text)
 
-    @QtCore.Slot(float, float, object)  #definition of Slot referring to a Signal
-    def updateScatterData(self, x, y, name):
+        
+    @QtCore.Slot(float, float, object)  
+    def updateScatterData(self, x, y, name): # Connected with data_ready ZmqThread - Manages the plot curves
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         self.semaphore.acquire()
-
         if name not in self.scatterData:
             # Soluzione temporanea per la selezione del colore
             scatter = self.scatterPlot.plot(x=[x], y=[y], pen=colors[int(name.split('_')[1]) % len(colors)], symbol='+', symbolSize=5, pxMode=True)
             self.scatterData[name] = [ScatterPlotData(10), scatter]
             cPoint = pg.CurvePoint(scatter)
-            self.scatterData[name].append(cPoint)  # Construction of curve point
-            self.scatterPlot.addItem(cPoint)  # Add to scatterPlot
+            self.scatterData[name].append(cPoint)   # Construction of curve point
+            self.scatterPlot.addItem(cPoint)        # Add to scatterPlot
             label = pg.TextItem(name, anchor=(0.5, 0))
             label.setParentItem(self.scatterData[name][2])
         self.scatterData[name][0].add_data(x, y)
         self.semaphore.release()
+
+    @QtCore.Slot(int, float, float)
+    def updateThiefRect(self, id, x, y):
+        if id not in self.thiefData:
+            self.thiefData[id] = {}
+            self.thiefData[id]['rect'] = QG.QGraphicsRectItem()
+            self.scatterPlot.addItem(self.thiefData[id]['rect'])
+        self.thiefData[id]['x'] = x
+        self.thiefData[id]['y'] = y
 
     @QtCore.Slot(int, object, object, object)
     def updateFovData(self, id, x, y, heading):
@@ -137,8 +153,9 @@ class Viewer(QtGui.QWidget):
             #self.fovData[id]['shape'] = QG.QGraphicsPathItem()
             #self.fovData[id]['shape'].setPen(pg.mkPen('y'))
             self.fovData[id]['ellipse'] = QG.QGraphicsEllipseItem()
+            self.fovData[id]['radius'] = self.sensors[id][0]
             self.scatterPlot.addItem(self.fovData[id]['ellipse'])
-            self.fovData[id]['ellipse'].setBrush(pg.mkBrush('b'))
+            #self.fovData[id]['ellipse'].setBrush(pg.mkBrush('b'))
 
         self.fovData[id]['x'] = x
         self.fovData[id]['y'] = y
@@ -157,18 +174,41 @@ class Viewer(QtGui.QWidget):
             if 'x' in self.fovData[i]:
                 X = self.fovData[i]['x']
                 Y = self.fovData[i]['y']
-
-                self.fovData[i]['ellipse'].setRect(QtCore.QRectF(X-250,Y-250,500,500))
+                radius = self.fovData[i]['radius']
+                self.fovData[i]['ellipse'].setRect(QtCore.QRectF(X-radius/2, Y-radius/2, radius, radius))
                 self.fovData[i]['ellipse'].setStartAngle((np.rad2deg(self.fovData[i]['h'])+ 90  - 90/2 +180)*16)
                 self.fovData[i]['ellipse'].setSpanAngle(360*4)
 
-                radialGrad = QG.QRadialGradient(QtCore.QPointF(X, Y), 250)
-                radialGrad.setColorAt(0, QtCore.Qt.red)
-                radialGrad.setColorAt(0.5, QtCore.Qt.blue)
-                radialGrad.setColorAt(1, QtCore.Qt.green)
+                radialGrad = QG.QRadialGradient(QtCore.QPointF(X, Y), radius/2)
+                b = QG.QColor(QtCore.Qt.black)
+                b.setAlpha(128)
+                r = QG.QColor(QtCore.Qt.red)
+                r.setAlpha(128)
+                y = QG.QColor(QtCore.Qt.yellow)
+                y.setAlpha(128)
+                radialGrad.setColorAt(0, b)
+                radialGrad.setColorAt(0.5, r)
+                radialGrad.setColorAt(1, y)
                 self.fovData[i]['ellipse'].setBrush(radialGrad)
 
-        if self.benefitValue.shape[0] > 0:  #se arrivano dati
+        for i in self.thiefData:
+            if 'x' in self.thiefData[i]:
+                X = self.thiefData[i]['x']
+                Y = self.thiefData[i]['y']
+                self.thiefData[i]['rect'].setRect(QtCore.QRectF(X-4*self.x_subs, Y-4*self.y_subs, 8*self.x_subs, 8*self.y_subs))
+                radialGrad = QG.QRadialGradient(QtCore.QPointF(X, Y), 4*self.x_subs)
+                b = QG.QColor(QtCore.Qt.black)
+                b.setAlpha(128)
+                r = QG.QColor(QtCore.Qt.red)
+                r.setAlpha(128)
+                y = QG.QColor(QtCore.Qt.yellow)
+                y.setAlpha(128)
+                radialGrad.setColorAt(0, b)
+                radialGrad.setColorAt(0.5, r)
+                radialGrad.setColorAt(1, y)
+                self.thiefData[i]['rect'].setBrush(radialGrad)
+
+        if self.benefitValue.shape[0] > 0:  
             self.benefit_p.setData(np.arange(self.benefitValue.shape[0]), self.benefitValue) # setta gli assi del plot
         if self.potentialValue.shape[0] > 0:
             self.potential_p.setData(np.arange(self.potentialValue.shape[0]), self.potentialValue) #arange returns a ndarray
